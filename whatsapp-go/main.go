@@ -37,6 +37,8 @@ Usage:
       Connect to WhatsApp (QR code on first run), archive messages, serve the socket.
   whatsapp-mcp serve [--data-dir DIR]
       MCP server over stdio (for claude_desktop_config.json).
+  whatsapp-mcp import --legacy-store DIR [--data-dir DIR]
+      Copy the old bridge's session, sync contact names and import its history, without connecting.
   whatsapp-mcp install-service [--data-dir DIR] [--send-root DIR] [--legacy-store DIR]
       Install and start the launchd agent ` + config.ServiceLabel + `.
   whatsapp-mcp uninstall-service
@@ -59,6 +61,8 @@ func main() {
 		err = runDaemon(os.Args[2:])
 	case "serve":
 		err = runServe(os.Args[2:])
+	case "import":
+		err = runImport(os.Args[2:])
 	case "install-service":
 		err = runInstall(os.Args[2:])
 	case "uninstall-service":
@@ -151,6 +155,40 @@ func runDaemon(args []string) error {
 		}
 	}
 	return daemon.Run(ctx, daemon.Options{Paths: paths, LegacyStore: legacyDir, Log: log, QROut: os.Stdout})
+}
+
+func runImport(args []string) error {
+	fs := flag.NewFlagSet("import", flag.ExitOnError)
+	dataDir, sendRoot := pathFlags(fs)
+	legacy := fs.String("legacy-store", "", "old whatsapp-bridge/store directory (required)")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if *legacy == "" {
+		return errors.New("--legacy-store is required")
+	}
+	legacyDir, err := filepath.Abs(*legacy)
+	if err != nil {
+		return err
+	}
+	paths, err := resolvePaths(*dataDir, *sendRoot)
+	if err != nil {
+		return err
+	}
+	log := slog.New(slog.NewTextHandler(os.Stderr, nil))
+	ctx, cancel := signalContext()
+	defer cancel()
+	d, err := daemon.Prepare(ctx, daemon.Options{Paths: paths, LegacyStore: legacyDir, Log: log})
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	counts, err := d.Store().Count(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("session: %s\nmessages.db: %d contacts, %d chats, %d messages\n", paths.SessionDB, counts.Contacts, counts.Chats, counts.Messages)
+	return nil
 }
 
 func runServe(args []string) error {

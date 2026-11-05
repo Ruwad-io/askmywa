@@ -137,6 +137,13 @@ func TestSearchContacts(t *testing.T) {
 	if len(got) != 1 || got[0].JID != "100000000000002@lid" || got[0].Phone != "" {
 		t.Errorf("accent-insensitive search failed: %+v", got)
 	}
+	if _, err := s.PutContact(ctx, "33600000099", "", "Stéphanie", SourceFullName); err != nil { // contains "hani" mid-word
+		t.Fatal(err)
+	}
+	got, _, _ = s.SearchContacts(ctx, "hani", 10, "")
+	if len(got) != 2 || got[0].Name != "Hani Comptable" || got[1].Name != "Stéphanie" {
+		t.Errorf("word-prefix matches should rank first: %+v", got)
+	}
 	got, _, _ = s.SearchContacts(ctx, "+33 6 12", 10, "")
 	if len(got) != 1 || got[0].Name != "Marc" {
 		t.Errorf("number search failed: %+v", got)
@@ -244,6 +251,12 @@ func TestMessagePaginationByCursor(t *testing.T) {
 	}
 	if fmt.Sprint(all) != "[M6 M5 M4 M8 M3 M7 M2 M1]" {
 		t.Errorf("pages do not cover the set exactly once: %v", all)
+	}
+	// Page size 4 ends on M8, which shares its timestamp with M3: the cursor must split the tie.
+	first, page, _ := s.ListMessages(ctx, MessageQuery{Limit: 4})
+	second, _, _ := s.ListMessages(ctx, MessageQuery{Limit: 4, Cursor: page.NextCursor})
+	if fmt.Sprint(ids(first)) != "[M6 M5 M4 M8]" || fmt.Sprint(ids(second)) != "[M3 M7 M2 M1]" {
+		t.Errorf("tie split: %v then %v", ids(first), ids(second))
 	}
 	if _, _, err := s.ListMessages(ctx, MessageQuery{Cursor: "garbage"}); err == nil {
 		t.Error("expected an error for a bad cursor")

@@ -134,6 +134,8 @@ func Open(ctx context.Context, path string, readOnly bool) (*Store, error) {
 			db.Close()
 			return nil, fmt.Errorf("create schema in %s: %w", path, err)
 		}
+		// The archive is private data.
+		_ = os.Chmod(path, 0o600)
 	}
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()

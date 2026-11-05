@@ -58,26 +58,6 @@ func (s *Store) ImportLegacy(ctx context.Context, legacyPath string, log *slog.L
 	}
 	chatRows.Close()
 
-	// Canonical JID for every legacy chat (LID chats move to the phone JID when known).
-	canonical := map[string]string{}
-	for _, ch := range chats {
-		target := ch.jid
-		if user, server := SplitJID(ch.jid); server == "lid" {
-			if c, ok, _ := s.LookupContact(ctx, "", user); ok && c.Phone != "" {
-				target = c.Phone + "@s.whatsapp.net"
-			}
-		}
-		canonical[ch.jid] = target
-		name := ch.name
-		if user, _ := SplitJID(ch.jid); name == user {
-			name = ""
-		}
-		if err := s.PutChat(ctx, target, name, IsGroupJID(target), ch.last); err != nil {
-			return stats, err
-		}
-		stats.Chats++
-	}
-
 	// Snapshot the contacts: the import runs in one transaction on the single
 	// connection, so no other query may run while it is open.
 	known, err := s.AllContacts(ctx)
@@ -92,6 +72,37 @@ func (s *Store) ImportLegacy(ctx context.Context, legacyPath string, log *slog.L
 		if c.LID != "" {
 			byLID[c.LID] = c
 		}
+	}
+
+	// Canonical JID for every legacy chat (LID chats move to the phone JID
+	// when known); direct chats take the contact's name.
+	canonical := map[string]string{}
+	for _, ch := range chats {
+		target := ch.jid
+		name := ch.name
+		user, server := SplitJID(ch.jid)
+		if name == user {
+			name = ""
+		}
+		if server == "lid" || server == "s.whatsapp.net" {
+			c, ok := byLID[user]
+			if server != "lid" {
+				c, ok = byPhone[user]
+			}
+			if ok {
+				if c.Phone != "" {
+					target = c.Phone + "@s.whatsapp.net"
+				}
+				if c.Name != "" {
+					name = c.Name
+				}
+			}
+		}
+		canonical[ch.jid] = target
+		if err := s.PutChat(ctx, target, name, IsGroupJID(target), ch.last); err != nil {
+			return stats, err
+		}
+		stats.Chats++
 	}
 
 	msgRows, err := src.QueryContext(ctx, `SELECT id, chat_jid, sender, content, timestamp, is_from_me, media_type, filename, url, media_key, file_sha256, file_enc_sha256, file_length FROM messages`)

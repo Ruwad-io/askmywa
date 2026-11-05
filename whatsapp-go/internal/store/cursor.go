@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 // Page is the pagination part of every list result.
@@ -33,6 +34,17 @@ func decodeCursor(cursor string, n int) ([]string, error) {
 		return nil, fmt.Errorf("invalid cursor %q: pass the next_cursor value of the previous page unchanged, or omit it to start over", cursor)
 	}
 	return parts, nil
+}
+
+// cursorInt parses one numeric cursor part. Numbers must be bound as
+// integers: SQLite orders every integer before every text value, so a
+// string bound against an INTEGER column would never compare as intended.
+func cursorInt(part, cursor string) (int64, error) {
+	n, err := strconv.ParseInt(part, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid cursor %q: pass the next_cursor value of the previous page unchanged, or omit it to start over", cursor)
+	}
+	return n, nil
 }
 
 // clampLimit applies the default and the hard maximum of list sizes.

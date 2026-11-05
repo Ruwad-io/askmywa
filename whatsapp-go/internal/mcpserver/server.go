@@ -354,12 +354,12 @@ type Preview struct {
 
 // SendOutput is the output of every send tool.
 type SendOutput struct {
-	Sent              bool      `json:"sent" jsonschema:"true only when the message left the account"`
-	NeedsConfirmation bool      `json:"needs_confirmation" jsonschema:"true when this was a preview: repeat the call with confirm=true after the user approved"`
-	Preview           *Preview  `json:"preview,omitempty"`
-	MessageID         string    `json:"message_id,omitempty"`
-	Timestamp         time.Time `json:"timestamp,omitempty"`
-	Message           string    `json:"message" jsonschema:"human-readable status"`
+	Sent              bool       `json:"sent" jsonschema:"true only when the message left the account"`
+	NeedsConfirmation bool       `json:"needs_confirmation" jsonschema:"true when this was a preview: repeat the call with confirm=true after the user approved"`
+	Preview           *Preview   `json:"preview,omitempty"`
+	MessageID         string     `json:"message_id,omitempty"`
+	Timestamp         *time.Time `json:"timestamp,omitempty" jsonschema:"server timestamp of the sent message"`
+	Message           string     `json:"message" jsonschema:"human-readable status"`
 }
 
 // SendMessageInput is the input of send_message.
@@ -478,7 +478,7 @@ func (s *Server) sendMessage(ctx context.Context, _ *mcp.CallToolRequest, in Sen
 	if err != nil {
 		return nil, SendOutput{}, err
 	}
-	return nil, SendOutput{Sent: true, MessageID: res.MessageID, Timestamp: res.Timestamp, Message: "Message sent to " + p.RecipientName + " (" + res.To + ")"}, nil
+	return nil, SendOutput{Sent: true, MessageID: res.MessageID, Timestamp: &res.Timestamp, Message: "Message sent to " + p.RecipientName + " (" + res.To + ")"}, nil
 }
 
 func (s *Server) checkFile(path string) (string, int64, error) {
@@ -510,7 +510,7 @@ func (s *Server) sendFile(ctx context.Context, _ *mcp.CallToolRequest, in SendFi
 	if err != nil {
 		return nil, SendOutput{}, err
 	}
-	return nil, SendOutput{Sent: true, MessageID: res.MessageID, Timestamp: res.Timestamp, Message: fmt.Sprintf("File %s sent to %s (%s)", filepath.Base(path), p.RecipientName, res.To)}, nil
+	return nil, SendOutput{Sent: true, MessageID: res.MessageID, Timestamp: &res.Timestamp, Message: fmt.Sprintf("File %s sent to %s (%s)", filepath.Base(path), p.RecipientName, res.To)}, nil
 }
 
 func (s *Server) sendAudio(ctx context.Context, _ *mcp.CallToolRequest, in SendAudioInput) (*mcp.CallToolResult, SendOutput, error) {
@@ -530,7 +530,7 @@ func (s *Server) sendAudio(ctx context.Context, _ *mcp.CallToolRequest, in SendA
 	if err != nil {
 		return nil, SendOutput{}, err
 	}
-	return nil, SendOutput{Sent: true, MessageID: res.MessageID, Timestamp: res.Timestamp, Message: fmt.Sprintf("Voice note %s sent to %s (%s)", filepath.Base(path), p.RecipientName, res.To)}, nil
+	return nil, SendOutput{Sent: true, MessageID: res.MessageID, Timestamp: &res.Timestamp, Message: fmt.Sprintf("Voice note %s sent to %s (%s)", filepath.Base(path), p.RecipientName, res.To)}, nil
 }
 
 // DownloadInput is the input of download_media.

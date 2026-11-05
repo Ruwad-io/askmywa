@@ -247,8 +247,12 @@ func (s *Store) ListMessages(ctx context.Context, q MessageQuery) ([]Hit, Page, 
 		args = append(args, fts)
 	}
 	if parts != nil {
+		seq, err := cursorInt(parts[1], q.Cursor)
+		if err != nil {
+			return nil, Page{}, err
+		}
 		where = append(where, "(m.timestamp < ? OR (m.timestamp = ? AND m.seq < ?))")
-		args = append(args, parts[0], parts[0], parts[1])
+		args = append(args, parts[0], parts[0], seq)
 	}
 	args = append(args, limit+1)
 	rows, err := s.db.QueryContext(ctx, `SELECT `+messageColumns+` FROM messages m LEFT JOIN chats c ON c.jid = m.chat_jid

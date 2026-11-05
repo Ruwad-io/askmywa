@@ -331,35 +331,48 @@ func (s *Store) ContactName(ctx context.Context, phone, lid string) (string, err
 }
 
 // SearchContacts finds people by name (accent- and case-insensitive
-// substring) or by number (substring of the phone number or LID).
+// substring) or by number (substring of the phone number or LID). Names
+// where the query starts a word rank first.
 func (s *Store) SearchContacts(ctx context.Context, query string, limit int, cursor string) ([]Contact, Page, error) {
 	limit = clampLimit(limit)
 	query = strings.TrimSpace(query)
 	if query == "" {
 		return nil, Page{}, errors.New("query is empty: pass part of a name or of a phone number")
 	}
-	parts, err := decodeCursor(cursor, 1)
+	parts, err := decodeCursor(cursor, 2)
 	if err != nil {
 		return nil, Page{}, err
 	}
-	var where []string
-	var args []any
-	needle := "%" + escapeLike(textfold.Fold(query)) + "%"
-	where = append(where, `c.name_fold LIKE ? ESCAPE '\'`)
-	args = append(args, needle)
+	folded := escapeLike(textfold.Fold(query))
+	where := []string{`c.name_fold LIKE ? ESCAPE '\'`}
+	args := []any{"%" + folded + "%"}
 	if digits := textfold.Digits(query); digits != "" && len(digits) >= 3 {
 		where = append(where, `c.phone LIKE ?`, `c.lid LIKE ?`)
 		args = append(args, "%"+digits+"%", "%"+digits+"%")
 	}
-	sqlText := `SELECT c.id, c.phone, c.lid, c.name, c.name_source,
+	rank := `CASE WHEN c.name_fold LIKE ? ESCAPE '\' OR c.name_fold LIKE ? ESCAPE '\' THEN 0 ELSE 1 END`
+	rankArgs := []any{folded + "%", "% " + folded + "%"}
+	sqlText := `SELECT ` + rank + ` AS rank, c.id, c.phone, c.lid, c.name, c.name_source,
 			(SELECT jid FROM chats WHERE jid = c.phone || '@s.whatsapp.net'),
 			(SELECT jid FROM chats WHERE jid = c.lid || '@lid')
 		FROM contacts c WHERE (` + strings.Join(where, " OR ") + `)`
+	args = append(rankArgs, args...)
 	if parts != nil {
-		sqlText += ` AND c.id > ?`
-		args = append(args, parts[0])
+		lastRank, err := cursorInt(parts[0], cursor)
+		if err != nil {
+			return nil, Page{}, err
+		}
+		lastID, err := cursorInt(parts[1], cursor)
+		if err != nil {
+			return nil, Page{}, err
+		}
+		sqlText += ` AND (` + rank + ` > ? OR (` + rank + ` = ? AND c.id > ?))`
+		args = append(args, rankArgs...)
+		args = append(args, lastRank)
+		args = append(args, rankArgs...)
+		args = append(args, lastRank, lastID)
 	}
-	sqlText += ` ORDER BY c.id LIMIT ?`
+	sqlText += ` ORDER BY rank, c.id LIMIT ?`
 	args = append(args, limit+1)
 
 	rows, err := s.db.QueryContext(ctx, sqlText, args...)
@@ -368,14 +381,14 @@ func (s *Store) SearchContacts(ctx context.Context, query string, limit int, cur
 	}
 	defer rows.Close()
 	var out []Contact
-	var ids []int64
+	var keys [][2]string
 	for rows.Next() {
-		var id int64
+		var rank, id int64
 		var p, l, n, src, pnChat, lidChat sql.NullString
-		if err := rows.Scan(&id, &p, &l, &n, &src, &pnChat, &lidChat); err != nil {
+		if err := rows.Scan(&rank, &id, &p, &l, &n, &src, &pnChat, &lidChat); err != nil {
 			return nil, Page{}, err
 		}
-		ids = append(ids, id)
+		keys = append(keys, [2]string{fmt.Sprint(rank), fmt.Sprint(id)})
 		c := Contact{Phone: p.String, LID: l.String, Name: n.String, NameSource: src.String}
 		switch {
 		case pnChat.Valid:
@@ -395,9 +408,8 @@ func (s *Store) SearchContacts(ctx context.Context, query string, limit int, cur
 	page := Page{}
 	if len(out) > limit {
 		out = out[:limit]
-		// Rows are ordered by id; the cursor is the id of the last row returned.
 		page.HasMore = true
-		page.NextCursor = encodeCursor(fmt.Sprint(ids[limit-1]))
+		page.NextCursor = encodeCursor(keys[limit-1][0], keys[limit-1][1])
 	}
 	return out, page, nil
 }

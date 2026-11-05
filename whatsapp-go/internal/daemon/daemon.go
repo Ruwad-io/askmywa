@@ -53,8 +53,10 @@ type Daemon struct {
 	loggedOut  bool
 }
 
-// Run starts the daemon and blocks until ctx is cancelled.
-func Run(ctx context.Context, opts Options) error {
+// Prepare opens the stores, copies the legacy session if needed, syncs the
+// contact names and imports the legacy history, without connecting to
+// WhatsApp. Run calls it; the import subcommand uses it alone.
+func Prepare(ctx context.Context, opts Options) (*Daemon, error) {
 	if opts.Log == nil {
 		opts.Log = slog.Default()
 	}
@@ -63,38 +65,39 @@ func Run(ctx context.Context, opts Options) error {
 	}
 	p := opts.Paths
 	if err := p.EnsureDirs(); err != nil {
-		return err
+		return nil, err
 	}
 	if err := ensureSession(ctx, p, opts.LegacyStore, opts.Log); err != nil {
-		return err
+		return nil, err
 	}
 	d := &Daemon{opts: opts, log: opts.Log, started: time.Now(),
 		linked: map[string]bool{}, pushNames: map[string]string{}, groupNames: map[string]string{}}
 
 	st, err := store.Open(ctx, p.MessagesDB, false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	d.store = st
-	defer st.Close()
 
 	session, err := sql.Open("sqlite", sessionDSN(p.SessionDB))
 	if err != nil {
-		return fmt.Errorf("open session store: %w", err)
+		st.Close()
+		return nil, fmt.Errorf("open session store: %w", err)
 	}
 	session.SetMaxOpenConns(1)
 	d.session = session
-	defer session.Close()
 	container := sqlstore.NewWithDB(session, "sqlite3", newWALogger(d.log, "sqlstore"))
 	if err := container.Upgrade(ctx); err != nil {
-		return fmt.Errorf("upgrade session store: %w", err)
+		d.Close()
+		return nil, fmt.Errorf("upgrade session store: %w", err)
 	}
 	device, err := container.GetFirstDevice(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		device = container.NewDevice()
 		d.log.Info("no paired device in the session store, a QR code will be shown")
 	} else if err != nil {
-		return fmt.Errorf("read device: %w", err)
+		d.Close()
+		return nil, fmt.Errorf("read device: %w", err)
 	}
 	d.cli = whatsmeow.NewClient(device, newWALogger(d.log, "whatsmeow"))
 
@@ -104,8 +107,33 @@ func Run(ctx context.Context, opts Options) error {
 		d.log.Info("contacts synced from session store", "changed", n)
 	}
 	if err := d.importLegacy(ctx); err != nil {
+		d.Close()
+		return nil, err
+	}
+	return d, nil
+}
+
+// Close releases the databases (the connection, if any, is closed by Run).
+func (d *Daemon) Close() {
+	if d.session != nil {
+		d.session.Close()
+	}
+	if d.store != nil {
+		d.store.Close()
+	}
+}
+
+// Store exposes the message store (status output of the import command).
+func (d *Daemon) Store() *store.Store { return d.store }
+
+// Run starts the daemon and blocks until ctx is cancelled.
+func Run(ctx context.Context, opts Options) error {
+	d, err := Prepare(ctx, opts)
+	if err != nil {
 		return err
 	}
+	defer d.Close()
+	p := opts.Paths
 
 	d.cli.AddEventHandler(d.handleEvent)
 	if err := d.connect(ctx); err != nil {
@@ -152,7 +180,7 @@ func ensureSession(ctx context.Context, p config.Paths, legacyDir string, log *s
 }
 
 func copySQLite(ctx context.Context, src, dst string) error {
-	db, err := sql.Open("sqlite", "file:"+src+"?mode=ro&_pragma=query_only(1)")
+	db, err := sql.Open("sqlite", "file:"+src+"?mode=ro")
 	if err != nil {
 		return err
 	}
