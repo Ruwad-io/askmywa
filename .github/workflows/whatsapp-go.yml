@@ -1,0 +1,98 @@
+name: whatsapp-go
+
+on:
+  push:
+    branches: [main]
+    paths: ['whatsapp-go/**', '.github/workflows/whatsapp-go.yml']
+  pull_request:
+    paths: ['whatsapp-go/**', '.github/workflows/whatsapp-go.yml']
+  schedule:
+    - cron: '17 6 * * 1' # weekly whatsmeow upgrade probe
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+defaults:
+  run:
+    working-directory: whatsapp-go
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: whatsapp-go/go.mod
+          cache-dependency-path: whatsapp-go/go.sum
+      - run: go mod download
+      - name: gofmt
+        run: |
+          diff=$(gofmt -l .)
+          if [ -n "$diff" ]; then
+            echo "gofmt differences:"; echo "$diff"; gofmt -d .; exit 1
+          fi
+      - run: go vet ./...
+      - run: go test -race ./...
+      - run: go build -o whatsapp-mcp .
+      - name: whatsmeow API parity
+        run: bash ./scripts/whatsmeow-parity.sh
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: whatsapp-go/go.mod
+          cache-dependency-path: whatsapp-go/go.sum
+      - run: go build -o whatsapp-mcp .
+      - run: go test ./...
+      - run: ./whatsapp-mcp version
+
+  upgrade-check:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: whatsapp-go/go.mod
+          cache-dependency-path: whatsapp-go/go.sum
+      - name: Record pinned version
+        run: echo "OLD_PIN=$(go list -m -f '{{.Version}}' go.mau.fi/whatsmeow)" >> "$GITHUB_ENV"
+      - run: go get go.mau.fi/whatsmeow@main
+      - run: go mod tidy
+      - name: Record upstream version
+        run: echo "NEW_PIN=$(go list -m -f '{{.Version}}' go.mau.fi/whatsmeow)" >> "$GITHUB_ENV"
+      - run: go build ./...
+      - run: go test ./...
+      - run: bash ./scripts/whatsmeow-parity.sh
+      - name: Record status
+        if: always()
+        run: echo "STATUS=${{ job.status }}" >> "$GITHUB_ENV"
+      - name: Report to the rolling issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "${OLD_PIN:-}" ] || [ -z "${NEW_PIN:-}" ] || [ "$OLD_PIN" = "$NEW_PIN" ]; then
+            echo "nothing to report"; exit 0
+          fi
+          body="whatsmeow can be bumped in whatsapp-go.
+
+          - Current pin: \`$OLD_PIN\`
+          - Upstream @main: \`$NEW_PIN\`
+          - Build, tests and parity check against @main: $STATUS
+
+          Run \`cd whatsapp-go && go get go.mau.fi/whatsmeow@main && go mod tidy\` to accept."
+          num=$(gh issue list --label upstream --state open --limit 1 --json number -q '.[0].number' || true)
+          if [ -n "$num" ]; then
+            gh issue edit "$num" --body "$body"
+          else
+            gh issue create --title "whatsmeow upstream update available" --label upstream --body "$body" || gh issue create --title "whatsmeow upstream update available" --body "$body"
+          fi

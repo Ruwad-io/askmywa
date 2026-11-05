@@ -1,0 +1,5 @@
+/whatsapp-mcp
+/dist/
+*.db
+*.db-wal
+*.db-shm
