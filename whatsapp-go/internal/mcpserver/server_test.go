@@ -47,6 +47,10 @@ func (f *fakeSender) Status(context.Context) (ipc.StatusResult, error) {
 	}
 	return ipc.StatusResult{}, nil
 }
+func (f *fakeSender) Logout(context.Context) (ipc.LogoutResult, error) {
+	f.calls = append(f.calls, "logout")
+	return ipc.LogoutResult{Unlinked: true}, nil
+}
 func (f *fakeSender) Pair(_ context.Context, p ipc.PairParams) (ipc.PairResult, error) {
 	f.calls = append(f.calls, "pair:"+p.Phone)
 	if f.pair != nil {
@@ -133,7 +137,7 @@ func TestToolsAreAnnotated(t *testing.T) {
 	}
 	want := map[string]bool{"search_contacts": true, "list_messages": true, "list_chats": true, "get_chat": true, "get_direct_chat_by_contact": true,
 		"get_contact_chats": true, "get_last_interaction": true, "get_message_context": true, "send_message": false, "send_file": false, "send_audio_message": false, "download_media": false,
-		"whatsapp_status": true, "connect_whatsapp": false}
+		"whatsapp_status": true, "connect_whatsapp": false, "disconnect_whatsapp": false}
 	if len(tools.Tools) != len(want) {
 		t.Errorf("got %d tools", len(tools.Tools))
 	}

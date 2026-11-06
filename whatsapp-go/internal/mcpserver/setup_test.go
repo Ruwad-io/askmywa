@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -29,6 +30,11 @@ func (f *fakeService) Install(p config.Paths) error {
 	if f.onStart != nil {
 		f.onStart()
 	}
+	return nil
+}
+func (f *fakeService) Uninstall() error {
+	f.actions = append(f.actions, "uninstall")
+	f.loaded = false
 	return nil
 }
 func (f *fakeService) Restart() error {
@@ -148,5 +154,65 @@ func TestPairErrorsAreReported(t *testing.T) {
 	_, text, isErr := h.call(t, "connect_whatsapp", map[string]any{"phone_number": "0612"})
 	if !isErr || !strings.Contains(text, "too short") {
 		t.Errorf("pair error: %q", text)
+	}
+}
+
+func TestDisconnectPreviewsThenUnlinks(t *testing.T) {
+	h, svc := firstRun(t)
+	svc.loaded = true
+	h.sender.status = func() (ipc.StatusResult, error) {
+		return ipc.StatusResult{Connected: true, LoggedIn: true, JID: "33600000000@s.whatsapp.net", SendRoot: h.paths.SendRoot}, nil
+	}
+	// Archive files, a downloaded photo, and a user file in the send folder.
+	must := func(err error) {
+		t.Helper()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	must(os.MkdirAll(h.paths.MediaDir+"/chat", 0o700))
+	must(os.MkdirAll(h.paths.SendRoot, 0o700))
+	for _, f := range []string{h.paths.SessionDB, h.paths.MessagesDB, h.paths.MessagesDB + "-wal", h.paths.MediaDir + "/chat/p.jpg", h.paths.SendRoot + "/mine.pdf"} {
+		must(os.WriteFile(f, []byte("x"), 0o600))
+	}
+
+	out, _, isErr := h.call(t, "disconnect_whatsapp", map[string]any{"delete_archive": true})
+	if isErr || out["needs_confirmation"] != true || out["done"] != false || len(out["steps"].([]any)) != 3 {
+		t.Fatalf("preview: %+v", out)
+	}
+	for _, c := range h.sender.calls {
+		if c == "logout" {
+			t.Fatal("preview logged out")
+		}
+	}
+	if len(svc.actions) != 0 {
+		t.Fatalf("preview touched the service: %v", svc.actions)
+	}
+	if _, err := os.Stat(h.paths.MessagesDB); err != nil {
+		t.Fatal("preview deleted the archive")
+	}
+
+	out, _, isErr = h.call(t, "disconnect_whatsapp", map[string]any{"delete_archive": true, "confirm": true})
+	if isErr || out["done"] != true {
+		t.Fatalf("confirm: %+v", out)
+	}
+	if h.sender.calls[len(h.sender.calls)-1] != "logout" || len(svc.actions) != 1 || svc.actions[0] != "uninstall" {
+		t.Errorf("calls %v actions %v", h.sender.calls, svc.actions)
+	}
+	for _, gone := range []string{h.paths.SessionDB, h.paths.MessagesDB, h.paths.MessagesDB + "-wal", h.paths.MediaDir} {
+		if _, err := os.Stat(gone); err == nil {
+			t.Errorf("%s still exists", gone)
+		}
+	}
+	if _, err := os.Stat(h.paths.SendRoot + "/mine.pdf"); err != nil {
+		t.Error("the user's file in the send folder was deleted")
+	}
+}
+
+func TestDisconnectWhenNothingIsSetUp(t *testing.T) {
+	h, _ := firstRun(t)
+	out, _, isErr := h.call(t, "disconnect_whatsapp", map[string]any{"confirm": true})
+	if isErr || out["done"] != true || !strings.Contains(out["message"].(string), "nothing to disconnect") {
+		t.Errorf("nothing set up: %+v", out)
 	}
 }

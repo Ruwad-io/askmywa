@@ -128,6 +128,7 @@ Everything lives in `~/Library/Application Support/whatsapp-mcp/` (override with
 |---|---|
 | `whatsapp_status` | Service installed and running, linked, connected, archive size, send folder, and a plain-language `next_step` |
 | `connect_whatsapp` | Installs or restarts the service, then returns a pairing code for `phone_number` when the Mac is not linked yet. Reports the account when it already is |
+| `disconnect_whatsapp` | Unlinks the Mac from the account, uninstalls the service and, with `delete_archive`, deletes the session, archive, downloaded media and logs (never the send folder). Previews unless `confirm=true` |
 | `search_contacts` | Name (accent-insensitive) or digits of a number. Returns the JID to pass elsewhere |
 | `list_messages` | Filters `chat_jid`, `sender` (number, JID or name), `query` (full text, word prefixes), `after`, `before`. `include_context` adds surrounding messages |
 | `list_chats` | `sort_by` = `last_active` or `name`, optional `query` |

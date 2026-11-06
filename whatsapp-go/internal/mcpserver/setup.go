@@ -24,6 +24,8 @@ type ServiceManager interface {
 	Install(paths config.Paths) error
 	// Restart restarts the running service.
 	Restart() error
+	// Uninstall stops the service and unregisters it.
+	Uninstall() error
 }
 
 // daemonWait bounds how long setup waits for the daemon to answer after

@@ -65,14 +65,14 @@ chmod +x "$dist/mcpb/server/whatsapp-mcp"
 sign "$dist/mcpb/server/whatsapp-mcp"
 
 if [[ $notarize == 1 ]]; then
-  echo "notarizing (this usually takes a few minutes)"
+  echo "notarizing (usually a few minutes; a team's first submissions can take an hour or more)"
   submission="$dist/notarize.zip"
   mkdir -p "$dist/notarize"
   cp "$dist/bin/whatsapp-mcp-arm64" "$dist/bin/whatsapp-mcp-amd64" "$dist/notarize/"
   cp "$dist/mcpb/server/whatsapp-mcp" "$dist/notarize/whatsapp-mcp-universal"
   ditto -c -k --keepParent "$dist/notarize" "$submission"
   xcrun notarytool submit "$submission" --key "$NOTARY_KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" \
-    --wait --timeout 30m --output-format json | tee "$dist/notarize.json"
+    --wait --timeout 2h --output-format json | tee "$dist/notarize.json"
   status=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("status",""))' "$dist/notarize.json")
   if [[ "$status" != "Accepted" ]]; then
     id=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("id",""))' "$dist/notarize.json")

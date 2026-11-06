@@ -55,6 +55,10 @@
       "description": "Link this computer to your WhatsApp with a code you type on your phone"
     },
     {
+      "name": "disconnect_whatsapp",
+      "description": "Unlink this Mac from WhatsApp and stop the background service, after showing you what will happen"
+    },
+    {
       "name": "search_contacts",
       "description": "Find people by name or phone number"
     },

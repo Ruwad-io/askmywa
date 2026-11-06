@@ -16,6 +16,7 @@ import (
 
 	"github.com/mdp/qrterminal"
 	"go.mau.fi/whatsmeow"
+	wastore "go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
@@ -102,6 +103,8 @@ func Prepare(ctx context.Context, opts Options) (*Daemon, error) {
 		d.Close()
 		return nil, fmt.Errorf("read device: %w", err)
 	}
+	// Name shown in WhatsApp > Linked devices for new pairings.
+	wastore.SetOSInfo("WhatsApp MCP", [3]uint32{1, 0, 0})
 	d.cli = whatsmeow.NewClient(device, newWALogger(d.log, "whatsmeow"))
 
 	if d.cli.Store.ID == nil {
