@@ -244,11 +244,13 @@ func parseLegacyTime(v string) (time.Time, error) {
 	return time.Time{}, fmt.Errorf("unrecognised timestamp %q", v)
 }
 
-// extractDirectPath recovers the media direct path from a full mmg.whatsapp.net URL.
+// extractDirectPath recovers the media direct path from a full
+// mmg.whatsapp.net URL. The query string is part of the path: whatsmeow
+// appends "&hash=..." to it, and the CDN answers 403 without it.
 func extractDirectPath(u string) string {
 	parts := strings.SplitN(u, ".net/", 2)
 	if len(parts) < 2 {
 		return ""
 	}
-	return "/" + strings.SplitN(parts[1], "?", 2)[0]
+	return "/" + parts[1]
 }

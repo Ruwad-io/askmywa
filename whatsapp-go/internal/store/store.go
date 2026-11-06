@@ -103,6 +103,17 @@ CREATE TRIGGER IF NOT EXISTS messages_au AFTER UPDATE OF content ON messages BEG
 END;
 `
 
+// repairs fixes rows written by earlier versions of the import; every
+// statement is idempotent.
+const repairs = `
+-- Status updates and channels are not archived.
+DELETE FROM messages WHERE chat_jid LIKE '%@broadcast' OR chat_jid LIKE '%@newsletter';
+DELETE FROM chats WHERE jid LIKE '%@broadcast' OR jid LIKE '%@newsletter';
+-- The media direct path must keep the URL's query string.
+UPDATE messages SET direct_path = '/' || substr(url, instr(url, '.net/') + 5)
+	WHERE url LIKE '%.net/%?%' AND (direct_path IS NULL OR direct_path NOT LIKE '%?%');
+`
+
 // DSN builds the modernc.org/sqlite connection string for path.
 func DSN(path string, readOnly bool) string {
 	q := url.Values{}
@@ -136,6 +147,10 @@ func Open(ctx context.Context, path string, readOnly bool) (*Store, error) {
 		}
 		// The archive is private data.
 		_ = os.Chmod(path, 0o600)
+		if _, err := db.ExecContext(ctx, repairs); err != nil {
+			db.Close()
+			return nil, fmt.Errorf("repair %s: %w", path, err)
+		}
 	}
 	if err := db.PingContext(ctx); err != nil {
 		db.Close()

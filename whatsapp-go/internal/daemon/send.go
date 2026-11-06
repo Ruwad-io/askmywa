@@ -345,10 +345,11 @@ func (d *Daemon) download(ctx context.Context, p ipc.DownloadParams) (ipc.Downlo
 	return ipc.DownloadResult{Path: target, MediaType: info.MediaType, Filename: filename, Size: int64(len(data))}, nil
 }
 
+// directPathFromURL keeps the query string: whatsmeow appends "&hash=" to it.
 func directPathFromURL(u string) string {
 	parts := strings.SplitN(u, ".net/", 2)
 	if len(parts) < 2 {
 		return ""
 	}
-	return "/" + strings.SplitN(parts[1], "?", 2)[0]
+	return "/" + parts[1]
 }

@@ -411,7 +411,7 @@ func TestImportLegacy(t *testing.T) {
 		t.Errorf("L7: %+v", m)
 	}
 	mi, err := s.GetMediaInfo(ctx, "L7", "999@g.us")
-	if err != nil || mi.DirectPath != "/v/t62.7118-24/abc.enc" || mi.FileLength != 42 {
+	if err != nil || mi.DirectPath != "/v/t62.7118-24/abc.enc?ccb=11" || mi.FileLength != 42 {
 		t.Errorf("media info: %+v err=%v", mi, err)
 	}
 	// Re-importing is idempotent.
@@ -435,5 +435,35 @@ func TestParseUserTime(t *testing.T) {
 func TestFTSQuery(t *testing.T) {
 	if got := FTSQuery(`école "bonjour" OR x`); got != `"école"* "bonjour"* "OR"* "x"*` {
 		t.Errorf("FTSQuery = %q", got)
+	}
+}
+
+func TestRepairsOnOpen(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "m.db")
+	s, err := Open(ctx, path, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = s.DB().ExecContext(ctx, `
+		INSERT INTO chats (jid, is_group) VALUES ('status@broadcast', 0), ('1@s.whatsapp.net', 0);
+		INSERT INTO messages (id, chat_jid, content, timestamp) VALUES ('S', 'status@broadcast', 'x', '2026-01-01T00:00:00Z');
+		INSERT INTO messages (id, chat_jid, content, timestamp, media_type, url, direct_path) VALUES
+			('M', '1@s.whatsapp.net', '', '2026-01-01T00:00:00Z', 'image', 'https://mmg.whatsapp.net/v/a.enc?ccb=1&oh=2', '/v/a.enc');`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Close()
+	s, err = Open(ctx, path, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	if _, ok, _ := s.GetChat(ctx, "status@broadcast", false); ok {
+		t.Error("broadcast chat not removed")
+	}
+	mi, err := s.GetMediaInfo(ctx, "M", "1@s.whatsapp.net")
+	if err != nil || mi.DirectPath != "/v/a.enc?ccb=1&oh=2" {
+		t.Errorf("direct path not repaired: %+v err=%v", mi, err)
 	}
 }
