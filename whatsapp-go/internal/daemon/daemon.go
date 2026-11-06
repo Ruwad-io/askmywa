@@ -101,7 +101,9 @@ func Prepare(ctx context.Context, opts Options) (*Daemon, error) {
 	}
 	d.cli = whatsmeow.NewClient(device, newWALogger(d.log, "whatsmeow"))
 
-	if n, err := d.syncNames(ctx); err != nil {
+	if d.cli.Store.ID == nil {
+		d.log.Info("no session yet, skipping the contact sync")
+	} else if n, err := d.syncNames(ctx); err != nil {
 		d.log.Warn("initial contact sync failed", "error", err)
 	} else {
 		d.log.Info("contacts synced from session store", "changed", n)
@@ -169,8 +171,9 @@ func ensureSession(ctx context.Context, p config.Paths, legacyDir string, log *s
 	}
 	src := filepath.Join(legacyDir, "whatsapp.db")
 	if _, err := os.Stat(src); err != nil {
-		log.Info("no legacy session to copy", "path", src)
-		return nil
+		// Pairing a new device here would silently consume a linked-device
+		// slot, so a wrong --legacy-store is an error, not a fallback.
+		return fmt.Errorf("--legacy-store %s has no whatsapp.db (%w): pass the absolute path of the old whatsapp-bridge/store directory, or omit the flag to pair a new device", legacyDir, err)
 	}
 	if err := copySQLite(ctx, src, p.SessionDB); err != nil {
 		return fmt.Errorf("copy legacy session %s: %w", src, err)

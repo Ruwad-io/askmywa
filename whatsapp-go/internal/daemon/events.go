@@ -202,6 +202,9 @@ func (d *Daemon) syncNames(ctx context.Context) (int, error) {
 		return changed, err
 	}
 
+	if d.cli.Store.Contacts == nil {
+		return changed, nil
+	}
 	contacts, err := d.cli.Store.Contacts.GetAllContacts(ctx)
 	if err != nil {
 		return changed, err

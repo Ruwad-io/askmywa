@@ -50,13 +50,13 @@ Only one process may use the session at a time, so stop the old bridge first:
 Then either import without connecting (safe to run while the old bridge is still up, it only reads):
 
 ```bash
-./whatsapp-mcp import --legacy-store ../whatsapp-bridge/store
+./whatsapp-mcp import --legacy-store /path/to/whatsapp-mcp/whatsapp-bridge/store
 ```
 
 or start the daemon directly with the same flag; it imports when the archive is empty:
 
 ```bash
-./whatsapp-mcp daemon --legacy-store ../whatsapp-bridge/store
+./whatsapp-mcp daemon --legacy-store /path/to/whatsapp-mcp/whatsapp-bridge/store
 ```
 
 Check the result:
