@@ -360,6 +360,8 @@ func TestImportLegacy(t *testing.T) {
 			media_type TEXT, filename TEXT, url TEXT, media_key BLOB, file_sha256 BLOB, file_enc_sha256 BLOB, file_length INTEGER, PRIMARY KEY (id, chat_jid));
 		INSERT INTO chats VALUES ('100000000000001@lid', '100000000000001', '2026-10-01 10:00:00+02:00');
 		INSERT INTO chats VALUES ('999@g.us', 'Old group', '2026-10-02 10:00:00+02:00');
+		INSERT INTO chats VALUES ('status@broadcast', 'status', '2026-10-02 10:00:00+02:00');
+		INSERT INTO messages (id, chat_jid, sender, content, timestamp, is_from_me) VALUES ('S1', 'status@broadcast', '33612345678', 'a status', '2026-10-02 10:00:00+02:00', 0);
 		INSERT INTO messages (id, chat_jid, sender, content, timestamp, is_from_me) VALUES
 			('L1', '100000000000001@lid', '100000000000001', 'ancien message', '2026-10-01 10:00:00+02:00', 0),
 			('L2', '999@g.us', '100000000000001@lid', 'lid suffixed', '2026-10-02 09:00:00+02:00', 0),
@@ -377,7 +379,7 @@ func TestImportLegacy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if stats.Chats != 2 || stats.Messages != 6 || stats.Skipped != 1 {
+	if stats.Chats != 2 || stats.Messages != 6 || stats.Skipped != 2 {
 		t.Errorf("stats: %+v", stats)
 	}
 	// The LID chat moved to the phone JID because the contact is known.

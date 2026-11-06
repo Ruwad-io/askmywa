@@ -81,6 +81,10 @@ func (s *Store) ImportLegacy(ctx context.Context, legacyPath string, log *slog.L
 		target := ch.jid
 		name := ch.name
 		user, server := SplitJID(ch.jid)
+		if server == "broadcast" || server == "newsletter" {
+			canonical[ch.jid] = "-" // status updates and channels are not archived
+			continue
+		}
 		if name == user {
 			name = ""
 		}
@@ -136,6 +140,10 @@ func (s *Store) ImportLegacy(ctx context.Context, legacyPath string, log *slog.L
 			continue
 		}
 		target := canonical[chatJID]
+		if target == "-" {
+			stats.Skipped++
+			continue
+		}
 		if target == "" {
 			target = chatJID
 			canonical[chatJID] = target
