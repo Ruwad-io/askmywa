@@ -17,6 +17,23 @@ It links to WhatsApp as a companion device through [whatsmeow](https://github.co
 
 > **Caution.** Like any MCP server that reads private data and can send messages, this one is exposed to [the lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/): a prompt injection hidden in a message could try to make the assistant leak data. The confirmation step on every send is the main safeguard, so read previews before approving them.
 
+## How this fork differs from lharries/whatsapp-mcp
+
+This is a rewrite, not a patch set. The tool names and the WhatsApp library are the same, so assistants and prompts written for the original keep working.
+
+| | [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp) | This fork |
+|---|---|---|
+| Components | Go bridge plus a Python MCP server run with `uv` | One Go binary |
+| Link between them | HTTP API on port 8080 of every network interface, no authentication | Private Unix socket, readable only by you |
+| Sender names | Looked up at read time from the chat list; group members and `@lid` senders often show as raw numbers | Resolved when stored, from the address book first; phone numbers and `@lid` identities merged into one contact |
+| Search | `LIKE` on message text, accent-sensitive, unindexed | SQLite FTS5 index, accent- and case-insensitive |
+| Tool results | Mostly formatted text, page numbers | Typed JSON with schemas, cursor pagination with `has_more` |
+| Sending | Immediate | Preview first, sent only with `confirm=true` |
+| Files that can be sent | Any readable path | Only files under one configured folder |
+| Running it | `go run main.go` in an open terminal | launchd service with rotated logs |
+
+An existing install of the original can switch without pairing again: the new daemon copies the old session and imports the old history, and never writes to the old files. See [Migrating from the old bridge](whatsapp-go/README.md#migrating-from-the-old-bridge).
+
 ## Quick start (macOS)
 
 Requires Go 1.26 or newer. `ffmpeg` is optional and only used to turn audio files into voice notes.
