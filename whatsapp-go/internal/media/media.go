@@ -156,6 +156,18 @@ func IsOggOpus(data []byte) bool {
 	return len(data) >= 4 && string(data[:4]) == "OggS" && bytes.Contains(data[:min(len(data), 4096)], []byte("OpusHead"))
 }
 
+// minimalEnv passes ffmpeg only what it needs to find itself and its
+// temporary directory, on Unix and Windows.
+func minimalEnv() []string {
+	var env []string
+	for _, k := range []string{"PATH", "HOME", "TMPDIR", "SYSTEMROOT", "WINDIR", "TEMP", "TMP", "USERPROFILE", "LOCALAPPDATA", "PATHEXT"} {
+		if v, ok := os.LookupEnv(k); ok {
+			env = append(env, k+"="+v)
+		}
+	}
+	return env
+}
+
 // ConvertToOpusOgg transcodes input to a 24 kHz Opus voice note in outDir
 // with ffmpeg. The returned path is a new file; callers remove it when done.
 func ConvertToOpusOgg(ctx context.Context, input, outDir string) (string, error) {
@@ -175,7 +187,7 @@ func ConvertToOpusOgg(ctx context.Context, input, outDir string) (string, error)
 	cmd := exec.CommandContext(ctx, ffmpeg, "-nostdin", "-hide_banner", "-loglevel", "error", "-i", input,
 		"-vn", "-c:a", "libopus", "-b:a", "32k", "-ar", "24000", "-ac", "1", "-application", "voip", "-vbr", "on",
 		"-compression_level", "10", "-frame_duration", "60", "-y", outPath)
-	cmd.Env = []string{"PATH=" + os.Getenv("PATH"), "HOME=" + os.Getenv("HOME")}
+	cmd.Env = minimalEnv()
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {

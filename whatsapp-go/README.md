@@ -14,7 +14,7 @@ Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go S
 
 ## Install
 
-The simplest install is the Claude Desktop extension: download `whatsapp-mcp-<version>.mcpb` from the [releases](https://github.com/abonur/whatsapp-mcp/releases), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for Apple Silicon and Intel are attached to the same releases.
+The simplest install is the Claude Desktop extension (Mac and Windows): download `whatsapp-mcp-<version>.mcpb` from the [releases](https://github.com/abonur/whatsapp-mcp/releases), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi OS (`armv7`) are attached to the same releases.
 
 To build from source you need Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` to convert audio to Opus voice notes.
 
@@ -54,7 +54,15 @@ whatsapp-mcp install-service
 whatsapp-mcp status
 ```
 
-This writes `~/Library/LaunchAgents/com.whatsapp-mcp.daemon.plist` (starts at login, restarted 10 s after a crash) and logs to `~/Library/Logs/whatsapp-mcp/daemon.log`, rotated at 10 MB with 5 compressed files kept.
+The service starts at login, restarts after a crash, and logs to `daemon.log` in the log folder (see [Files](#files)), rotated at 10 MB with 5 compressed files kept.
+
+| System | What `install-service` registers |
+|---|---|
+| macOS | launchd agent `~/Library/LaunchAgents/com.whatsapp-mcp.daemon.plist`, restarted 10 s after a crash |
+| Linux, Raspberry Pi | systemd user service `~/.config/systemd/user/whatsapp-mcp.service`, `Restart=always`. It also enables lingering (`loginctl enable-linger`) so the service runs at boot and after you log out; if that needs `sudo`, it says so |
+| Windows | scheduled task `whatsapp-mcp daemon`, started at logon and restarted every minute after a failure. The console window closes by itself right after it opens |
+
+`install-service --dry-run` prints the definition without installing anything, and `--no-wait` returns as soon as the service is started.
 
 ```bash
 whatsapp-mcp uninstall-service
@@ -105,13 +113,21 @@ If you already run [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-
 
 ## Files
 
-Everything lives in `~/Library/Application Support/whatsapp-mcp/` (override with `--data-dir` or `WHATSAPP_MCP_DATA_DIR`):
+Everything lives in one data folder (override with `--data-dir` or `WHATSAPP_MCP_DATA_DIR`), and logs in a separate log folder:
+
+| System | Data folder | Log folder |
+|---|---|---|
+| macOS | `~/Library/Application Support/whatsapp-mcp` | `~/Library/Logs/whatsapp-mcp` |
+| Windows | `%LOCALAPPDATA%\whatsapp-mcp` | `%LOCALAPPDATA%\whatsapp-mcp\logs` |
+| Linux | `~/.local/share/whatsapp-mcp` (`$XDG_DATA_HOME`) | `~/.local/state/whatsapp-mcp` (`$XDG_STATE_HOME`) |
+
+Inside the data folder:
 
 | Path | Content |
 |---|---|
 | `whatsapp.db` | WhatsApp session keys. Keep it private; deleting it means pairing again |
 | `messages.db` | Contacts, chats and messages, with a full-text index |
-| `daemon.sock` | Socket used by `serve`, readable only by you |
+| `daemon.sock` | Socket used by `serve`, readable only by you (a Unix socket, also on Windows 10 and 11) |
 | `files/` | The only folder files can be sent from (`--send-root` or `WHATSAPP_MCP_SEND_ROOT` to change it) |
 | `files/media/<chat>/` | Downloaded attachments |
 
@@ -142,7 +158,9 @@ List tools return `has_more` and `next_cursor`; pass the cursor back as `cursor`
 
 | Symptom | Fix |
 |---|---|
-| `status` says the daemon is not reachable | `whatsapp-mcp install-service`, then read `~/Library/Logs/whatsapp-mcp/daemon.log` |
+| `status` says the daemon is not reachable | `whatsapp-mcp install-service`, then read `daemon.log` in the log folder |
+| Linux: the service stops when you log out of the Pi | Run `sudo loginctl enable-linger $USER` once |
+| Linux: `install-service` says it cannot reach systemd | Log in to the machine (SSH is fine) so that a systemd user session exists, then retry |
 | Log says `stream replaced` | Another process uses the same session: stop the original bridge or any hand-started daemon |
 | Log says `logged out` | The phone removed this linked device: ask Claude to connect WhatsApp again, or restart the service and pair in a terminal |
 | The pairing code is refused or expired | Codes last about two minutes; ask for a new one. Use the number in international format, without a leading 0 |
@@ -161,4 +179,4 @@ go vet ./... && go test ./...
 
 To publish a release, push a tag: `git tag v0.1.0 && git push origin v0.1.0`. The release workflow (`.github/workflows/release.yml`) runs the tests, builds, signs with a Developer ID certificate, notarizes with Apple and attaches the artifacts to a GitHub release. [RELEASING.md](RELEASING.md) lists the one-time setup: the certificate, the notary key and the repository secrets.
 
-CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets, runs the tests with the race detector on Linux, builds and packages the extension on macOS, and runs the parity script. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.
+CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets and runs the tests on Linux x64 (with the race detector), Linux ARM64, Windows and macOS. On each it runs `scripts/smoke.sh`, which starts an unpaired daemon on an empty folder and checks it answers on its socket without trying to pair, and it validates the service definition: `systemd-analyze verify` for the unit, `plutil -lint` for the property list, and a real register, query and delete of the Windows scheduled task. macOS also packages the release artifacts and the extension. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.

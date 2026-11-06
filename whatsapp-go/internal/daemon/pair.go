@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"runtime"
 	"strings"
 	"time"
 
@@ -18,7 +19,7 @@ const (
 	// PairQR prints a QR code on stdout (interactive terminal).
 	PairQR = "qr"
 	// PairWait opens the socket and waits for a pair_phone request
-	// (launchd service, Claude Desktop extension).
+	// (background service, Claude Desktop extension).
 	PairWait = "wait"
 )
 
@@ -116,7 +117,7 @@ func (d *Daemon) startPhonePairing(phone string) (string, time.Time, error) {
 		d.cli.Disconnect()
 		return "", time.Time{}, errors.New("WhatsApp did not answer within 30 s; check the internet connection and retry")
 	}
-	code, err := d.cli.PairPhone(pctx, phone, true, whatsmeow.PairClientChrome, "Chrome (Mac OS)")
+	code, err := d.cli.PairPhone(pctx, phone, true, whatsmeow.PairClientChrome, pairDisplayName(runtime.GOOS))
 	if err != nil {
 		cancel()
 		d.cli.Disconnect()
@@ -170,6 +171,18 @@ func (d *Daemon) logout(ctx context.Context) (ipc.LogoutResult, error) {
 	d.mu.Unlock()
 	d.log.Info("unlinked from WhatsApp at the user's request")
 	return ipc.LogoutResult{Unlinked: true, JID: jid}, nil
+}
+
+// pairDisplayName is the "Browser (OS)" label WhatsApp shows while linking;
+// the server only accepts common browsers and systems.
+func pairDisplayName(goos string) string {
+	switch goos {
+	case "windows":
+		return "Chrome (Windows)"
+	case "linux":
+		return "Chrome (Linux)"
+	}
+	return "Chrome (Mac OS)"
 }
 
 // formatCode renders "ABCD1234" as "ABCD-1234", the way WhatsApp displays it.

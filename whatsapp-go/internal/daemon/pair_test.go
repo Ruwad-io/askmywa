@@ -20,6 +20,12 @@ func TestPairPhoneValidatesNumbers(t *testing.T) {
 	}
 }
 
+func TestPairDisplayName(t *testing.T) {
+	if pairDisplayName("windows") != "Chrome (Windows)" || pairDisplayName("linux") != "Chrome (Linux)" || pairDisplayName("darwin") != "Chrome (Mac OS)" {
+		t.Error("pairDisplayName")
+	}
+}
+
 func TestFormatCode(t *testing.T) {
 	if formatCode("ABCD1234") != "ABCD-1234" || formatCode("ABCD-1234") != "ABCD-1234" {
 		t.Error("formatCode")

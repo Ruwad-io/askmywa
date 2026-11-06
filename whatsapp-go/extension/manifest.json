@@ -3,8 +3,8 @@
   "name": "whatsapp-mcp",
   "display_name": "WhatsApp",
   "version": "0.0.0",
-  "description": "Read, search and send your WhatsApp messages from Claude. Nothing is sent without your approval.",
-  "long_description": "Links to your personal WhatsApp account as a linked device, like WhatsApp Web, and keeps a private archive of your messages on this Mac. Claude can search it, read conversations, save attachments and, after showing you a preview you approve, send messages, files and voice notes.\n\nTo start, ask Claude to connect WhatsApp: it asks for your phone number and gives you a code to type in WhatsApp > Linked devices > Link with phone number.\n\nThis uses an unofficial WhatsApp interface. Your messages stay on your Mac and only reach Claude when it calls a tool.",
+  "description": "Read, search and send your WhatsApp messages from Claude on Mac and Windows. Nothing is sent without your approval.",
+  "long_description": "Links to your personal WhatsApp account as a linked device, like WhatsApp Web, and keeps a private archive of your messages on this computer. Claude can search it, read conversations, save attachments and, after showing you a preview you approve, send messages, files and voice notes.\n\nTo start, ask Claude to connect WhatsApp: it asks for your phone number and gives you a code to type in WhatsApp > Linked devices > Link with phone number.\n\nThis uses an unofficial WhatsApp interface. Your messages stay on your computer and only reach Claude when it calls a tool.",
   "author": {
     "name": "abonur",
     "url": "https://github.com/abonur"
@@ -33,6 +33,11 @@
       ],
       "env": {
         "WHATSAPP_MCP_SEND_ROOT": "${user_config.send_folder}"
+      },
+      "platform_overrides": {
+        "win32": {
+          "command": "${__dirname}/server/whatsapp-mcp.exe"
+        }
       }
     }
   },
@@ -56,7 +61,7 @@
     },
     {
       "name": "disconnect_whatsapp",
-      "description": "Unlink this Mac from WhatsApp and stop the background service, after showing you what will happen"
+      "description": "Unlink this computer from WhatsApp and stop the background service, after showing you what will happen"
     },
     {
       "name": "search_contacts",
@@ -109,7 +114,8 @@
   ],
   "compatibility": {
     "platforms": [
-      "darwin"
+      "darwin",
+      "win32"
     ]
   }
 }

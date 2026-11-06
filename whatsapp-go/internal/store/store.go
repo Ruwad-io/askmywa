@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite" // database/sql driver "sqlite"
@@ -114,6 +116,17 @@ UPDATE messages SET direct_path = '/' || substr(url, instr(url, '.net/') + 5)
 	WHERE url LIKE '%.net/%?%' AND (direct_path IS NULL OR direct_path NOT LIKE '%?%');
 `
 
+// FileURI renders path as an SQLite "file:" URI. Windows paths become
+// file:/C:/dir/db, which SQLite reads as the drive path; on Unix the path
+// is used as is.
+func FileURI(path string) string {
+	p := filepath.ToSlash(path)
+	if len(p) >= 2 && p[1] == ':' { // drive letter
+		p = "/" + p
+	}
+	return "file:" + strings.ReplaceAll(strings.ReplaceAll(p, "?", "%3f"), "#", "%23")
+}
+
 // DSN builds the modernc.org/sqlite connection string for path.
 func DSN(path string, readOnly bool) string {
 	q := url.Values{}
@@ -123,7 +136,7 @@ func DSN(path string, readOnly bool) string {
 	if readOnly {
 		q.Add("_pragma", "query_only(1)")
 	}
-	return "file:" + path + "?" + q.Encode()
+	return FileURI(path) + "?" + q.Encode()
 }
 
 // Open creates or upgrades messages.db at path. With readOnly the connection

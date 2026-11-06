@@ -1,7 +1,8 @@
 // Package config resolves the on-disk locations used by every subcommand.
 //
 // Everything lives under one data directory, by default
-// ~/Library/Application Support/whatsapp-mcp:
+// ~/Library/Application Support/whatsapp-mcp on macOS, %LOCALAPPDATA%\whatsapp-mcp
+// on Windows and ~/.local/share/whatsapp-mcp on Linux:
 //
 //	whatsapp.db   whatsmeow session store (a copy of the legacy one, never the original)
 //	messages.db   message history, contacts and chats written by the daemon
@@ -16,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 const (
@@ -45,16 +47,44 @@ func Default() (Paths, error) {
 	if err != nil {
 		return Paths{}, fmt.Errorf("resolve home directory: %w", err)
 	}
-	dataDir := os.Getenv("WHATSAPP_MCP_DATA_DIR")
-	if dataDir == "" {
-		dataDir = filepath.Join(home, "Library", "Application Support", AppName)
+	dataDir, logDir := defaultDirs(runtime.GOOS, home, os.Getenv)
+	if d := os.Getenv("WHATSAPP_MCP_DATA_DIR"); d != "" {
+		dataDir = d
 	}
 	p := FromDataDir(dataDir)
-	p.LogDir = filepath.Join(home, "Library", "Logs", AppName)
+	p.LogDir = logDir
 	if root := os.Getenv("WHATSAPP_MCP_SEND_ROOT"); root != "" {
 		p.SendRoot = root
 	}
 	return p, nil
+}
+
+// defaultDirs returns the data and log directories each OS expects:
+//
+//	macOS    ~/Library/Application Support/whatsapp-mcp, ~/Library/Logs/whatsapp-mcp
+//	Windows  %LOCALAPPDATA%\whatsapp-mcp, %LOCALAPPDATA%\whatsapp-mcp\logs
+//	Linux    $XDG_DATA_HOME/whatsapp-mcp (~/.local/share), $XDG_STATE_HOME/whatsapp-mcp (~/.local/state)
+func defaultDirs(goos, home string, getenv func(string) string) (dataDir, logDir string) {
+	switch goos {
+	case "darwin":
+		return filepath.Join(home, "Library", "Application Support", AppName), filepath.Join(home, "Library", "Logs", AppName)
+	case "windows":
+		base := getenv("LOCALAPPDATA")
+		if base == "" {
+			base = filepath.Join(home, "AppData", "Local")
+		}
+		return filepath.Join(base, AppName), filepath.Join(base, AppName, "logs")
+	default:
+		data := getenv("XDG_DATA_HOME")
+		if data == "" {
+			data = filepath.Join(home, ".local", "share")
+		}
+		state := getenv("XDG_STATE_HOME")
+		if state == "" {
+			state = filepath.Join(home, ".local", "state")
+		}
+		return filepath.Join(data, AppName), filepath.Join(state, AppName)
+	}
 }
 
 // FromDataDir derives every path from a data directory (used by tests and flags).

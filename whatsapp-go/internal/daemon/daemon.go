@@ -163,7 +163,7 @@ func Run(ctx context.Context, opts Options) error {
 }
 
 func sessionDSN(path string) string {
-	return "file:" + path + "?_pragma=foreign_keys(1)&_pragma=busy_timeout(10000)"
+	return store.FileURI(path) + "?_pragma=foreign_keys(1)&_pragma=busy_timeout(10000)"
 }
 
 // ensureSession copies the legacy whatsapp.db into the data directory when
@@ -190,7 +190,7 @@ func ensureSession(ctx context.Context, p config.Paths, legacyDir string, log *s
 }
 
 func copySQLite(ctx context.Context, src, dst string) error {
-	db, err := sql.Open("sqlite", "file:"+src+"?mode=ro")
+	db, err := sql.Open("sqlite", store.FileURI(src)+"?mode=ro")
 	if err != nil {
 		return err
 	}

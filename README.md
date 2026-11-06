@@ -2,7 +2,7 @@
 
 *[Version française](README.fr.md)*
 
-An [MCP](https://modelcontextprotocol.io) server for your personal WhatsApp account, as a single Go binary.
+An [MCP](https://modelcontextprotocol.io) server for your personal WhatsApp account, as a single Go binary for Mac, Windows and Linux, including Raspberry Pi.
 
 It links to WhatsApp as a companion device through [whatsmeow](https://github.com/tulir/whatsmeow), keeps a local archive of your messages, and lets an assistant such as Claude Desktop search them, read them, download attachments and, after your approval, send messages and files.
 
@@ -10,7 +10,7 @@ It links to WhatsApp as a companion device through [whatsmeow](https://github.co
 
 ## What it does
 
-- **Local archive.** Every message lands in a SQLite database on your Mac. Nothing reaches the assistant unless it calls a tool.
+- **Local archive.** Every message lands in a SQLite database on your computer. Nothing reaches the assistant unless it calls a tool.
 - **Real names.** Senders are resolved when messages are stored, from your address book first, then the name people set for themselves. Phone numbers and WhatsApp's hidden `@lid` identifiers are merged into one contact.
 - **Full-text search.** Accent- and case-insensitive: `ecole` finds `école`.
 - **Typed tools.** Every tool declares its input and output schema, paginates with a cursor and returns errors that say how to fix the call.
@@ -32,29 +32,36 @@ This is a rewrite, not a patch set. The tool names and the WhatsApp library are 
 | Tool results | Mostly formatted text, page numbers | Typed JSON with schemas, cursor pagination with `has_more` |
 | Sending | Immediate | Preview first, sent only with `confirm=true` |
 | Files that can be sent | Any readable path | Only files under one configured folder |
-| Running it | `go run main.go` in an open terminal | launchd service with rotated logs |
+| Running it | `go run main.go` in an open terminal | A background service with rotated logs on Mac, Windows and Linux |
 | Installing it | Go, Python, `uv`, a terminal QR code and a hand-edited JSON config | A Claude Desktop extension, linked with a code typed on the phone |
 
 An existing install of the original can switch without pairing again: the new daemon copies the old session and imports the old history, and never writes to the old files. See [Migrating from the original project](whatsapp-go/README.md#migrating-from-the-original-project).
 
-## Install in Claude Desktop (macOS, no terminal)
+## Install in Claude Desktop (Mac and Windows, no terminal)
 
-1. Download `whatsapp-mcp-<version>.mcpb` from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest).
+1. Download `whatsapp-mcp-<version>.mcpb` from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest). The same file works on Mac and Windows.
 2. Double-click it. Claude Desktop opens and asks you to confirm the install.
 3. In a new conversation, write: **Connect my WhatsApp.**
-4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings > Linked devices > Link a device > **Link with phone number instead**, and type the code.
+4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code.
 
 That's it. Your messages start appearing within a few minutes, and the link keeps working after a restart. To send a file, put it in the `Documents/WhatsApp MCP` folder first (you can choose another folder in the extension's settings).
 
-To remove it, ask Claude to **disconnect WhatsApp from this Mac** (it unlinks the Mac, stops the background service and, if you want, deletes the stored messages), then uninstall the extension in Claude Desktop's settings.
+To remove it, ask Claude to **disconnect WhatsApp from this computer** (it unlinks the computer, stops the background service and, if you want, deletes the stored messages), then uninstall the extension in Claude Desktop's settings.
 
-> The app is signed and notarized by Apple.
+> The Mac app is signed and notarized by Apple. The Windows app is not code-signed yet: if Windows shows a SmartScreen warning, choose *More info* > *Run anyway*.
 >
 > It talks to WhatsApp through an unofficial interface, the same way WhatsApp Web automation tools do. WhatsApp's terms do not allow this, and WhatsApp could restrict an account that uses it.
 
-## Install from source
+## Install without the extension (Mac, Windows, Linux)
 
-Requires Go 1.26 or newer. `ffmpeg` is optional and only used to turn audio files into voice notes.
+Download the archive for your system from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest), or build from source with Go 1.26 or newer:
+
+| System | Archive |
+|---|---|
+| Mac (Apple Silicon / Intel) | `darwin-arm64` / `darwin-amd64` |
+| Windows (x64 / ARM) | `windows-amd64` / `windows-arm64` |
+| Linux, Raspberry Pi 4 and 5 with a 64-bit OS | `linux-amd64` / `linux-arm64` |
+| Raspberry Pi with a 32-bit OS (Pi 2, 3, Zero 2) | `linux-armv7` |
 
 ```bash
 git clone https://github.com/abonur/whatsapp-mcp.git
@@ -63,21 +70,15 @@ mkdir -p ~/.local/bin
 go build -o ~/.local/bin/whatsapp-mcp .
 ```
 
-Pair once, in a terminal, and scan the QR code from WhatsApp (Linked devices > Link a device):
-
-```bash
-~/.local/bin/whatsapp-mcp daemon
-```
-
-Once it logs `connected to WhatsApp`, stop it with Ctrl+C and install it as a background service that starts at login:
+Install the background service, which starts at login (a launchd agent on Mac, a systemd user service on Linux, a scheduled task on Windows):
 
 ```bash
 ~/.local/bin/whatsapp-mcp install-service
 ```
 
-You can also skip the terminal pairing: install the service right away, then ask Claude to connect WhatsApp as in the extension steps above.
+Then link WhatsApp, either by asking Claude to connect it as in the extension steps above, or in a terminal: uninstall the service, run `whatsapp-mcp daemon`, scan the QR code from WhatsApp (Linked devices > Link a device), stop it with Ctrl+C and install the service again.
 
-Then add the server to `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude Desktop. The path must be absolute: `~` is not expanded there.
+Add the server to Claude Desktop's `claude_desktop_config.json` (Mac: `~/Library/Application Support/Claude/`, Windows: `%APPDATA%\Claude\`) and restart Claude Desktop. The path must be absolute: `~` is not expanded there.
 
 ```json
 {
@@ -90,15 +91,34 @@ Then add the server to `~/Library/Application Support/Claude/claude_desktop_conf
 }
 ```
 
-Cursor uses the same block in `~/.cursor/mcp.json`.
+On Windows, use the full path to `whatsapp-mcp.exe`, with doubled backslashes. Cursor uses the same block in `~/.cursor/mcp.json`, and Claude Code accepts it with `claude mcp add whatsapp -- /path/to/whatsapp-mcp serve`.
+
+### On a Raspberry Pi or another always-on machine
+
+A Pi left on keeps the archive complete even when your laptop sleeps. Install the Linux binary on the Pi, run `whatsapp-mcp install-service` there (it asks systemd to keep the service running after you log out), and link WhatsApp once over SSH with `whatsapp-mcp daemon` and its QR code.
+
+Claude Desktop on your laptop can then use the Pi over SSH, provided you log in to the Pi with an SSH key, without a password prompt:
+
+```json
+{
+  "mcpServers": {
+    "whatsapp": {
+      "command": "ssh",
+      "args": ["pi@raspberrypi.local", "/home/pi/.local/bin/whatsapp-mcp", "serve"]
+    }
+  }
+}
+```
+
+Files to send must then be on the Pi, in its send folder.
 
 ## Tools
 
 | Tool | What it does |
 |---|---|
 | `whatsapp_status` | Whether WhatsApp is set up and connected, and what to do next |
-| `connect_whatsapp` | Start the background service and link this Mac with a pairing code |
-| `disconnect_whatsapp` | Unlink this Mac, stop the service and optionally delete the archive, after a preview |
+| `connect_whatsapp` | Start the background service and link this computer with a pairing code |
+| `disconnect_whatsapp` | Unlink this computer, stop the service and optionally delete the archive, after a preview |
 | `search_contacts` | Find people by name or number |
 | `list_chats` | Chats, most recent first or by name |
 | `list_messages` | Messages filtered by chat, sender, dates and full-text query, with optional surrounding context |
