@@ -1,4 +1,29 @@
+# Message archives and session stores (whatsmeow, SQLite)
 *.db
 *.db-wal
 *.db-shm
+# Leftovers of the removed legacy bridge: its store holds real conversations
+whatsapp-bridge/
+whatsapp-mcp-server/
+
+# Signing and notarization material: keep it out of the repository
+*.p12
+*.p8
+*.key
+*.pem
+*.cer
+*.certSigningRequest
+*.mobileprovision
+
+# Local configuration and secrets
 claude_desktop_config.json
+.env
+.env.*
+
+# Build, test and editor files
+*.out
+*.test
+*.log
+.DS_Store
+.idea/
+.vscode/
