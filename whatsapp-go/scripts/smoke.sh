@@ -7,7 +7,16 @@
 set -euo pipefail
 bin=$1
 work=$(mktemp -d smoke.XXXX)
-trap 'kill "$pid" 2>/dev/null || true; rm -rf "$work"' EXIT
+pid=""
+cleanup() {
+  if [[ -n "$pid" ]]; then
+    kill "$pid" 2>/dev/null || true
+    # Windows refuses to delete files a process still holds open.
+    wait "$pid" 2>/dev/null || true
+  fi
+  rm -rf "$work" 2>/dev/null || true
+}
+trap cleanup EXIT
 
 "$bin" version
 "$bin" daemon --data-dir "$work/data" --pair wait >"$work/daemon.log" 2>&1 &
