@@ -46,7 +46,7 @@ That's it. Your messages start appearing within a few minutes, and the link keep
 
 To remove it: in WhatsApp on your phone, Linked devices > this Mac > Log out; then uninstall the extension in Claude Desktop's settings.
 
-> The app is not notarized by Apple yet. If macOS blocks it, open System Settings > Privacy & Security and choose "Allow Anyway".
+> The app is signed and notarized by Apple.
 >
 > It talks to WhatsApp through an unofficial interface, the same way WhatsApp Web automation tools do. WhatsApp's terms do not allow this, and WhatsApp could restrict an account that uses it.
 

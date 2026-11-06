@@ -158,6 +158,6 @@ go vet ./... && go test ./...
 
 `scripts/build-release.sh VERSION` builds the release artifacts into `dist/`: one tarball per architecture, the Claude Desktop extension with a universal binary, and `checksums.txt`. It needs macOS and Node.js (for `npx @anthropic-ai/mcpb`). The extension's manifest is `extension/manifest.json`.
 
-To publish a release, push a tag: `git tag v0.1.0 && git push origin v0.1.0`. The release workflow (`.github/workflows/release.yml`) runs the tests, builds the artifacts on macOS and attaches them to a GitHub release.
+To publish a release, push a tag: `git tag v0.1.0 && git push origin v0.1.0`. The release workflow (`.github/workflows/release.yml`) runs the tests, builds, signs with a Developer ID certificate, notarizes with Apple and attaches the artifacts to a GitHub release. [RELEASING.md](RELEASING.md) lists the one-time setup: the certificate, the notary key and the repository secrets.
 
 CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets, runs the tests with the race detector on Linux, builds and packages the extension on macOS, and runs the parity script. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.
