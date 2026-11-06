@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"whatsapp-mcp/internal/config"
 )
@@ -42,14 +43,34 @@ func Install(binary string, paths config.Paths, extraArgs []string) (string, err
 		return "", err
 	}
 	domain := "gui/" + strconv.Itoa(os.Getuid())
-	_ = run("launchctl", "bootout", domain+"/"+config.ServiceLabel)
-	if err := run("launchctl", "bootstrap", domain, plistPath); err != nil {
+	target := domain + "/" + config.ServiceLabel
+	_ = run("launchctl", "bootout", target)
+	// bootout returns before the job is gone; bootstrapping too early fails
+	// with "Input/output error", so wait for the job to disappear.
+	waitUntilGone(target, 10*time.Second)
+	for attempt := 0; attempt < 5; attempt++ {
+		if err = run("launchctl", "bootstrap", domain, plistPath); err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+	if err != nil {
 		return plistPath, fmt.Errorf("launchctl bootstrap: %w", err)
 	}
-	if err := run("launchctl", "kickstart", "-k", domain+"/"+config.ServiceLabel); err != nil {
+	if err := run("launchctl", "kickstart", "-k", target); err != nil {
 		return plistPath, fmt.Errorf("launchctl kickstart: %w", err)
 	}
 	return plistPath, nil
+}
+
+func waitUntilGone(target string, timeout time.Duration) {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if exec.Command("launchctl", "print", target).Run() != nil {
+			return
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
 }
 
 // Uninstall stops the agent and removes the plist.
