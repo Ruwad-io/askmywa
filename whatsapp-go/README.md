@@ -1,92 +1,53 @@
-# whatsapp-mcp (Go)
+# whatsapp-mcp
 
-One Go binary that replaces the previous `whatsapp-bridge` (Go) + `whatsapp-mcp-server` (Python) pair:
+One binary, five commands:
 
-- `whatsapp-mcp daemon` connects to WhatsApp with [whatsmeow](https://github.com/tulir/whatsmeow), archives every message in a clean SQLite database and serves sends and downloads over a Unix socket.
-- `whatsapp-mcp serve` is an MCP server over stdio, built on the official [`modelcontextprotocol/go-sdk`](https://github.com/modelcontextprotocol/go-sdk), with the same tools as the Python server.
-- `whatsapp-mcp install-service` / `uninstall-service` run the daemon as a launchd agent.
-
-Everything lives in `~/Library/Application Support/whatsapp-mcp/`:
-
-| File | Role |
+| Command | Role |
 |---|---|
-| `whatsapp.db` | whatsmeow session (a copy of the old one, never the original) |
-| `messages.db` | contacts, chats and messages; FTS5 index on message text |
-| `daemon.sock` | Unix socket (mode 0600) used by `serve` to send and download |
-| `files/` | the only directory files can be sent from; downloads land in `files/media/<chat>/` |
+| `whatsapp-mcp daemon` | Stays connected to WhatsApp, archives every message, serves sends and downloads over a Unix socket |
+| `whatsapp-mcp serve` | MCP server over stdio, started by Claude Desktop or Cursor |
+| `whatsapp-mcp install-service` / `uninstall-service` | Run the daemon as a launchd agent |
+| `whatsapp-mcp import` | Migrate an existing install of the old bridge without connecting |
+| `whatsapp-mcp status` | Service state, connection and archive size |
 
-What changed compared with the old pair:
+Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) and [modernc.org/sqlite](https://pkg.go.dev/modernc.org/sqlite) (pure Go, no cgo).
 
-- Senders are stored as a `(phone, lid)` pair, and the sender's name is resolved when the row is written (address-book name > first name > business name > push name), then refreshed when WhatsApp sends a better name. Readers never touch whatsmeow's tables.
-- Full-text search with FTS5 (`unicode61`, `remove_diacritics 2`): `ecole` finds `école`.
-- Typed tool inputs and outputs with JSON schemas, cursor pagination with `has_more`, errors that say how to fix the call.
-- The three send tools preview by default and only send with `confirm=true`.
-- No TCP port: the MCP server talks to the daemon through the socket.
-- Files can only be sent from the send root (symlinks resolved).
+## Install
 
-## Build
-
-Go 1.26 or newer. No cgo: SQLite comes from `modernc.org/sqlite`.
+Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` to convert audio to Opus voice notes.
 
 ```bash
-cd whatsapp-go
-go build -o whatsapp-mcp .
+git clone https://github.com/abonur/whatsapp-mcp.git
+cd whatsapp-mcp/whatsapp-go
+go build -o /usr/local/bin/whatsapp-mcp .
 ```
 
-Optional: `brew install ffmpeg` for `send_audio_message` (conversion to Opus voice notes).
+Build to a stable location. The launchd agent and the Claude Desktop config both record the binary's absolute path, so a binary inside a temporary folder or a git worktree will break them when that folder goes away.
 
-Put the binary somewhere stable, for example `/usr/local/bin/whatsapp-mcp`; the launchd agent records its absolute path.
-
-## Migrating from the old bridge
-
-The daemon never opens the old `whatsapp-bridge/store/` for writing. On first run it copies `whatsapp.db` (session) with `VACUUM INTO` and imports `messages.db` (history), then connects with the same linked device: no new QR code, no extra linked-device slot.
-
-Only one process may use the session at a time, so stop the old bridge first:
+## First pairing
 
 ```bash
-../whatsapp-bridge/install-service.sh uninstall
+whatsapp-mcp daemon
 ```
 
-Then either import without connecting (safe to run while the old bridge is still up, it only reads):
+A QR code appears in the terminal. Scan it from WhatsApp (Linked devices > Link a device). The session is saved and reused on every later start, without a QR code. Stop with Ctrl+C once the log shows `connected to WhatsApp`.
+
+## Run as a service
 
 ```bash
-./whatsapp-mcp import --legacy-store /path/to/whatsapp-mcp/whatsapp-bridge/store
+whatsapp-mcp install-service
+whatsapp-mcp status
 ```
 
-or start the daemon directly with the same flag; it imports when the archive is empty:
+This writes `~/Library/LaunchAgents/com.whatsapp-mcp.daemon.plist` (starts at login, restarted 10 s after a crash) and logs to `~/Library/Logs/whatsapp-mcp/daemon.log`, rotated at 10 MB with 5 compressed files kept.
 
 ```bash
-./whatsapp-mcp daemon --legacy-store /path/to/whatsapp-mcp/whatsapp-bridge/store
+whatsapp-mcp uninstall-service
 ```
 
-Check the result:
+After rebuilding or moving the binary, run `install-service` again from its new location.
 
-```bash
-sqlite3 "$HOME/Library/Application Support/whatsapp-mcp/messages.db" "select name, phone, lid from contacts where name_fold like '%hani%'"
-```
-
-## First pairing (no previous session)
-
-```bash
-./whatsapp-mcp daemon
-```
-
-A QR code is printed; scan it from WhatsApp (Linked devices > Link a device). The session is saved in `whatsapp.db` and reused afterwards. Logs go to stderr (`--log-file FILE` writes rotated logs instead; `--debug` is verbose).
-
-## Install as a service
-
-```bash
-./whatsapp-mcp install-service
-```
-
-This writes `~/Library/LaunchAgents/com.whatsapp-mcp.daemon.plist` (RunAtLoad, KeepAlive, restart after 10 s) and starts the daemon with `--log-file ~/Library/Logs/whatsapp-mcp/daemon.log` (rotated at 10 MB, 5 files kept, compressed). Pass `--legacy-store DIR` to migrate on first start and `--send-root DIR` to change where files may be sent from.
-
-```bash
-./whatsapp-mcp status            # launchd state, connection, row counts
-./whatsapp-mcp uninstall-service
-```
-
-The agent must be installed from the final location of the binary: reinstall after moving it.
+Only one process may use a WhatsApp session at a time. Never run `whatsapp-mcp daemon` by hand while the service is loaded, and never run the old bridge alongside it: WhatsApp disconnects both.
 
 ## Claude Desktop
 
@@ -103,19 +64,71 @@ The agent must be installed from the final location of the binary: reinstall aft
 }
 ```
 
-`serve` opens `messages.db` read-only and needs the daemon only for `send_*` and `download_media`. Environment overrides: `WHATSAPP_MCP_DATA_DIR`, `WHATSAPP_MCP_SEND_ROOT`.
+Restart Claude Desktop afterwards. `serve` reads the archive directly, so reading works even when the daemon is down. Sending and downloading need the daemon.
+
+## Migrating from the old bridge
+
+The new binary can take over the session of the old `whatsapp-bridge`, so no new QR code and no extra linked-device slot are needed. It copies the old session file and imports the old history. The old `whatsapp-bridge/store/` folder is only read, never modified.
+
+1. Stop the old bridge:
+
+   ```bash
+   /path/to/whatsapp-mcp/whatsapp-bridge/install-service.sh uninstall
+   ```
+
+2. Start the daemon once with the **absolute** path of the old store:
+
+   ```bash
+   whatsapp-mcp daemon --legacy-store /path/to/whatsapp-mcp/whatsapp-bridge/store
+   ```
+
+   The log should show `legacy session copied`, `legacy history imported`, then `connected to WhatsApp`. If a QR code appears instead, stop with Ctrl+C without scanning it: the path is wrong. The daemon refuses to start when the folder has no `whatsapp.db`.
+
+3. Stop it with Ctrl+C and install the service as above.
+
+`whatsapp-mcp import --legacy-store DIR` does the copy and import of step 2 without connecting, which is safe while the old bridge still runs. Run it again right before switching: the old bridge keeps rotating its encryption keys, so an old copy goes stale. To start over, delete `~/Library/Application Support/whatsapp-mcp/` (with the service uninstalled).
+
+## Files
+
+Everything lives in `~/Library/Application Support/whatsapp-mcp/` (override with `--data-dir` or `WHATSAPP_MCP_DATA_DIR`):
+
+| Path | Content |
+|---|---|
+| `whatsapp.db` | WhatsApp session keys. Keep it private; deleting it means pairing again |
+| `messages.db` | Contacts, chats and messages, with a full-text index |
+| `daemon.sock` | Socket used by `serve`, readable only by you |
+| `files/` | The only folder files can be sent from (`--send-root` or `WHATSAPP_MCP_SEND_ROOT` to change it) |
+| `files/media/<chat>/` | Downloaded attachments |
+
+### Archive schema
+
+- `contacts(phone, lid, name, name_source)`: one row per person. `phone` and `lid` are the bare digits of the `@s.whatsapp.net` and `@lid` identifiers, merged when WhatsApp reveals they belong together. `name_source` is `full_name`, `first_name`, `business_name`, `push_name` or `chat`, best first; a worse source never overwrites a better one.
+- `chats(jid, name, is_group, last_message_time)`.
+- `messages(id, chat_jid, sender_phone, sender_lid, sender_name, content, timestamp, is_from_me, media_type, filename, ...)`: `sender_name` is set when the message is stored and updated when a better name arrives. Timestamps are UTC.
+- `messages_fts`: FTS5 index on `content`, tokenizer `unicode61 remove_diacritics 2`.
 
 ## Tools
 
 | Tool | Notes |
 |---|---|
-| `search_contacts` | name (accent-insensitive) or number; returns the JID to use elsewhere |
-| `list_messages` | filters: `chat_jid`, `sender` (number, JID or name), `query` (FTS), `after`, `before`; `include_context`; cursor pagination |
-| `list_chats`, `get_chat`, `get_direct_chat_by_contact`, `get_contact_chats`, `get_last_interaction`, `get_message_context` | read-only |
-| `send_message`, `send_file`, `send_audio_message` | without `confirm` they return a preview (resolved JID, name, group or not, content) and send nothing; with `confirm=true` they send through the daemon |
-| `download_media` | writes under `files/media/<chat>/`, returns the path |
+| `search_contacts` | Name (accent-insensitive) or digits of a number. Returns the JID to pass elsewhere |
+| `list_messages` | Filters `chat_jid`, `sender` (number, JID or name), `query` (full text, word prefixes), `after`, `before`. `include_context` adds surrounding messages |
+| `list_chats` | `sort_by` = `last_active` or `name`, optional `query` |
+| `get_chat`, `get_direct_chat_by_contact`, `get_contact_chats`, `get_last_interaction`, `get_message_context` | Read-only lookups |
+| `send_message`, `send_file`, `send_audio_message` | Return a preview and send nothing unless `confirm=true`. A name that matches several contacts is refused with the list of candidates |
+| `download_media` | Downloads once, then returns the cached file |
 
-Read tools carry `readOnlyHint`; send tools carry `destructiveHint` and `openWorldHint`.
+List tools return `has_more` and `next_cursor`; pass the cursor back as `cursor` for the next page. Read tools are annotated `readOnlyHint`, send tools `destructiveHint` and `openWorldHint`.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `status` says the daemon is not reachable | `whatsapp-mcp install-service`, then read `~/Library/Logs/whatsapp-mcp/daemon.log` |
+| Log says `stream replaced` | Another process uses the same session: uninstall the old bridge, stop any hand-started daemon |
+| Log says `logged out` | The phone removed this linked device: uninstall the service, delete `whatsapp.db`, pair again |
+| `download_media` fails with 403 | WhatsApp no longer stores that file; attachments expire after a few weeks |
+| `send_file` says the file is outside the send root | Copy the file under `~/Library/Application Support/whatsapp-mcp/files/` |
 
 ## Development
 
@@ -124,4 +137,4 @@ go vet ./... && go test ./...
 ./scripts/whatsmeow-parity.sh   # every whatsmeow method we call still exists
 ```
 
-CI (`.github/workflows/whatsapp-go.yml`) runs gofmt, vet, tests with `-race`, the build on Linux and macOS, and the parity script. A weekly job upgrades whatsmeow to `@main`, builds and tests, and reports in a rolling issue.
+CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets, runs the tests with the race detector on Linux, builds on macOS and runs the parity script. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.
