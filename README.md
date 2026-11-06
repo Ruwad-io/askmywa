@@ -17,11 +17,11 @@ It links to WhatsApp as a companion device through [whatsmeow](https://github.co
 
 > **Caution.** Like any MCP server that reads private data and can send messages, this one is exposed to [the lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/): a prompt injection hidden in a message could try to make the assistant leak data. The confirmation step on every send is the main safeguard, so read previews before approving them.
 
-## How this fork differs from lharries/whatsapp-mcp
+## How it differs from lharries/whatsapp-mcp
 
 This is a rewrite, not a patch set. The tool names and the WhatsApp library are the same, so assistants and prompts written for the original keep working.
 
-| | [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp) | This fork |
+| | [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp) | This project |
 |---|---|---|
 | Components | Go bridge plus a Python MCP server run with `uv` | One Go binary |
 | Link between them | HTTP API on port 8080 of every network interface, no authentication | Private Unix socket, readable only by you |
@@ -32,7 +32,7 @@ This is a rewrite, not a patch set. The tool names and the WhatsApp library are 
 | Files that can be sent | Any readable path | Only files under one configured folder |
 | Running it | `go run main.go` in an open terminal | launchd service with rotated logs |
 
-An existing install of the original can switch without pairing again: the new daemon copies the old session and imports the old history, and never writes to the old files. See [Migrating from the old bridge](whatsapp-go/README.md#migrating-from-the-old-bridge).
+An existing install of the original can switch without pairing again: the new daemon copies the old session and imports the old history, and never writes to the old files. See [Migrating from the original project](whatsapp-go/README.md#migrating-from-the-original-project).
 
 ## Quick start (macOS)
 
@@ -41,29 +41,29 @@ Requires Go 1.26 or newer. `ffmpeg` is optional and only used to turn audio file
 ```bash
 git clone https://github.com/abonur/whatsapp-mcp.git
 cd whatsapp-mcp/whatsapp-go
-go build -o /usr/local/bin/whatsapp-mcp .
+mkdir -p ~/.local/bin
+go build -o ~/.local/bin/whatsapp-mcp .
 ```
 
 Pair once, in a terminal, and scan the QR code from WhatsApp (Linked devices > Link a device):
 
 ```bash
-whatsapp-mcp daemon
+~/.local/bin/whatsapp-mcp daemon
 ```
 
 Once it logs `connected to WhatsApp`, stop it with Ctrl+C and install it as a background service that starts at login:
 
 ```bash
-whatsapp-mcp install-service
-whatsapp-mcp status
+~/.local/bin/whatsapp-mcp install-service
 ```
 
-Then add the server to `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude Desktop:
+Then add the server to `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude Desktop. The path must be absolute: `~` is not expanded there.
 
 ```json
 {
   "mcpServers": {
     "whatsapp": {
-      "command": "/usr/local/bin/whatsapp-mcp",
+      "command": "/Users/YOU/.local/bin/whatsapp-mcp",
       "args": ["serve"]
     }
   }
@@ -88,12 +88,8 @@ Contacts can be given as a phone number, a JID or a name.
 
 ## More
 
-[`whatsapp-go/README.md`](whatsapp-go/README.md) covers the data layout, migration from the previous version, service management, configuration and development.
-
-## Previous version
-
-The original Go bridge (`whatsapp-bridge/`) and Python MCP server (`whatsapp-mcp-server/`) are still in the repository while existing installs migrate. They are no longer developed. To move an existing install to the new binary without pairing again, see [Migrating from the old bridge](whatsapp-go/README.md#migrating-from-the-old-bridge).
+[`whatsapp-go/README.md`](whatsapp-go/README.md) covers the data layout, migration from the original project, service management, configuration and development.
 
 ## Credits
 
-Forked from [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp) by Luke Harries, MIT licensed. The voice-note encoding and the overall tool set come from that project.
+Started as a fork of [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp) by Luke Harries, MIT licensed. The voice-note encoding and the overall tool set come from that project; its Go bridge and Python server were removed once this binary replaced them, and remain in this repository's git history.
