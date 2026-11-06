@@ -153,6 +153,25 @@ func (d *Daemon) startPhonePairing(phone string) (string, time.Time, error) {
 	return code, expires, nil
 }
 
+// logout unlinks this device from the WhatsApp account (it disappears from
+// Linked devices on the phone) and deletes its keys from the session store.
+func (d *Daemon) logout(ctx context.Context) (ipc.LogoutResult, error) {
+	if !d.isLoggedIn() {
+		return ipc.LogoutResult{}, nil
+	}
+	jid := d.cli.Store.ID.ToNonAD().String()
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	if err := d.cli.Logout(ctx); err != nil {
+		return ipc.LogoutResult{}, fmt.Errorf("unlink from WhatsApp: %w; you can also remove this computer from Linked devices on the phone", err)
+	}
+	d.mu.Lock()
+	d.loggedOut = true
+	d.mu.Unlock()
+	d.log.Info("unlinked from WhatsApp at the user's request")
+	return ipc.LogoutResult{Unlinked: true, JID: jid}, nil
+}
+
 // formatCode renders "ABCD1234" as "ABCD-1234", the way WhatsApp displays it.
 func formatCode(code string) string {
 	if len(code) == 8 && !strings.Contains(code, "-") {

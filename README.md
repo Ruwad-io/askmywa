@@ -1,5 +1,7 @@
 # WhatsApp MCP
 
+*[Version française](README.fr.md)*
+
 An [MCP](https://modelcontextprotocol.io) server for your personal WhatsApp account, as a single Go binary.
 
 It links to WhatsApp as a companion device through [whatsmeow](https://github.com/tulir/whatsmeow), keeps a local archive of your messages, and lets an assistant such as Claude Desktop search them, read them, download attachments and, after your approval, send messages and files.
@@ -44,7 +46,7 @@ An existing install of the original can switch without pairing again: the new da
 
 That's it. Your messages start appearing within a few minutes, and the link keeps working after a restart. To send a file, put it in the `Documents/WhatsApp MCP` folder first (you can choose another folder in the extension's settings).
 
-To remove it: in WhatsApp on your phone, Linked devices > this Mac > Log out; then uninstall the extension in Claude Desktop's settings.
+To remove it, ask Claude to **disconnect WhatsApp from this Mac** (it unlinks the Mac, stops the background service and, if you want, deletes the stored messages), then uninstall the extension in Claude Desktop's settings.
 
 > The app is signed and notarized by Apple.
 >
@@ -96,6 +98,7 @@ Cursor uses the same block in `~/.cursor/mcp.json`.
 |---|---|
 | `whatsapp_status` | Whether WhatsApp is set up and connected, and what to do next |
 | `connect_whatsapp` | Start the background service and link this Mac with a pairing code |
+| `disconnect_whatsapp` | Unlink this Mac, stop the service and optionally delete the archive, after a preview |
 | `search_contacts` | Find people by name or number |
 | `list_chats` | Chats, most recent first or by name |
 | `list_messages` | Messages filtered by chat, sender, dates and full-text query, with optional surrounding context |

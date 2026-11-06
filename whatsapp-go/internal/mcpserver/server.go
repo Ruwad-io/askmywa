@@ -60,6 +60,7 @@ func New(st *store.Store, sender ipc.Sender, svc ServiceManager, paths config.Pa
 		&mcp.ServerOptions{Instructions: Instructions, Logger: log})
 	s.registerSetup(srv)
 	s.register(srv)
+	s.registerDisconnect(srv)
 	return srv
 }
 

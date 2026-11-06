@@ -28,6 +28,7 @@ const (
 	MethodSendAudio     = "send_audio"
 	MethodDownloadMedia = "download_media"
 	MethodPair          = "pair_phone"
+	MethodLogout        = "logout"
 )
 
 // Request is one call.
@@ -100,6 +101,12 @@ type StatusResult struct {
 	// Pairing is true while a phone-pairing code is waiting to be entered.
 	Pairing   bool   `json:"pairing,omitempty"`
 	PairError string `json:"pair_error,omitempty"`
+}
+
+// LogoutResult reports whether the device was unlinked from WhatsApp.
+type LogoutResult struct {
+	Unlinked bool   `json:"unlinked"`
+	JID      string `json:"jid,omitempty"`
 }
 
 // PairParams asks for a phone-pairing code.
@@ -250,6 +257,13 @@ type Sender interface {
 	DownloadMedia(ctx context.Context, p DownloadParams) (DownloadResult, error)
 	Status(ctx context.Context) (StatusResult, error)
 	Pair(ctx context.Context, p PairParams) (PairResult, error)
+	Logout(ctx context.Context) (LogoutResult, error)
+}
+
+// Logout implements Sender.
+func (c *Client) Logout(ctx context.Context) (LogoutResult, error) {
+	var r LogoutResult
+	return r, c.Call(ctx, MethodLogout, struct{}{}, &r)
 }
 
 // Pair implements Sender.

@@ -52,6 +52,8 @@ func (d *Daemon) Handle(ctx context.Context, method string, params json.RawMessa
 			return nil, err
 		}
 		return d.pairPhone(p)
+	case ipc.MethodLogout:
+		return d.logout(ctx)
 	case ipc.MethodDownloadMedia:
 		var p ipc.DownloadParams
 		if err := decode(params, &p); err != nil {

@@ -181,3 +181,6 @@ func (l Launchd) Install(p config.Paths) error {
 
 // Restart restarts the agent.
 func (l Launchd) Restart() error { return Restart() }
+
+// Uninstall stops the agent and removes it.
+func (l Launchd) Uninstall() error { return Uninstall() }
