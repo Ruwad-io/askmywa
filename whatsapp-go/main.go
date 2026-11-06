@@ -15,6 +15,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -248,11 +249,30 @@ func runInstall(args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Installed %s\nLogs: %s\n", plist, filepath.Join(paths.LogDir, "daemon.log"))
-	if loaded, pid := service.Status(); loaded {
-		fmt.Printf("%s is loaded (pid %s)\n", config.ServiceLabel, pid)
+	logFile := filepath.Join(paths.LogDir, "daemon.log")
+	fmt.Printf("Installed %s\nLogs: %s\n", plist, logFile)
+	// launchd may hold a restarted job for its 10 s throttle interval, so
+	// wait for the daemon to answer before reporting.
+	fmt.Println("Waiting for the daemon to connect...")
+	client := ipc.NewClient(paths.Socket)
+	deadline := time.Now().Add(45 * time.Second)
+	for {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		st, err := client.Status(ctx)
+		cancel()
+		if err == nil && st.Connected {
+			_, pid := service.Status()
+			fmt.Printf("%s is running (pid %s) and connected as %s\n", config.ServiceLabel, pid, st.JID)
+			return nil
+		}
+		if time.Now().After(deadline) {
+			if err == nil && !st.LoggedIn {
+				return fmt.Errorf("the daemon started but has no WhatsApp session: uninstall the service, run `whatsapp-mcp daemon` in a terminal to pair, then install again")
+			}
+			return fmt.Errorf("the daemon is not connected after 45 s; see %s", logFile)
+		}
+		time.Sleep(time.Second)
 	}
-	return nil
 }
 
 func runUninstall() error {
