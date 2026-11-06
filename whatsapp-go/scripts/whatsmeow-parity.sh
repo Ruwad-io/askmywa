@@ -21,6 +21,7 @@ methods=(
   Download
   GetGroupInfo
   GetQRChannel
+  PairPhone
   IsConnected
   ParseWebMessage
   SendMessage

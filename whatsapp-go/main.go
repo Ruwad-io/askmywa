@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -126,6 +127,7 @@ func runDaemon(args []string) error {
 	dataDir, sendRoot := pathFlags(fs)
 	legacy := fs.String("legacy-store", "", "old whatsapp-bridge/store directory: its session is copied and its history imported on first run")
 	logFile := fs.String("log-file", "", "write logs to this file with rotation instead of stderr")
+	pairMode := fs.String("pair", "auto", "without a session: qr (show a QR code), wait (wait for connect_whatsapp), or auto (qr in a terminal, wait otherwise)")
 	debug := fs.Bool("debug", false, "verbose logging")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -155,7 +157,18 @@ func runDaemon(args []string) error {
 			return err
 		}
 	}
-	return daemon.Run(ctx, daemon.Options{Paths: paths, LegacyStore: legacyDir, Log: log, QROut: os.Stdout})
+	mode := *pairMode
+	switch mode {
+	case "auto":
+		mode = daemon.PairWait
+		if st, err := os.Stdout.Stat(); err == nil && st.Mode()&os.ModeCharDevice != 0 {
+			mode = daemon.PairQR
+		}
+	case daemon.PairQR, daemon.PairWait:
+	default:
+		return fmt.Errorf("invalid --pair %q: use qr, wait or auto", mode)
+	}
+	return daemon.Run(ctx, daemon.Options{Paths: paths, LegacyStore: legacyDir, Log: log, QROut: os.Stdout, PairMode: mode})
 }
 
 func runImport(args []string) error {
@@ -206,13 +219,28 @@ func runServe(args []string) error {
 	log := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelWarn}))
 	ctx, cancel := signalContext()
 	defer cancel()
-	st, err := store.Open(ctx, paths.MessagesDB, true)
-	if err != nil {
-		return err
+	// The send folder is where the user drops files to send; make sure it exists.
+	_ = os.MkdirAll(paths.SendRoot, 0o700)
+	// The archive may not exist yet (first run of the Claude Desktop
+	// extension): the server then starts anyway and opens it on first use.
+	var st *store.Store
+	if _, err := os.Stat(paths.MessagesDB); err == nil {
+		if st, err = store.Open(ctx, paths.MessagesDB, true); err != nil {
+			return err
+		}
+		defer st.Close()
 	}
-	defer st.Close()
+	var svc mcpserver.ServiceManager
+	if runtime.GOOS == "darwin" {
+		if exe, err := os.Executable(); err == nil {
+			if resolved, err := filepath.EvalSymlinks(exe); err == nil {
+				exe = resolved
+			}
+			svc = service.Launchd{Binary: exe}
+		}
+	}
 	mcpserver.Version = version
-	srv := mcpserver.New(st, ipc.NewClient(paths.Socket), paths, log)
+	srv := mcpserver.New(st, ipc.NewClient(paths.Socket), svc, paths, log)
 	if err := srv.Run(ctx, &mcp.StdioTransport{}); err != nil && !errors.Is(err, context.Canceled) {
 		return err
 	}
@@ -242,9 +270,6 @@ func runInstall(args []string) error {
 		}
 		extra = append(extra, "--legacy-store", abs)
 	}
-	if _, err := os.Stat(paths.SessionDB); err != nil && *legacy == "" {
-		fmt.Fprintf(os.Stderr, "note: no session at %s yet; pair first with `%s daemon` (QR code) or pass --legacy-store\n", paths.SessionDB, exe)
-	}
 	plist, err := service.Install(exe, paths, extra)
 	if err != nil {
 		return err
@@ -265,10 +290,14 @@ func runInstall(args []string) error {
 			fmt.Printf("%s is running (pid %s) and connected as %s\n", config.ServiceLabel, pid, st.JID)
 			return nil
 		}
+		if err == nil && !st.LoggedIn {
+			_, pid := service.Status()
+			fmt.Printf("%s is running (pid %s) but not linked to WhatsApp yet.\n", config.ServiceLabel, pid)
+			fmt.Println("Ask Claude to connect WhatsApp (it gives you a code to type on your phone), or")
+			fmt.Printf("uninstall the service and run `%s daemon` in a terminal to scan a QR code.\n", exe)
+			return nil
+		}
 		if time.Now().After(deadline) {
-			if err == nil && !st.LoggedIn {
-				return fmt.Errorf("the daemon started but has no WhatsApp session: uninstall the service, run `whatsapp-mcp daemon` in a terminal to pair, then install again")
-			}
 			return fmt.Errorf("the daemon is not connected after 45 s; see %s", logFile)
 		}
 		time.Sleep(time.Second)

@@ -1,0 +1,46 @@
+name: release
+
+# Push a tag such as v0.1.0 to publish the macOS binaries and the Claude
+# Desktop extension (.mcpb) as a GitHub release.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)build, for example v0.1.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: whatsapp-go
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: whatsapp-go/go.mod
+          cache-dependency-path: whatsapp-go/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: go vet ./... && go test ./...
+      - run: bash ./scripts/build-release.sh "$TAG"
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* --title "$TAG" --generate-notes
+          fi

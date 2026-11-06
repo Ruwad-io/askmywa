@@ -31,10 +31,26 @@ This is a rewrite, not a patch set. The tool names and the WhatsApp library are 
 | Sending | Immediate | Preview first, sent only with `confirm=true` |
 | Files that can be sent | Any readable path | Only files under one configured folder |
 | Running it | `go run main.go` in an open terminal | launchd service with rotated logs |
+| Installing it | Go, Python, `uv`, a terminal QR code and a hand-edited JSON config | A Claude Desktop extension, linked with a code typed on the phone |
 
 An existing install of the original can switch without pairing again: the new daemon copies the old session and imports the old history, and never writes to the old files. See [Migrating from the original project](whatsapp-go/README.md#migrating-from-the-original-project).
 
-## Quick start (macOS)
+## Install in Claude Desktop (macOS, no terminal)
+
+1. Download `whatsapp-mcp-<version>.mcpb` from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest).
+2. Double-click it. Claude Desktop opens and asks you to confirm the install.
+3. In a new conversation, write: **Connect my WhatsApp.**
+4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings > Linked devices > Link a device > **Link with phone number instead**, and type the code.
+
+That's it. Your messages start appearing within a few minutes, and the link keeps working after a restart. To send a file, put it in the `Documents/WhatsApp MCP` folder first (you can choose another folder in the extension's settings).
+
+To remove it: in WhatsApp on your phone, Linked devices > this Mac > Log out; then uninstall the extension in Claude Desktop's settings.
+
+> The app is not notarized by Apple yet. If macOS blocks it, open System Settings > Privacy & Security and choose "Allow Anyway".
+>
+> It talks to WhatsApp through an unofficial interface, the same way WhatsApp Web automation tools do. WhatsApp's terms do not allow this, and WhatsApp could restrict an account that uses it.
+
+## Install from source
 
 Requires Go 1.26 or newer. `ffmpeg` is optional and only used to turn audio files into voice notes.
 
@@ -57,6 +73,8 @@ Once it logs `connected to WhatsApp`, stop it with Ctrl+C and install it as a ba
 ~/.local/bin/whatsapp-mcp install-service
 ```
 
+You can also skip the terminal pairing: install the service right away, then ask Claude to connect WhatsApp as in the extension steps above.
+
 Then add the server to `~/Library/Application Support/Claude/claude_desktop_config.json` and restart Claude Desktop. The path must be absolute: `~` is not expanded there.
 
 ```json
@@ -76,6 +94,8 @@ Cursor uses the same block in `~/.cursor/mcp.json`.
 
 | Tool | What it does |
 |---|---|
+| `whatsapp_status` | Whether WhatsApp is set up and connected, and what to do next |
+| `connect_whatsapp` | Start the background service and link this Mac with a pairing code |
 | `search_contacts` | Find people by name or number |
 | `list_chats` | Chats, most recent first or by name |
 | `list_messages` | Messages filtered by chat, sender, dates and full-text query, with optional surrounding context |
