@@ -51,6 +51,11 @@ jobs:
       - run: go build -o whatsapp-mcp .
       - run: go test ./...
       - run: ./whatsapp-mcp version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Package the release artifacts and the extension
+        run: bash ./scripts/build-release.sh 0.0.0-ci
 
   upgrade-check:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

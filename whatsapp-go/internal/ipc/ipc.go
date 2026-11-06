@@ -27,6 +27,7 @@ const (
 	MethodSendFile      = "send_file"
 	MethodSendAudio     = "send_audio"
 	MethodDownloadMedia = "download_media"
+	MethodPair          = "pair_phone"
 )
 
 // Request is one call.
@@ -94,6 +95,24 @@ type StatusResult struct {
 	MediaDir  string       `json:"media_dir"`
 	Counts    store.Counts `json:"counts"`
 	Uptime    string       `json:"uptime"`
+	// LoggedOut is true when WhatsApp revoked this device; restart the daemon to pair again.
+	LoggedOut bool `json:"logged_out,omitempty"`
+	// Pairing is true while a phone-pairing code is waiting to be entered.
+	Pairing   bool   `json:"pairing,omitempty"`
+	PairError string `json:"pair_error,omitempty"`
+}
+
+// PairParams asks for a phone-pairing code.
+type PairParams struct {
+	Phone string `json:"phone"`
+}
+
+// PairResult carries the code to type in WhatsApp.
+type PairResult struct {
+	Code          string    `json:"code,omitempty"`
+	ExpiresAt     time.Time `json:"expires_at,omitempty"`
+	AlreadyPaired bool      `json:"already_paired,omitempty"`
+	JID           string    `json:"jid,omitempty"`
 }
 
 // Handler serves requests; it returns the result value or an error whose
@@ -104,6 +123,10 @@ type Handler interface {
 
 // Serve listens on the Unix socket at path until ctx is cancelled.
 func Serve(ctx context.Context, path string, h Handler, log *slog.Logger) error {
+	// macOS limits Unix socket paths to 104 bytes (sun_path), Linux to 108.
+	if len(path) >= 104 {
+		return fmt.Errorf("socket path %s is %d bytes long, over the 103-byte limit for Unix sockets: choose a shorter --data-dir", path, len(path))
+	}
 	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("remove stale socket %s: %w", path, err)
 	}
@@ -226,6 +249,13 @@ type Sender interface {
 	SendAudio(ctx context.Context, p SendAudioParams) (SendResult, error)
 	DownloadMedia(ctx context.Context, p DownloadParams) (DownloadResult, error)
 	Status(ctx context.Context) (StatusResult, error)
+	Pair(ctx context.Context, p PairParams) (PairResult, error)
+}
+
+// Pair implements Sender.
+func (c *Client) Pair(ctx context.Context, p PairParams) (PairResult, error) {
+	var r PairResult
+	return r, c.Call(ctx, MethodPair, p, &r)
 }
 
 // SendMessage implements Sender.

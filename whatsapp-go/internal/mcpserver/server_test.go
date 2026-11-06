@@ -20,7 +20,9 @@ import (
 
 // fakeSender records calls; the preview tests assert it is never called.
 type fakeSender struct {
-	calls []string
+	calls  []string
+	status func() (ipc.StatusResult, error)
+	pair   func(ipc.PairParams) (ipc.PairResult, error)
 }
 
 func (f *fakeSender) SendMessage(_ context.Context, p ipc.SendMessageParams) (ipc.SendResult, error) {
@@ -40,7 +42,17 @@ func (f *fakeSender) DownloadMedia(_ context.Context, p ipc.DownloadParams) (ipc
 	return ipc.DownloadResult{Path: "/tmp/x", MediaType: "image", Filename: "x.jpg", Size: 1}, nil
 }
 func (f *fakeSender) Status(context.Context) (ipc.StatusResult, error) {
+	if f.status != nil {
+		return f.status()
+	}
 	return ipc.StatusResult{}, nil
+}
+func (f *fakeSender) Pair(_ context.Context, p ipc.PairParams) (ipc.PairResult, error) {
+	f.calls = append(f.calls, "pair:"+p.Phone)
+	if f.pair != nil {
+		return f.pair(p)
+	}
+	return ipc.PairResult{Code: "ABCD-EFGH", ExpiresAt: time.Now().Add(2 * time.Minute)}, nil
 }
 
 func seed(t *testing.T) (*store.Store, config.Paths) {
@@ -78,7 +90,7 @@ func newHarness(t *testing.T) *harness {
 	t.Helper()
 	st, paths := seed(t)
 	sender := &fakeSender{}
-	srv := New(st, sender, paths, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	srv := New(st, sender, nil, paths, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	ct, stt := mcp.NewInMemoryTransports()
 	ctx := context.Background()
 	if _, err := srv.Connect(ctx, stt, nil); err != nil {
@@ -120,7 +132,8 @@ func TestToolsAreAnnotated(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := map[string]bool{"search_contacts": true, "list_messages": true, "list_chats": true, "get_chat": true, "get_direct_chat_by_contact": true,
-		"get_contact_chats": true, "get_last_interaction": true, "get_message_context": true, "send_message": false, "send_file": false, "send_audio_message": false, "download_media": false}
+		"get_contact_chats": true, "get_last_interaction": true, "get_message_context": true, "send_message": false, "send_file": false, "send_audio_message": false, "download_media": false,
+		"whatsapp_status": true, "connect_whatsapp": false}
 	if len(tools.Tools) != len(want) {
 		t.Errorf("got %d tools", len(tools.Tools))
 	}

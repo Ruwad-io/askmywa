@@ -1,0 +1,111 @@
+{
+  "manifest_version": "0.3",
+  "name": "whatsapp-mcp",
+  "display_name": "WhatsApp",
+  "version": "0.0.0",
+  "description": "Read, search and send your WhatsApp messages from Claude. Nothing is sent without your approval.",
+  "long_description": "Links to your personal WhatsApp account as a linked device, like WhatsApp Web, and keeps a private archive of your messages on this Mac. Claude can search it, read conversations, save attachments and, after showing you a preview you approve, send messages, files and voice notes.\n\nTo start, ask Claude to connect WhatsApp: it asks for your phone number and gives you a code to type in WhatsApp > Linked devices > Link with phone number.\n\nThis uses an unofficial WhatsApp interface. Your messages stay on your Mac and only reach Claude when it calls a tool.",
+  "author": {
+    "name": "abonur",
+    "url": "https://github.com/abonur"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abonur/whatsapp-mcp"
+  },
+  "homepage": "https://github.com/abonur/whatsapp-mcp",
+  "support": "https://github.com/abonur/whatsapp-mcp/issues",
+  "license": "MIT",
+  "icon": "icon.png",
+  "keywords": [
+    "whatsapp",
+    "messages",
+    "chat",
+    "messaging"
+  ],
+  "server": {
+    "type": "binary",
+    "entry_point": "server/whatsapp-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/server/whatsapp-mcp",
+      "args": [
+        "serve"
+      ],
+      "env": {
+        "WHATSAPP_MCP_SEND_ROOT": "${user_config.send_folder}"
+      }
+    }
+  },
+  "user_config": {
+    "send_folder": {
+      "type": "directory",
+      "title": "Folder for files to send",
+      "description": "Claude can only send files that are inside this folder. Put a file here, then ask Claude to send it.",
+      "required": true,
+      "default": "${HOME}/Documents/WhatsApp MCP"
+    }
+  },
+  "tools": [
+    {
+      "name": "whatsapp_status",
+      "description": "Check whether WhatsApp is set up and connected, and what to do next"
+    },
+    {
+      "name": "connect_whatsapp",
+      "description": "Link this computer to your WhatsApp with a code you type on your phone"
+    },
+    {
+      "name": "search_contacts",
+      "description": "Find people by name or phone number"
+    },
+    {
+      "name": "list_chats",
+      "description": "List conversations, most recent first"
+    },
+    {
+      "name": "list_messages",
+      "description": "Read and search messages by chat, sender, date or words"
+    },
+    {
+      "name": "get_chat",
+      "description": "Get one conversation"
+    },
+    {
+      "name": "get_direct_chat_by_contact",
+      "description": "Find the one-to-one conversation with someone"
+    },
+    {
+      "name": "get_contact_chats",
+      "description": "List every conversation someone takes part in"
+    },
+    {
+      "name": "get_last_interaction",
+      "description": "Get the latest exchange with someone"
+    },
+    {
+      "name": "get_message_context",
+      "description": "Show the messages around a given message"
+    },
+    {
+      "name": "download_media",
+      "description": "Save a photo, video, voice note or document from a message"
+    },
+    {
+      "name": "send_message",
+      "description": "Send a text message, after showing you a preview"
+    },
+    {
+      "name": "send_file",
+      "description": "Send a file, after showing you a preview"
+    },
+    {
+      "name": "send_audio_message",
+      "description": "Send a voice note, after showing you a preview"
+    }
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin"
+    ]
+  }
+}

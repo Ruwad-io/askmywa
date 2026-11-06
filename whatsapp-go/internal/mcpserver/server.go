@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -32,23 +33,32 @@ var Version = "dev"
 type Server struct {
 	store  *store.Store
 	sender ipc.Sender
+	svc    ServiceManager
 	paths  config.Paths
 	log    *slog.Logger
+
+	storeMu sync.Mutex
 }
 
 // Instructions is sent to the client at initialisation.
 const Instructions = `WhatsApp tools backed by a local message archive.
+If WhatsApp is not set up yet, or a tool says it is not connected, call whatsapp_status
+and follow its next_step; connect_whatsapp links this computer with a code the user
+types on their phone.
 Reads (list_chats, list_messages, search_contacts, ...) are instant and local.
 Every send tool (send_message, send_file, send_audio_message) only returns a preview
 unless confirm=true: show the preview to the user, and call again with confirm=true
 only once they approved that exact recipient and content. Never set confirm=true on
 the first call. Contacts can be given as a phone number, a JID or a name.`
 
-// New builds the MCP server with every tool registered.
-func New(st *store.Store, sender ipc.Sender, paths config.Paths, log *slog.Logger) *mcp.Server {
-	s := &Server{store: st, sender: sender, paths: paths, log: log}
+// New builds the MCP server with every tool registered. st may be nil: the
+// archive is then opened on first use, once the daemon has created it.
+// svc may be nil when the service cannot be managed (tests, other OSes).
+func New(st *store.Store, sender ipc.Sender, svc ServiceManager, paths config.Paths, log *slog.Logger) *mcp.Server {
+	s := &Server{store: st, sender: sender, svc: svc, paths: paths, log: log}
 	srv := mcp.NewServer(&mcp.Implementation{Name: "whatsapp", Title: "WhatsApp", Version: Version},
 		&mcp.ServerOptions{Instructions: Instructions, Logger: log})
+	s.registerSetup(srv)
 	s.register(srv)
 	return srv
 }
@@ -66,40 +76,40 @@ func sending() *mcp.ToolAnnotations {
 func (s *Server) register(srv *mcp.Server) {
 	mcp.AddTool(srv, &mcp.Tool{Name: "search_contacts", Title: "Search contacts", Annotations: readOnly(),
 		Description: "Search WhatsApp contacts by name or phone number. Matching is case- and accent-insensitive (\"elodie\" finds \"Élodie\"). Each result gives the best known name, the phone number and/or LID, and the JID to pass to list_messages (chat_jid) or to the send tools (recipient)."},
-		s.searchContacts)
+		withStore(s, s.searchContacts))
 	mcp.AddTool(srv, &mcp.Tool{Name: "list_messages", Title: "List messages", Annotations: readOnly(),
 		Description: "List stored WhatsApp messages, newest first, optionally filtered by chat, sender, date range and a full-text query (words matched by prefix, accent- and case-insensitive). Results are paginated: pass next_cursor back as cursor while has_more is true. Set include_context to get the neighbouring messages of each hit."},
-		s.listMessages)
+		withStore(s, s.listMessages))
 	mcp.AddTool(srv, &mcp.Tool{Name: "list_chats", Title: "List chats", Annotations: readOnly(),
 		Description: "List WhatsApp chats (people and groups), most recently active first or by name, optionally filtered by a name, JID or contact. Paginated by cursor."},
-		s.listChats)
+		withStore(s, s.listChats))
 	mcp.AddTool(srv, &mcp.Tool{Name: "get_chat", Title: "Get chat", Annotations: readOnly(),
 		Description: "Get one chat by JID, with its latest message."},
-		s.getChat)
+		withStore(s, s.getChat))
 	mcp.AddTool(srv, &mcp.Tool{Name: "get_direct_chat_by_contact", Title: "Direct chat with a contact", Annotations: readOnly(),
 		Description: "Get the one-to-one chat with a contact given their phone number, JID or name."},
-		s.getDirectChat)
+		withStore(s, s.getDirectChat))
 	mcp.AddTool(srv, &mcp.Tool{Name: "get_contact_chats", Title: "Chats involving a contact", Annotations: readOnly(),
 		Description: "List every chat involving a contact: the direct chat and the groups they wrote in, most recently active first. Paginated by cursor."},
-		s.getContactChats)
+		withStore(s, s.getContactChats))
 	mcp.AddTool(srv, &mcp.Tool{Name: "get_last_interaction", Title: "Last interaction", Annotations: readOnly(),
 		Description: "Get the most recent message exchanged with a contact (sent by them anywhere, or in their direct chat)."},
-		s.getLastInteraction)
+		withStore(s, s.getLastInteraction))
 	mcp.AddTool(srv, &mcp.Tool{Name: "get_message_context", Title: "Message context", Annotations: readOnly(),
 		Description: "Get the messages before and after a given message in its chat."},
-		s.getMessageContext)
+		withStore(s, s.getMessageContext))
 	mcp.AddTool(srv, &mcp.Tool{Name: "send_message", Title: "Send a text message", Annotations: sending(),
 		Description: "Send a WhatsApp text message to a person or a group.\n\nSafety: with confirm=false (the default) NOTHING is sent; the tool returns a preview (resolved recipient, their name, whether it is a group, the text). Show it to the user and call again with confirm=true only after they approved that exact content. Never set confirm=true on the first call. Recipient: phone number with country code and no plus sign, a JID (123@s.whatsapp.net, 123@g.us for a group) or a contact name."},
-		s.sendMessage)
+		withStore(s, s.sendMessage))
 	mcp.AddTool(srv, &mcp.Tool{Name: "send_file", Title: "Send a file", Annotations: sending(),
 		Description: "Send a file (image, video, document, or an audio file as a plain attachment) with an optional caption. The file must be under the daemon's send root directory.\n\nSafety: with confirm=false (the default) NOTHING is sent; the tool returns a preview. Show it to the user and call again with confirm=true only after they approved that exact file and recipient. Never set confirm=true on the first call."},
-		s.sendFile)
+		withStore(s, s.sendFile))
 	mcp.AddTool(srv, &mcp.Tool{Name: "send_audio_message", Title: "Send a voice note", Annotations: sending(),
 		Description: "Send an audio file as a WhatsApp voice note (converted to Opus with ffmpeg when needed; if ffmpeg is missing use send_file instead). The file must be under the daemon's send root directory.\n\nSafety: with confirm=false (the default) NOTHING is sent; the tool returns a preview. Show it to the user and call again with confirm=true only after they approved. Never set confirm=true on the first call."},
-		s.sendAudio)
+		withStore(s, s.sendAudio))
 	mcp.AddTool(srv, &mcp.Tool{Name: "download_media", Title: "Download media", Annotations: &mcp.ToolAnnotations{ReadOnlyHint: false, IdempotentHint: true, DestructiveHint: new(bool), OpenWorldHint: ptr(true)},
 		Description: "Download the media (image, video, audio, document, sticker) attached to a message and return its local path. Use the id and chat_jid of a list_messages result whose media_type is set."},
-		s.downloadMedia)
+		withStore(s, s.downloadMedia))
 }
 
 func ptr[T any](v T) *T { return &v }
@@ -481,8 +491,8 @@ func (s *Server) sendMessage(ctx context.Context, _ *mcp.CallToolRequest, in Sen
 	return nil, SendOutput{Sent: true, MessageID: res.MessageID, Timestamp: &res.Timestamp, Message: "Message sent to " + p.RecipientName + " (" + res.To + ")"}, nil
 }
 
-func (s *Server) checkFile(path string) (string, int64, error) {
-	resolved, err := security.ValidateSendPath(path, s.paths.SendRoot)
+func (s *Server) checkFile(ctx context.Context, path string) (string, int64, error) {
+	resolved, err := security.ValidateSendPath(path, s.sendRoot(ctx))
 	if err != nil {
 		return "", 0, err
 	}
@@ -494,7 +504,7 @@ func (s *Server) checkFile(path string) (string, int64, error) {
 }
 
 func (s *Server) sendFile(ctx context.Context, _ *mcp.CallToolRequest, in SendFileInput) (*mcp.CallToolResult, SendOutput, error) {
-	path, size, err := s.checkFile(in.MediaPath)
+	path, size, err := s.checkFile(ctx, in.MediaPath)
 	if err != nil {
 		return nil, SendOutput{}, err
 	}
@@ -514,7 +524,7 @@ func (s *Server) sendFile(ctx context.Context, _ *mcp.CallToolRequest, in SendFi
 }
 
 func (s *Server) sendAudio(ctx context.Context, _ *mcp.CallToolRequest, in SendAudioInput) (*mcp.CallToolResult, SendOutput, error) {
-	path, size, err := s.checkFile(in.MediaPath)
+	path, size, err := s.checkFile(ctx, in.MediaPath)
 	if err != nil {
 		return nil, SendOutput{}, err
 	}

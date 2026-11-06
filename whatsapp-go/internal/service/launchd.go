@@ -155,3 +155,29 @@ func run(name string, args ...string) error {
 	}
 	return nil
 }
+
+// Restart restarts the loaded agent.
+func Restart() error {
+	return run("launchctl", "kickstart", "-k", "gui/"+strconv.Itoa(os.Getuid())+"/"+config.ServiceLabel)
+}
+
+// Launchd manages the agent for the MCP server's setup tools.
+type Launchd struct {
+	// Binary is the absolute path of the whatsapp-mcp executable to run.
+	Binary string
+}
+
+// Loaded reports whether the agent is registered.
+func (l Launchd) Loaded() bool {
+	ok, _ := Status()
+	return ok
+}
+
+// Install registers the agent with these paths and starts it.
+func (l Launchd) Install(p config.Paths) error {
+	_, err := Install(l.Binary, p, nil)
+	return err
+}
+
+// Restart restarts the agent.
+func (l Launchd) Restart() error { return Restart() }

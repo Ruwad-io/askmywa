@@ -14,7 +14,9 @@ Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go S
 
 ## Install
 
-Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` to convert audio to Opus voice notes.
+The simplest install is the Claude Desktop extension: download `whatsapp-mcp-<version>.mcpb` from the [releases](https://github.com/abonur/whatsapp-mcp/releases), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for Apple Silicon and Intel are attached to the same releases.
+
+To build from source you need Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` to convert audio to Opus voice notes.
 
 ```bash
 git clone https://github.com/abonur/whatsapp-mcp.git
@@ -29,11 +31,21 @@ Build to a stable location you can write to without `sudo` (`/usr/local/bin` usu
 
 ## First pairing
 
+There are two ways to link the daemon to your WhatsApp account. Either way, the session is saved and reused on every later start.
+
+### Pairing from Claude
+
+With the service installed (or with the extension, which installs it on first use), ask Claude to connect WhatsApp. The `connect_whatsapp` tool starts the service if needed, asks WhatsApp for an 8-character code for your phone number, and Claude shows it to you. On the phone: WhatsApp > Settings > Linked devices > Link a device > **Link with phone number instead**, then type the code within about two minutes. `whatsapp_status` reports the result.
+
+A daemon without a session that is not attached to a terminal (the service) waits for this request and does not connect to WhatsApp until then.
+
+### Pairing in a terminal
+
 ```bash
 whatsapp-mcp daemon
 ```
 
-A QR code appears in the terminal. Scan it from WhatsApp (Linked devices > Link a device). The session is saved and reused on every later start, without a QR code. Stop with Ctrl+C once the log shows `connected to WhatsApp`.
+A QR code appears in the terminal. Scan it from WhatsApp (Linked devices > Link a device). Stop with Ctrl+C once the log shows `connected to WhatsApp`. `--pair qr` or `--pair wait` forces either behaviour.
 
 ## Run as a service
 
@@ -114,6 +126,8 @@ Everything lives in `~/Library/Application Support/whatsapp-mcp/` (override with
 
 | Tool | Notes |
 |---|---|
+| `whatsapp_status` | Service installed and running, linked, connected, archive size, send folder, and a plain-language `next_step` |
+| `connect_whatsapp` | Installs or restarts the service, then returns a pairing code for `phone_number` when the Mac is not linked yet. Reports the account when it already is |
 | `search_contacts` | Name (accent-insensitive) or digits of a number. Returns the JID to pass elsewhere |
 | `list_messages` | Filters `chat_jid`, `sender` (number, JID or name), `query` (full text, word prefixes), `after`, `before`. `include_context` adds surrounding messages |
 | `list_chats` | `sort_by` = `last_active` or `name`, optional `query` |
@@ -129,9 +143,11 @@ List tools return `has_more` and `next_cursor`; pass the cursor back as `cursor`
 |---|---|
 | `status` says the daemon is not reachable | `whatsapp-mcp install-service`, then read `~/Library/Logs/whatsapp-mcp/daemon.log` |
 | Log says `stream replaced` | Another process uses the same session: stop the original bridge or any hand-started daemon |
-| Log says `logged out` | The phone removed this linked device: uninstall the service, delete `whatsapp.db`, pair again |
+| Log says `logged out` | The phone removed this linked device: ask Claude to connect WhatsApp again, or restart the service and pair in a terminal |
+| The pairing code is refused or expired | Codes last about two minutes; ask for a new one. Use the number in international format, without a leading 0 |
 | `download_media` fails with 403 | WhatsApp no longer stores that file; attachments expire after a few weeks |
-| `send_file` says the file is outside the send root | Copy the file under `~/Library/Application Support/whatsapp-mcp/files/` |
+| `send_file` says the file is outside the send root | Copy the file into the send folder that `whatsapp_status` reports |
+| The extension's reads say WhatsApp is not set up | Ask Claude to connect WhatsApp: the archive is created by the service on first start |
 
 ## Development
 
@@ -140,4 +156,8 @@ go vet ./... && go test ./...
 ./scripts/whatsmeow-parity.sh   # every whatsmeow method we call still exists
 ```
 
-CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets, runs the tests with the race detector on Linux, builds on macOS and runs the parity script. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.
+`scripts/build-release.sh VERSION` builds the release artifacts into `dist/`: one tarball per architecture, the Claude Desktop extension with a universal binary, and `checksums.txt`. It needs macOS and Node.js (for `npx @anthropic-ai/mcpb`). The extension's manifest is `extension/manifest.json`.
+
+To publish a release, push a tag: `git tag v0.1.0 && git push origin v0.1.0`. The release workflow (`.github/workflows/release.yml`) runs the tests, builds, signs with a Developer ID certificate, notarizes with Apple and attaches the artifacts to a GitHub release. [RELEASING.md](RELEASING.md) lists the one-time setup: the certificate, the notary key and the repository secrets.
+
+CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets, runs the tests with the race detector on Linux, builds and packages the extension on macOS, and runs the parity script. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.

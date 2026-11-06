@@ -35,6 +35,8 @@ type Options struct {
 	Log         *slog.Logger
 	// QROut receives the pairing QR code (stdout by default).
 	QROut *os.File
+	// PairMode is PairQR or PairWait; it only matters when there is no session.
+	PairMode string
 }
 
 // Daemon is the running service.
@@ -51,6 +53,7 @@ type Daemon struct {
 	pushNames  map[string]string // identity key -> last push name recorded
 	groupNames map[string]string // group JID -> name
 	loggedOut  bool
+	pair       pairState
 }
 
 // Prepare opens the stores, copies the legacy session if needed, syncs the
@@ -138,13 +141,14 @@ func Run(ctx context.Context, opts Options) error {
 	p := opts.Paths
 
 	d.cli.AddEventHandler(d.handleEvent)
-	if err := d.connect(ctx); err != nil {
-		return err
-	}
-	defer d.cli.Disconnect()
-
 	errCh := make(chan error, 1)
 	go func() { errCh <- ipc.Serve(ctx, p.Socket, d, d.log) }()
+	defer d.cli.Disconnect()
+	if d.cli.Store.ID == nil && opts.PairMode == PairWait {
+		d.log.Info("not paired yet: waiting for a pairing request (connect_whatsapp tool)")
+	} else if err := d.connect(ctx); err != nil {
+		return err
+	}
 	d.log.Info("daemon ready", "data_dir", p.DataDir, "send_root", p.SendRoot)
 	select {
 	case <-ctx.Done():
@@ -308,7 +312,7 @@ func (d *Daemon) handleEvent(evt any) {
 		d.mu.Lock()
 		d.loggedOut = true
 		d.mu.Unlock()
-		d.log.Error("logged out by WhatsApp: delete whatsapp.db in the data directory and run `whatsapp-mcp daemon` to pair again", "reason", v.Reason.String())
+		d.log.Error("logged out by WhatsApp: pair again with the connect_whatsapp tool or `whatsapp-mcp daemon`", "reason", v.Reason.String())
 	case *events.TemporaryBan:
 		d.log.Error("temporary ban", "code", v.Code, "expire", v.Expire)
 	case *events.KeepAliveTimeout:

@@ -46,6 +46,12 @@ func (d *Daemon) Handle(ctx context.Context, method string, params json.RawMessa
 			return nil, err
 		}
 		return d.sendAudio(ctx, p)
+	case ipc.MethodPair:
+		var p ipc.PairParams
+		if err := decode(params, &p); err != nil {
+			return nil, err
+		}
+		return d.pairPhone(p)
 	case ipc.MethodDownloadMedia:
 		var p ipc.DownloadParams
 		if err := decode(params, &p); err != nil {
@@ -73,6 +79,11 @@ func (d *Daemon) status(ctx context.Context) (ipc.StatusResult, error) {
 	}
 	res := ipc.StatusResult{Connected: d.cli.IsConnected(), LoggedIn: d.isLoggedIn(), SendRoot: d.opts.Paths.SendRoot,
 		MediaDir: d.opts.Paths.MediaDir, Counts: counts, Uptime: time.Since(d.started).Round(time.Second).String()}
+	d.mu.Lock()
+	res.LoggedOut = d.loggedOut
+	res.Pairing = d.pair.active && time.Now().Before(d.pair.expires)
+	res.PairError = d.pair.lastErr
+	d.mu.Unlock()
 	if d.cli.Store.ID != nil {
 		res.JID = d.cli.Store.ID.ToNonAD().String()
 	}
@@ -114,7 +125,7 @@ func ParseRecipient(to string) (types.JID, error) {
 
 func (d *Daemon) requireConnected() error {
 	if !d.isLoggedIn() {
-		return errors.New("the daemon is not logged in: pair it first (run `whatsapp-mcp daemon` in a terminal and scan the QR code)")
+		return errors.New("WhatsApp is not paired yet: call connect_whatsapp with the user's phone number, or run `whatsapp-mcp daemon` in a terminal and scan the QR code")
 	}
 	if !d.cli.IsConnected() {
 		return errors.New("the daemon is not connected to WhatsApp right now: retry in a few seconds")
