@@ -7,7 +7,7 @@ One binary, five commands:
 | `whatsapp-mcp daemon` | Stays connected to WhatsApp, archives every message, serves sends and downloads over a Unix socket |
 | `whatsapp-mcp serve` | MCP server over stdio, started by Claude Desktop or Cursor |
 | `whatsapp-mcp install-service` / `uninstall-service` | Run the daemon as a launchd agent |
-| `whatsapp-mcp import` | Migrate an existing install of the old bridge without connecting |
+| `whatsapp-mcp import` | Import the session and history of an lharries/whatsapp-mcp install without connecting |
 | `whatsapp-mcp status` | Service state, connection and archive size |
 
 Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) and [modernc.org/sqlite](https://pkg.go.dev/modernc.org/sqlite) (pure Go, no cgo).
@@ -19,10 +19,13 @@ Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` 
 ```bash
 git clone https://github.com/abonur/whatsapp-mcp.git
 cd whatsapp-mcp/whatsapp-go
-go build -o /usr/local/bin/whatsapp-mcp .
+mkdir -p ~/.local/bin
+go build -o ~/.local/bin/whatsapp-mcp .
 ```
 
-Build to a stable location. The launchd agent and the Claude Desktop config both record the binary's absolute path, so a binary inside a temporary folder or a git worktree will break them when that folder goes away.
+The commands below assume `~/.local/bin` is on your `PATH`; otherwise call the binary by its full path.
+
+Build to a stable location you can write to without `sudo` (`/usr/local/bin` usually needs it). The launchd agent and the Claude Desktop config both record the binary's absolute path, so a binary inside a temporary folder or a git worktree breaks them when that folder goes away.
 
 ## First pairing
 
@@ -47,7 +50,9 @@ whatsapp-mcp uninstall-service
 
 After rebuilding or moving the binary, run `install-service` again from its new location.
 
-Only one process may use a WhatsApp session at a time. Never run `whatsapp-mcp daemon` by hand while the service is loaded, and never run the old bridge alongside it: WhatsApp disconnects both.
+`install-service` waits until the daemon is connected and prints the account, or tells you why it is not.
+
+Only one process may use a WhatsApp session at a time. Never run `whatsapp-mcp daemon` by hand while the service is loaded, and never run the original project's bridge alongside it: WhatsApp disconnects both.
 
 ## Claude Desktop
 
@@ -57,36 +62,34 @@ Only one process may use a WhatsApp session at a time. Never run `whatsapp-mcp d
 {
   "mcpServers": {
     "whatsapp": {
-      "command": "/usr/local/bin/whatsapp-mcp",
+      "command": "/Users/YOU/.local/bin/whatsapp-mcp",
       "args": ["serve"]
     }
   }
 }
 ```
 
-Restart Claude Desktop afterwards. `serve` reads the archive directly, so reading works even when the daemon is down. Sending and downloading need the daemon.
+Use the absolute path: `~` is not expanded in this file. Restart Claude Desktop afterwards (Cmd+Q, then reopen). `serve` reads the archive directly, so reading works even when the daemon is down. Sending and downloading need the daemon.
 
-## Migrating from the old bridge
+## Migrating from the original project
 
-The new binary can take over the session of the old `whatsapp-bridge`, so no new QR code and no extra linked-device slot are needed. It copies the old session file and imports the old history. The old `whatsapp-bridge/store/` folder is only read, never modified.
+If you already run [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp), this binary can take over its WhatsApp session, so no new QR code and no extra linked-device slot are needed. It copies the session file and imports the message history from the original's `whatsapp-bridge/store/` folder, which it only reads and never modifies.
 
-1. Stop the old bridge:
+1. Stop the original bridge: press Ctrl+C in the terminal running `go run main.go`, or unload the launchd agent if you made one.
 
-   ```bash
-   /path/to/whatsapp-mcp/whatsapp-bridge/install-service.sh uninstall
-   ```
-
-2. Start the daemon once with the **absolute** path of the old store:
+2. Start the daemon once with the **absolute** path of the original store, inside your clone of the original project:
 
    ```bash
-   whatsapp-mcp daemon --legacy-store /path/to/whatsapp-mcp/whatsapp-bridge/store
+   whatsapp-mcp daemon --legacy-store /path/to/lharries-whatsapp-mcp/whatsapp-bridge/store
    ```
 
    The log should show `legacy session copied`, `legacy history imported`, then `connected to WhatsApp`. If a QR code appears instead, stop with Ctrl+C without scanning it: the path is wrong. The daemon refuses to start when the folder has no `whatsapp.db`.
 
 3. Stop it with Ctrl+C and install the service as above.
 
-`whatsapp-mcp import --legacy-store DIR` does the copy and import of step 2 without connecting, which is safe while the old bridge still runs. Run it again right before switching: the old bridge keeps rotating its encryption keys, so an old copy goes stale. To start over, delete `~/Library/Application Support/whatsapp-mcp/` (with the service uninstalled).
+4. Point Claude Desktop at `whatsapp-mcp serve` instead of `uv run main.py`.
+
+`whatsapp-mcp import --legacy-store DIR` does the copy and import of step 2 without connecting, which is safe while the original bridge still runs. Run it again right before switching: the original bridge keeps rotating its encryption keys, so an old copy goes stale. To start over, delete `~/Library/Application Support/whatsapp-mcp/` (with the service uninstalled).
 
 ## Files
 
@@ -125,7 +128,7 @@ List tools return `has_more` and `next_cursor`; pass the cursor back as `cursor`
 | Symptom | Fix |
 |---|---|
 | `status` says the daemon is not reachable | `whatsapp-mcp install-service`, then read `~/Library/Logs/whatsapp-mcp/daemon.log` |
-| Log says `stream replaced` | Another process uses the same session: uninstall the old bridge, stop any hand-started daemon |
+| Log says `stream replaced` | Another process uses the same session: stop the original bridge or any hand-started daemon |
 | Log says `logged out` | The phone removed this linked device: uninstall the service, delete `whatsapp.db`, pair again |
 | `download_media` fails with 403 | WhatsApp no longer stores that file; attachments expire after a few weeks |
 | `send_file` says the file is outside the send root | Copy the file under `~/Library/Application Support/whatsapp-mcp/files/` |

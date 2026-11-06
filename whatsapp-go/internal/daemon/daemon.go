@@ -303,7 +303,7 @@ func (d *Daemon) handleEvent(evt any) {
 	case *events.Disconnected:
 		d.log.Warn("disconnected, whatsmeow will reconnect")
 	case *events.StreamReplaced:
-		d.log.Error("stream replaced: another process is using this session; stop the old bridge (install-service.sh uninstall)")
+		d.log.Error("stream replaced: another process is using this session; stop the old bridge or any other whatsapp-mcp daemon using the same session")
 	case *events.LoggedOut:
 		d.mu.Lock()
 		d.loggedOut = true
