@@ -6,16 +6,16 @@
   "description": "Read, search and send your WhatsApp messages from Claude on Mac and Windows. Nothing is sent without your approval.",
   "long_description": "Links to your personal WhatsApp account as a linked device, like WhatsApp Web, and keeps a private archive of your messages on this computer. Claude can search it, read conversations, save attachments and, after showing you a preview you approve, send messages, files and voice notes.\n\nTo start, ask Claude to connect WhatsApp: it asks for your phone number and gives you a code to type in WhatsApp > Linked devices > Link with phone number.\n\nThis uses an unofficial WhatsApp interface. Your messages stay on your computer and only reach Claude when it calls a tool.",
   "author": {
-    "name": "abonur",
-    "url": "https://github.com/abonur"
+    "name": "RUWAD",
+    "url": "https://ruwad.io"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/abonur/askmywa"
+    "url": "https://github.com/Ruwad-io/askmywa"
   },
   "homepage": "https://askmywa.com",
-  "documentation": "https://github.com/abonur/askmywa#readme",
-  "support": "https://github.com/abonur/askmywa/issues",
+  "documentation": "https://github.com/Ruwad-io/askmywa#readme",
+  "support": "https://github.com/Ruwad-io/askmywa/issues",
   "privacy_policies": [
     "https://askmywa.com/privacy/"
   ],

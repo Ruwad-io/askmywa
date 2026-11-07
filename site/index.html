@@ -27,7 +27,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="fr_FR">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/", "inLanguage": "en", "description": "Free, open-source WhatsApp MCP server for Claude Desktop, ChatGPT and Codex. Your AI searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, the ChatGPT desktop app, Codex, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/abonur/askmywa", "downloadUrl": "https://github.com/abonur/askmywa/releases/latest", "image": "https://askmywa.com/assets/og-en.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/", "inLanguage": "en", "description": "Free, open-source WhatsApp MCP server for Claude Desktop, ChatGPT and Codex. Your AI searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, the ChatGPT desktop app, Codex, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/Ruwad-io/askmywa", "downloadUrl": "https://github.com/Ruwad-io/askmywa/releases/latest", "image": "https://askmywa.com/assets/og-en.png"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -40,7 +40,7 @@
       <a class="lg" href="#privacy">Privacy</a>
       <a class="lg" href="#questions">Questions</a>
       <a href="fr/" hreflang="fr" lang="fr">FR</a>
-      <a href="https://github.com/abonur/askmywa">GitHub</a>
+      <a href="https://github.com/Ruwad-io/askmywa">GitHub</a>
     </nav>
   </header>
 
@@ -51,7 +51,7 @@
       <h1><span class="rise">Ask your</span><br><span class="rise d1">WhatsApp</span><br><span class="rise d2 hl">anything.</span></h1>
       <p class="lede rise d3">Claude reads your chats <strong>on your computer</strong> and answers in plain words. It never sends a thing <strong>without your yes</strong>.</p>
       <div class="rise d4">
-        <a class="composer" href="https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb">
+        <a class="composer" href="https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb">
           <span class="txt">Download for Claude Desktop</span>
           <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
         </a>
@@ -176,7 +176,7 @@
       <p class="lead2">askmywa also works in the ChatGPT app on a Mac, and in Codex. There is no file to double-click for ChatGPT yet: you paste one line into Terminal instead. It does not work on chatgpt.com or in the ChatGPT phone app.</p>
     </div>
     <ol class="steps">
-      <li><div><h3>Paste this into Terminal</h3><p><code class="cmd">curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh</code></p></div></li>
+      <li><div><h3>Paste this into Terminal</h3><p><code class="cmd">curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.sh | sh</code></p></div></li>
       <li><div><h3>Type the code on your phone</h3><p>Terminal shows it. <span class="path">WhatsApp › Linked devices › Link a device › Link with phone number instead</span></p></div></li>
       <li><div><h3>Quit and reopen ChatGPT</h3><p>The installer added askmywa to ChatGPT and Codex. Ask away in a new chat.</p></div></li>
     </ol>
@@ -215,10 +215,10 @@
     <div>
       <p class="kicker">For developers</p>
       <h2 id="terminal-h">A WhatsApp MCP server in one binary.</h2>
-      <p class="lead2">Under the extension is an MCP server: <code>askmywa serve</code> speaks MCP over stdio, with 15 typed tools such as <code>list_messages</code>, <code>search_contacts</code> and a <code>send_message</code> that waits for confirmation. On Linux, a Raspberry Pi or a Mac, one command picks the right build, checks it, installs the background service and links WhatsApp with a code. A Pi left on keeps your archive complete while your laptop sleeps. <a href="https://github.com/abonur/askmywa#install-without-the-extension-mac-windows-linux">Full guide</a></p>
+      <p class="lead2">Under the extension is an MCP server: <code>askmywa serve</code> speaks MCP over stdio, with 15 typed tools such as <code>list_messages</code>, <code>search_contacts</code> and a <code>send_message</code> that waits for confirmation. On Linux, a Raspberry Pi or a Mac, one command picks the right build, checks it, installs the background service and links WhatsApp with a code. A Pi left on keeps your archive complete while your laptop sleeps. <a href="https://github.com/Ruwad-io/askmywa#install-without-the-extension-mac-windows-linux">Full guide</a></p>
     </div>
     <div>
-      <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh</code></pre>
+      <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.sh | sh</code></pre>
       <pre class="term"><code><span class="p">$ </span>brew install abonur/tap/askmywa
 <span class="p">$ </span>askmywa install-service
 <span class="p">$ </span>askmywa link</code></pre>
@@ -238,7 +238,7 @@
       <div><h3>Can it send messages on its own?</h3><p>No. Every send first returns a preview. Claude sends only after you approve that exact message.</p></div>
       <div><h3>Will WhatsApp ban my account?</h3><p>We can't promise it won't. It uses the same kind of connection as WhatsApp Web, through an unofficial interface that WhatsApp's terms don't allow.</p></div>
       <div><h3>How do I remove it?</h3><p>Ask Claude: “Disconnect WhatsApp from this computer and delete the messages.” Then remove the extension in Claude's Settings › Extensions.</p></div>
-      <div><h3>Who makes it?</h3><p>Open-source software published by RUWAD, a small company in Paris (<a href="legal/">legal notice</a>). It is not affiliated with WhatsApp, Meta or Anthropic. It started as a rewrite of lharries/whatsapp-mcp. Bugs and questions go to <a href="https://github.com/abonur/askmywa/issues">GitHub</a>.</p></div>
+      <div><h3>Who makes it?</h3><p>Open-source software published by RUWAD, a small company in Paris (<a href="legal/">legal notice</a>). It is not affiliated with WhatsApp, Meta or Anthropic. It started as a rewrite of lharries/whatsapp-mcp. Bugs and questions go to <a href="https://github.com/Ruwad-io/askmywa/issues">GitHub</a>.</p></div>
     </div>
   </div>
 </section>
@@ -247,8 +247,8 @@
   <div class="wrap">
     <div class="foot">
       <nav aria-label="Footer">
-        <a href="https://github.com/abonur/askmywa">GitHub</a>
-        <a href="https://github.com/abonur/askmywa/releases">All downloads</a>
+        <a href="https://github.com/Ruwad-io/askmywa">GitHub</a>
+        <a href="https://github.com/Ruwad-io/askmywa/releases">All downloads</a>
         <a href="privacy/">Privacy</a>
         <a href="legal/">Legal notice</a>
         <a href="fr/" hreflang="fr" lang="fr">Français</a>

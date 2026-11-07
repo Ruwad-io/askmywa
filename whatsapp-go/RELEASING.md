@@ -39,11 +39,11 @@ An "Apple Development" certificate is not enough: only "Developer ID Application
 Run these from a terminal, in the folder holding the two files. `gh` prompts for the values that are not piped in.
 
 ```bash
-base64 -i developer-id.p12 | gh secret set MACOS_SIGN_P12_BASE64 --repo abonur/askmywa
-gh secret set MACOS_SIGN_P12_PASSWORD --repo abonur/askmywa
-base64 -i AuthKey_XXXXXXXXXX.p8 | gh secret set APPLE_API_KEY_P8_BASE64 --repo abonur/askmywa
-gh secret set APPLE_API_KEY_ID --repo abonur/askmywa
-gh secret set APPLE_API_ISSUER_ID --repo abonur/askmywa
+base64 -i developer-id.p12 | gh secret set MACOS_SIGN_P12_BASE64 --repo Ruwad-io/askmywa
+gh secret set MACOS_SIGN_P12_PASSWORD --repo Ruwad-io/askmywa
+base64 -i AuthKey_XXXXXXXXXX.p8 | gh secret set APPLE_API_KEY_P8_BASE64 --repo Ruwad-io/askmywa
+gh secret set APPLE_API_KEY_ID --repo Ruwad-io/askmywa
+gh secret set APPLE_API_ISSUER_ID --repo Ruwad-io/askmywa
 ```
 
 Then delete `developer-id.p12` and keep the `.p8` file somewhere safe, such as a password manager.
@@ -89,7 +89,7 @@ In the account, **Certificate profiles** > **Create** > **Public Trust**: name `
 ### 4. Let GitHub sign, without a password
 
 1. **Microsoft Entra ID** > **App registrations** > **New registration**: name `askmywa-release-signing`, single tenant. Note the **Application (client) ID** and the **Directory (tenant) ID**.
-2. In the app, **Certificates & secrets** > **Federated credentials** > **Add credential** > **GitHub Actions deploying Azure resources**: organization `abonur`, repository `askmywa`, entity **Environment**, environment `release`.
+2. In the app, **Certificates & secrets** > **Federated credentials** > **Add credential** > **GitHub Actions deploying Azure resources**: organization `Ruwad-io` (ID 255990248), repository `askmywa` (ID 1447660386), entity **Environment**, environment `release`. The repository uses GitHub's immutable subject format, so the subject is `repo:Ruwad-io@255990248/askmywa@1447660386:environment:release`; if the repository moves again, update the organization name and ID there.
 3. Back in the signing account, **Access control (IAM)** > **Add role assignment**: give the app `askmywa-release-signing` the **Artifact Signing Certificate Profile Signer** role.
 
 GitHub proves to Azure that the job runs in this repository's `release` environment, so no Azure secret is stored in GitHub. The environment is created by the first run that uses it.
@@ -99,11 +99,11 @@ GitHub proves to Azure that the job runs in this repository's `release` environm
 These are identifiers, not secrets. The endpoint matches the account's region (`https://weu.codesigning.azure.net` for West Europe, `https://neu.codesigning.azure.net` for North Europe).
 
 ```bash
-gh variable set AZURE_CLIENT_ID --repo abonur/askmywa --body "<application (client) ID>"
-gh variable set AZURE_TENANT_ID --repo abonur/askmywa --body "<directory (tenant) ID>"
-gh variable set AZURE_SIGNING_ENDPOINT --repo abonur/askmywa --body https://weu.codesigning.azure.net
-gh variable set AZURE_SIGNING_PROFILE --repo abonur/askmywa --body askmywa
-gh variable set AZURE_SIGNING_ACCOUNT --repo abonur/askmywa --body askmywa
+gh variable set AZURE_CLIENT_ID --repo Ruwad-io/askmywa --body "<application (client) ID>"
+gh variable set AZURE_TENANT_ID --repo Ruwad-io/askmywa --body "<directory (tenant) ID>"
+gh variable set AZURE_SIGNING_ENDPOINT --repo Ruwad-io/askmywa --body https://weu.codesigning.azure.net
+gh variable set AZURE_SIGNING_PROFILE --repo Ruwad-io/askmywa --body askmywa
+gh variable set AZURE_SIGNING_ACCOUNT --repo Ruwad-io/askmywa --body askmywa
 ```
 
 Set `AZURE_SIGNING_ACCOUNT` last: it is the switch that turns signing on. Set them as repository variables, not environment variables: the workflow reads the switch before the job enters the environment.

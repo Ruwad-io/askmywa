@@ -85,7 +85,7 @@ func SystemdUnit(args []string) string {
 	}
 	return `[Unit]
 Description=WhatsApp MCP daemon (archives WhatsApp messages for MCP clients)
-Documentation=https://github.com/abonur/askmywa
+Documentation=https://github.com/Ruwad-io/askmywa
 After=network-online.target
 Wants=network-online.target
 
@@ -130,7 +130,7 @@ func TaskXML(args []string, user string) string {
 	return `<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Description>Archives WhatsApp messages for MCP clients such as Claude Desktop. https://github.com/abonur/askmywa</Description>
+    <Description>Archives WhatsApp messages for MCP clients such as Claude Desktop. https://github.com/Ruwad-io/askmywa</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>
