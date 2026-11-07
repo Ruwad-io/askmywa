@@ -3,14 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>askmywa — ask your WhatsApp anything</title>
-<meta name="description" content="Claude reads your WhatsApp chats on your computer and answers in plain words. It never sends a thing without your yes. Free and open source.">
+<title>askmywa — WhatsApp MCP for Claude: ask your WhatsApp anything</title>
+<meta name="description" content="Free, open-source WhatsApp MCP server and Claude Desktop extension. Claude searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.">
+<link rel="canonical" href="https://askmywa.com/">
+<link rel="alternate" hreflang="en" href="https://askmywa.com/">
+<link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/">
+<link rel="alternate" hreflang="x-default" href="https://askmywa.com/">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="assets/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/style.css">
-<link rel="alternate" hreflang="fr" href="fr/">
-<meta property="og:title" content="askmywa — ask your WhatsApp anything">
-<meta property="og:description" content="Free, open-source WhatsApp extension for Claude Desktop. Your chats stay on your computer; nothing is sent without your yes.">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#efeaff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120a2e" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="askmywa">
+<meta property="og:url" content="https://askmywa.com/">
+<meta property="og:title" content="askmywa — WhatsApp MCP for Claude: ask your WhatsApp anything">
+<meta property="og:description" content="Ask Claude to find, sum up and answer your WhatsApp messages. Your chats stay on your computer; nothing is sent without your yes.">
+<meta property="og:image" content="https://askmywa.com/assets/og-en.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/", "inLanguage": "en", "description": "Free, open-source WhatsApp MCP server and Claude Desktop extension. Claude searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/abonur/whatsapp-mcp", "downloadUrl": "https://github.com/abonur/whatsapp-mcp/releases/latest", "image": "https://askmywa.com/assets/og-en.png"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -30,6 +46,7 @@
   <main id="main">
   <div class="hero">
     <div>
+      <p class="eyebrow-mcp rise">WhatsApp MCP server · for Claude Desktop, Claude Code and Cursor</p>
       <h1><span class="rise">Ask your</span><br><span class="rise d1">WhatsApp</span><br><span class="rise d2 hl">anything.</span></h1>
       <p class="lede rise d3">Claude reads your chats <strong>on your computer</strong> and answers in plain words. It never sends a thing <strong>without your yes</strong>.</p>
       <div class="rise d4">
@@ -180,15 +197,16 @@
 <section class="band night" id="terminal" aria-labelledby="terminal-h">
   <div class="wrap term-band">
     <div>
-      <p class="kicker">With a terminal</p>
-      <h2 id="terminal-h">Linux, Raspberry Pi, Mac.</h2>
-      <p class="lead2">One command picks the right build, checks it, installs the background service and links WhatsApp with a code. Run it again to upgrade. A Pi left on keeps your archive complete while your laptop sleeps. <a href="https://github.com/abonur/whatsapp-mcp#install-without-the-extension-mac-windows-linux">Full guide</a></p>
+      <p class="kicker">For developers</p>
+      <h2 id="terminal-h">A WhatsApp MCP server in one binary.</h2>
+      <p class="lead2">Under the extension is an MCP server: <code>whatsapp-mcp serve</code> speaks MCP over stdio, with 15 typed tools such as <code>list_messages</code>, <code>search_contacts</code> and a <code>send_message</code> that waits for confirmation. On Linux, a Raspberry Pi or a Mac, one command picks the right build, checks it, installs the background service and links WhatsApp with a code. A Pi left on keeps your archive complete while your laptop sleeps. <a href="https://github.com/abonur/whatsapp-mcp#install-without-the-extension-mac-windows-linux">Full guide</a></p>
     </div>
     <div>
       <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh</code></pre>
       <pre class="term"><code><span class="p">$ </span>brew install abonur/tap/whatsapp-mcp
 <span class="p">$ </span>whatsapp-mcp install-service
 <span class="p">$ </span>whatsapp-mcp link</code></pre>
+      <pre class="term"><code><span class="p">$ </span>claude mcp add whatsapp -- ~/.local/bin/whatsapp-mcp serve</code></pre>
     </div>
   </div>
 </section>
