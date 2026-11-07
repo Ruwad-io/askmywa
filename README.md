@@ -43,7 +43,7 @@ An existing install of the original can switch without pairing again: the new da
 
 1. Download [`askmywa.mcpb`](https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb), the latest version, from [askmywa.com](https://askmywa.com) or the [releases](https://github.com/Ruwad-io/askmywa/releases/latest). The same file works on Mac and Windows.
 2. Double-click it. Claude Desktop opens and asks you to confirm the install.
-3. In a new conversation, write: **Connect my WhatsApp.**
+3. In a new conversation, write: **Connect my WhatsApp.** The first time, Claude asks for permission to use askmywa's tools: choose to always allow them, so it doesn't ask again. Sending stays safe either way: every message waits for your yes.
 4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code.
 
 That's it. Your messages start appearing within a few minutes, and the link keeps working after a restart. To send a file, put it in the `Documents/WhatsApp MCP` folder first (you can choose another folder in the extension's settings).
