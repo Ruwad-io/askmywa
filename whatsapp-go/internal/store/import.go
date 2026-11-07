@@ -28,7 +28,7 @@ type ImportStats struct {
 // known are moved to the phone JID. Existing rows are not overwritten.
 func (s *Store) ImportLegacy(ctx context.Context, legacyPath string, log *slog.Logger) (ImportStats, error) {
 	var stats ImportStats
-	src, err := sql.Open("sqlite", "file:"+legacyPath+"?mode=ro&_pragma=query_only(1)")
+	src, err := sql.Open("sqlite", FileURI(legacyPath)+"?mode=ro&_pragma=query_only(1)")
 	if err != nil {
 		return stats, fmt.Errorf("open legacy database %s: %w", legacyPath, err)
 	}

@@ -1,6 +1,8 @@
 // Command whatsapp-mcp is a single binary that archives a WhatsApp account
 // (daemon), exposes it to MCP clients over stdio (serve), and installs
-// itself as a launchd agent (install-service / uninstall-service).
+// itself as a background service (install-service / uninstall-service):
+// a launchd agent on macOS, a systemd user service on Linux, a scheduled
+// task on Windows.
 package main
 
 import (
@@ -14,7 +16,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"runtime"
 	"syscall"
 	"time"
 
@@ -41,10 +42,10 @@ Usage:
       MCP server over stdio (for claude_desktop_config.json).
   whatsapp-mcp import --legacy-store DIR [--data-dir DIR]
       Copy the old bridge's session, sync contact names and import its history, without connecting.
-  whatsapp-mcp install-service [--data-dir DIR] [--send-root DIR] [--legacy-store DIR]
-      Install and start the launchd agent ` + config.ServiceLabel + `.
+  whatsapp-mcp install-service [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--dry-run] [--no-wait]
+      Install and start the background service (` + "launchd on macOS, systemd on Linux, a scheduled task on Windows" + `).
   whatsapp-mcp uninstall-service
-      Stop and remove the launchd agent.
+      Stop and remove the background service.
   whatsapp-mcp status [--data-dir DIR]
       Show the daemon's connection state and database counts.
   whatsapp-mcp version
@@ -128,6 +129,7 @@ func runDaemon(args []string) error {
 	legacy := fs.String("legacy-store", "", "old whatsapp-bridge/store directory: its session is copied and its history imported on first run")
 	logFile := fs.String("log-file", "", "write logs to this file with rotation instead of stderr")
 	pairMode := fs.String("pair", "auto", "without a session: qr (show a QR code), wait (wait for connect_whatsapp), or auto (qr in a terminal, wait otherwise)")
+	background := fs.Bool("background", false, "run as the background service: never show a QR code, and on Windows close the console window")
 	debug := fs.Bool("debug", false, "verbose logging")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -158,6 +160,12 @@ func runDaemon(args []string) error {
 		}
 	}
 	mode := *pairMode
+	if *background {
+		detachConsole()
+		if mode == "auto" {
+			mode = daemon.PairWait
+		}
+	}
 	switch mode {
 	case "auto":
 		mode = daemon.PairWait
@@ -231,12 +239,12 @@ func runServe(args []string) error {
 		defer st.Close()
 	}
 	var svc mcpserver.ServiceManager
-	if runtime.GOOS == "darwin" {
+	if service.Supported() {
 		if exe, err := os.Executable(); err == nil {
 			if resolved, err := filepath.EvalSymlinks(exe); err == nil {
 				exe = resolved
 			}
-			svc = service.Launchd{Binary: exe}
+			svc = service.Manager{Binary: exe}
 		}
 	}
 	mcpserver.Version = version
@@ -251,8 +259,13 @@ func runInstall(args []string) error {
 	fs := flag.NewFlagSet("install-service", flag.ExitOnError)
 	dataDir, sendRoot := pathFlags(fs)
 	legacy := fs.String("legacy-store", "", "old whatsapp-bridge/store directory to migrate from on first start")
+	dryRun := fs.Bool("dry-run", false, "print the service definition and where it would be written, without installing")
+	noWait := fs.Bool("no-wait", false, "return right after starting the service instead of waiting for it to answer")
 	if err := fs.Parse(args); err != nil {
 		return err
+	}
+	if !service.Supported() {
+		return service.ErrUnsupported
 	}
 	paths, err := resolvePaths(*dataDir, *sendRoot)
 	if err != nil {
@@ -270,14 +283,29 @@ func runInstall(args []string) error {
 		}
 		extra = append(extra, "--legacy-store", abs)
 	}
-	plist, err := service.Install(exe, paths, extra)
+	if *dryRun {
+		path, content, err := service.Definition(exe, paths, extra)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(os.Stderr, "# %s would be written to %s\n", service.Name(), path)
+		fmt.Print(content)
+		return nil
+	}
+	inst, err := service.Install(exe, paths, extra)
 	if err != nil {
 		return err
 	}
 	logFile := filepath.Join(paths.LogDir, "daemon.log")
-	fmt.Printf("Installed %s\nLogs: %s\n", plist, logFile)
-	// launchd may hold a restarted job for its 10 s throttle interval, so
-	// wait for the daemon to answer before reporting.
+	fmt.Printf("Installed the %s (%s)\nLogs: %s\n", service.Name(), inst.Path, logFile)
+	if inst.Warning != "" {
+		fmt.Println("Note:", inst.Warning)
+	}
+	if *noWait {
+		return nil
+	}
+	// The OS may hold a restarted job for a while (launchd throttles for
+	// 10 s), so wait for the daemon to answer before reporting.
 	fmt.Println("Waiting for the daemon to connect...")
 	client := ipc.NewClient(paths.Socket)
 	deadline := time.Now().Add(45 * time.Second)
@@ -286,13 +314,11 @@ func runInstall(args []string) error {
 		st, err := client.Status(ctx)
 		cancel()
 		if err == nil && st.Connected {
-			_, pid := service.Status()
-			fmt.Printf("%s is running (pid %s) and connected as %s\n", config.ServiceLabel, pid, st.JID)
+			fmt.Printf("The service is %s and connected as %s\n", service.Status(), st.JID)
 			return nil
 		}
 		if err == nil && !st.LoggedIn {
-			_, pid := service.Status()
-			fmt.Printf("%s is running (pid %s) but not linked to WhatsApp yet.\n", config.ServiceLabel, pid)
+			fmt.Printf("The service is %s but not linked to WhatsApp yet.\n", service.Status())
 			fmt.Println("Ask Claude to connect WhatsApp (it gives you a code to type on your phone), or")
 			fmt.Printf("uninstall the service and run `%s daemon` in a terminal to scan a QR code.\n", exe)
 			return nil
@@ -308,7 +334,7 @@ func runUninstall() error {
 	if err := service.Uninstall(); err != nil {
 		return err
 	}
-	fmt.Println("Removed", config.ServiceLabel)
+	fmt.Println("Removed the", service.Name())
 	return nil
 }
 
@@ -322,11 +348,7 @@ func runStatus(args []string) error {
 	if err != nil {
 		return err
 	}
-	if loaded, pid := service.Status(); loaded {
-		fmt.Printf("launchd agent %s: loaded (pid %s)\n", config.ServiceLabel, pid)
-	} else {
-		fmt.Printf("launchd agent %s: not loaded\n", config.ServiceLabel)
-	}
+	fmt.Printf("%s: %s\n", service.Name(), service.Status())
 	ctx, cancel := signalContext()
 	defer cancel()
 	st, err := ipc.NewClient(paths.Socket).Status(ctx)

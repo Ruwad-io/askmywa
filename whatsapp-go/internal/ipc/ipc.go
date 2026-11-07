@@ -14,6 +14,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"runtime"
 	"time"
 
 	"whatsapp-mcp/internal/store"
@@ -141,7 +142,7 @@ func Serve(ctx context.Context, path string, h Handler, log *slog.Logger) error 
 	if err != nil {
 		return fmt.Errorf("listen on %s: %w", path, err)
 	}
-	if err := os.Chmod(path, 0o600); err != nil {
+	if err := os.Chmod(path, 0o600); err != nil && runtime.GOOS != "windows" {
 		ln.Close()
 		return fmt.Errorf("chmod socket %s: %w", path, err)
 	}

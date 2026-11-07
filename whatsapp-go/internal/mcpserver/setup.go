@@ -15,7 +15,7 @@ import (
 	"whatsapp-mcp/internal/store"
 )
 
-// ServiceManager installs and restarts the background daemon. The launchd
+// ServiceManager installs and restarts the background daemon. The OS
 // implementation lives in internal/service; tests use a fake.
 type ServiceManager interface {
 	// Loaded reports whether the service is registered with the OS.
@@ -209,7 +209,7 @@ func (s *Server) connect(ctx context.Context, _ *mcp.CallToolRequest, in Connect
 		if err := s.svc.Restart(); err != nil {
 			return nil, ConnectOutput{}, fmt.Errorf("restart the WhatsApp background service: %w", err)
 		}
-		// Give launchd time to stop the old process before polling.
+		// Give the OS time to stop the old process before polling.
 		time.Sleep(2 * time.Second)
 		if st, err = s.waitForDaemon(ctx); err != nil {
 			return nil, ConnectOutput{}, err

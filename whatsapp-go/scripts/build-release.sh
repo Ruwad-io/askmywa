@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Builds the release artifacts into dist/:
-#   whatsapp-mcp-<version>-darwin-arm64.tar.gz
-#   whatsapp-mcp-<version>-darwin-amd64.tar.gz
-#   whatsapp-mcp-<version>.mcpb          (Claude Desktop extension, universal binary)
+#   whatsapp-mcp-<version>-darwin-{arm64,amd64}.tar.gz   macOS, signed and notarized
+#   whatsapp-mcp-<version>-linux-{amd64,arm64,armv7}.tar.gz  Linux and Raspberry Pi
+#   whatsapp-mcp-<version>-windows-{amd64,arm64}.zip
+#   whatsapp-mcp-<version>.mcpb   Claude Desktop extension: macOS universal binary + Windows x64
 #   checksums.txt
 #
 # Usage: scripts/build-release.sh [version]   (default: git describe, without the leading v)
@@ -96,6 +97,28 @@ for arch in arm64 amd64; do
   rm -rf "${dist:?}/$pkg"
 done
 
+echo "building Linux and Windows"
+for target in linux/amd64 linux/arm64 linux/arm windows/amd64 windows/arm64; do
+  os=${target%/*}
+  arch=${target#*/}
+  name=$arch
+  [[ $arch == arm ]] && name=armv7
+  ext=""
+  [[ $os == windows ]] && ext=".exe"
+  pkg="whatsapp-mcp-${version}-${os}-${name}"
+  mkdir -p "$dist/$pkg"
+  CGO_ENABLED=0 GOOS=$os GOARCH=$arch GOARM=7 go build -trimpath -ldflags "$ldflags" -o "$dist/$pkg/whatsapp-mcp$ext" .
+  cp README.md ../LICENSE "$dist/$pkg/"
+  if [[ $os == windows ]]; then
+    # The extension runs the x64 build on every Windows PC (ARM PCs emulate it).
+    [[ $arch == amd64 ]] && cp "$dist/$pkg/whatsapp-mcp.exe" "$dist/mcpb/server/"
+    (cd "$dist" && zip -qr "$pkg.zip" "$pkg")
+  else
+    tar -C "$dist" -czf "$dist/$pkg.tar.gz" "$pkg"
+  fi
+  rm -rf "${dist:?}/$pkg"
+done
+
 echo "packing the Claude Desktop extension"
 python3 - "$version" extension/manifest.json "$dist/mcpb/manifest.json" <<'PY'
 import json, sys
@@ -112,6 +135,6 @@ npx -y "$mcpb_cli" validate "$dist/mcpb/manifest.json"
 npx -y "$mcpb_cli" pack "$dist/mcpb" "$dist/whatsapp-mcp-${version}.mcpb"
 
 rm -rf "${dist:?}/bin" "${dist:?}/mcpb"
-(cd "$dist" && shasum -a 256 ./*.tar.gz ./*.mcpb > checksums.txt)
+(cd "$dist" && shasum -a 256 ./*.tar.gz ./*.zip ./*.mcpb > checksums.txt)
 echo "done:"
 ls -l "$dist"

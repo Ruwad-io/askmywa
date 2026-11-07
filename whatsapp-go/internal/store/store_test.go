@@ -350,7 +350,7 @@ func TestMergeLIDChat(t *testing.T) {
 func TestImportLegacy(t *testing.T) {
 	s, ctx := fixture(t)
 	legacy := filepath.Join(t.TempDir(), "old.db")
-	db, err := sql.Open("sqlite", "file:"+legacy)
+	db, err := sql.Open("sqlite", FileURI(legacy))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -429,6 +429,21 @@ func TestParseUserTime(t *testing.T) {
 	}
 	if _, err := ParseUserTime("yesterday", "after"); err == nil {
 		t.Error("expected an error")
+	}
+}
+
+func TestFileURI(t *testing.T) {
+	for in, want := range map[string]string{
+		"/Users/a/Library/Application Support/x.db": "file:/Users/a/Library/Application Support/x.db",
+		"rel/x.db":   "file:rel/x.db",
+		"/tmp/a?b#c": "file:/tmp/a%3fb%23c",
+	} {
+		if got := FileURI(in); got != want {
+			t.Errorf("FileURI(%q) = %q, want %q", in, got, want)
+		}
+	}
+	if FileURI(`C:/Users/A B/x.db`) != "file:/C:/Users/A B/x.db" {
+		t.Errorf("drive path: %q", FileURI(`C:/Users/A B/x.db`))
 	}
 }
 

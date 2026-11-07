@@ -39,6 +39,51 @@ jobs:
       - run: go build -o whatsapp-mcp .
       - name: whatsmeow API parity
         run: bash ./scripts/whatsmeow-parity.sh
+      - name: Smoke test (unpaired daemon answers on its socket)
+        run: bash ./scripts/smoke.sh ./whatsapp-mcp
+      - name: Check the systemd unit
+        run: |
+          ./whatsapp-mcp install-service --dry-run > "$RUNNER_TEMP/whatsapp-mcp.service"
+          cat "$RUNNER_TEMP/whatsapp-mcp.service"
+          systemd-analyze verify --man=no "$RUNNER_TEMP/whatsapp-mcp.service"
+
+  # Raspberry Pi 4/5 and other 64-bit ARM Linux machines, and Windows.
+  cross:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04-arm, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: whatsapp-go
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: whatsapp-go/go.mod
+          cache-dependency-path: whatsapp-go/go.sum
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build -o whatsapp-mcp${{ runner.os == 'Windows' && '.exe' || '' }} .
+      - name: Smoke test (unpaired daemon answers on its socket)
+        run: bash ./scripts/smoke.sh ./whatsapp-mcp${{ runner.os == 'Windows' && '.exe' || '' }}
+      - name: Check the systemd unit
+        if: runner.os == 'Linux'
+        run: |
+          ./whatsapp-mcp install-service --dry-run > "$RUNNER_TEMP/whatsapp-mcp.service"
+          systemd-analyze verify --man=no "$RUNNER_TEMP/whatsapp-mcp.service"
+      - name: Install, query and remove the scheduled task
+        if: runner.os == 'Windows'
+        run: |
+          ./whatsapp-mcp.exe install-service --data-dir svc-data --no-wait
+          schtasks //Query //TN "whatsapp-mcp daemon" //V //FO LIST
+          ./whatsapp-mcp.exe status --data-dir svc-data || echo "(the task may not start on a CI runner without an interactive session)"
+          ./whatsapp-mcp.exe uninstall-service
+          if schtasks //Query //TN "whatsapp-mcp daemon" >/dev/null 2>&1; then
+            echo "the scheduled task is still registered"; exit 1
+          fi
 
   build-macos:
     runs-on: macos-latest
@@ -51,6 +96,8 @@ jobs:
       - run: go build -o whatsapp-mcp .
       - run: go test ./...
       - run: ./whatsapp-mcp version
+      - name: Check the launchd property list
+        run: ./whatsapp-mcp install-service --dry-run | plutil -lint -
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

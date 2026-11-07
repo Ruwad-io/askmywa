@@ -66,11 +66,36 @@ func SafeFilename(raw string) string {
 		return fallback()
 	}
 	base := filepath.Base(strings.ReplaceAll(raw, `\`, `/`))
+	base = strings.Map(func(r rune) rune {
+		if r < 32 || strings.ContainsRune(`<>:"/\|?*`, r) {
+			return '_'
+		}
+		return r
+	}, base)
+	// Windows also refuses names ending in a dot or a space.
+	base = strings.TrimRight(base, ". ")
 	switch base {
 	case "", ".", "..", "/":
 		return fallback()
 	}
+	if isReservedWindowsName(base) {
+		return "_" + base
+	}
 	return base
+}
+
+// isReservedWindowsName reports names such as CON or LPT1.txt that Windows
+// cannot create.
+func isReservedWindowsName(name string) bool {
+	stem := strings.ToUpper(strings.SplitN(name, ".", 2)[0])
+	switch stem {
+	case "CON", "PRN", "AUX", "NUL":
+		return true
+	}
+	if len(stem) == 4 && (strings.HasPrefix(stem, "COM") || strings.HasPrefix(stem, "LPT")) && stem[3] >= '1' && stem[3] <= '9' {
+		return true
+	}
+	return false
 }
 
 func fallback() string { return "document_" + time.Now().UTC().Format("20060102_150405") }
