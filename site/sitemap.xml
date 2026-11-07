@@ -32,4 +32,20 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/confidentialite/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://askmywa.com/privacy/"/>
   </url>
+  <url>
+    <loc>https://askmywa.com/legal/</loc>
+    <lastmod>2026-11-07</lastmod>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://askmywa.com/legal/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/mentions-legales/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://askmywa.com/legal/"/>
+  </url>
+  <url>
+    <loc>https://askmywa.com/fr/mentions-legales/</loc>
+    <lastmod>2026-11-07</lastmod>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://askmywa.com/legal/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/mentions-legales/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://askmywa.com/legal/"/>
+  </url>
 </urlset>
