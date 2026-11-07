@@ -31,6 +31,12 @@ for target in darwin/arm64 darwin/amd64 linux/arm64 linux/amd64; do
   pkg="askmywa-$version-$os-$arch"
   mkdir -p "$work/pkg/$pkg"
   CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -ldflags "-s -w -X main.version=$version" -o "$work/pkg/$pkg/askmywa" .
+  if [[ $os == darwin ]]; then
+    bash scripts/macos-app.sh "$work/pkg/$pkg/askmywa" "$work/pkg/$pkg" "$version" >/dev/null
+    codesign --force --sign - "$work/pkg/$pkg/askmywa.app" 2>/dev/null
+    rm "$work/pkg/$pkg/askmywa"
+    ln -s askmywa.app/Contents/MacOS/askmywa "$work/pkg/$pkg/askmywa"
+  fi
   tar -C "$work/pkg" -czf "$rel/$pkg.tar.gz" "$pkg"
 done
 sum="sha256sum"
@@ -58,7 +64,8 @@ HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --formula "
 brew test "$tap/askmywa"
 
 echo "--- the service would run the opt path, which survives upgrades"
-opt="$(brew --prefix)/opt/askmywa/bin/askmywa"
+opt="$(brew --prefix)/opt/askmywa/"
+[[ $(uname -s) == Darwin ]] && opt="$(brew --prefix)/opt/askmywa/libexec/askmywa.app/Contents/MacOS/askmywa"
 def=$("$(brew --prefix)/bin/askmywa" install-service --dry-run 2>/dev/null)
 grep -q "$opt" <<<"$def" || { echo "FAIL: service definition does not use $opt:"; echo "$def"; exit 1; } >&2
 if grep -q "/Cellar/" <<<"$def"; then

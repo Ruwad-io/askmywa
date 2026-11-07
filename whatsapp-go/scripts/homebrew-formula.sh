@@ -53,7 +53,14 @@ $(block linux-amd64)
   end
 
   def install
-    bin.install "askmywa"
+    if OS.mac?
+      # askmywa.app gives the background service its name and logo in
+      # System Settings; the command is a link to the binary inside it.
+      libexec.install "askmywa.app"
+      bin.install_symlink libexec/"askmywa.app/Contents/MacOS/askmywa"
+    else
+      bin.install "askmywa"
+    end
   end
 
   def caveats

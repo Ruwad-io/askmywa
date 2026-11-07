@@ -252,6 +252,7 @@ func runServe(args []string) error {
 		}
 	}
 	mcpserver.Version = version
+	mcpserver.Icons = serverIcons()
 	srv := mcpserver.New(st, ipc.NewClient(paths.Socket), svc, paths, log)
 	if err := srv.Run(ctx, &mcp.StdioTransport{}); err != nil && !errors.Is(err, context.Canceled) {
 		return err

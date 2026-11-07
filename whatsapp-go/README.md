@@ -1,3 +1,5 @@
+<img src="assets/logo.svg" width="96" height="96" alt="askmywa logo">
+
 # askmywa
 
 One binary, six commands:
@@ -17,7 +19,7 @@ Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go S
 
 The simplest install is the Claude Desktop extension (Mac and Windows): download [`askmywa.mcpb`](https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb) (also on [askmywa.com](https://askmywa.com)), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
 
-On Linux, a Raspberry Pi or a Mac, the installer picks the right archive, checks it against the release's `checksums.txt`, installs it in `~/.local/bin`, installs the service and offers to link WhatsApp. Run it again to upgrade:
+On Linux, a Raspberry Pi or a Mac, the installer picks the right archive, checks it against the release's `checksums.txt`, installs it in `~/.local/bin`, installs the service and offers to link WhatsApp. Run it again to upgrade. On macOS the program is `askmywa.app`, installed in `~/Applications` with `~/.local/bin/askmywa` linked to the binary inside it: the app is what gives the background service its name and logo in System Settings.
 
 ```bash
 curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
@@ -36,6 +38,8 @@ go build -o ~/.local/bin/askmywa .
 ```
 
 The commands below assume `~/.local/bin` is on your `PATH`; otherwise call the binary by its full path.
+
+On macOS, `scripts/macos-app.sh ~/.local/bin/askmywa ~/Applications dev` wraps a source build in `askmywa.app` so the service shows with its logo; link `~/.local/bin/askmywa` to `~/Applications/askmywa.app/Contents/MacOS/askmywa` afterwards.
 
 Build to a stable location you can write to without `sudo` (`/usr/local/bin` usually needs it). The launchd agent and the Claude Desktop config both record the binary's absolute path, so a binary inside a temporary folder or a git worktree breaks them when that folder goes away.
 

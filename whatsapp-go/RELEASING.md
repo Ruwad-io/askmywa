@@ -73,12 +73,16 @@ export NOTARY_ISSUER_ID=00000000-0000-0000-0000-000000000000
 ## What the script does
 
 1. Builds `darwin/arm64` and `darwin/amd64` with the version baked in.
-2. Signs each binary with the hardened runtime and a secure timestamp, which notarization requires.
-3. Joins them into a universal binary for the extension and signs it again.
-4. Sends all three binaries to Apple's notary service and waits for `Accepted`. Bare executables cannot be stapled, so macOS checks the notarization online the first time the binary runs.
+2. Wraps each one in `askmywa.app` (`scripts/macos-app.sh`: icon, `LSUIElement`, bundle identifier `com.askmywa.app`) and signs the app with the hardened runtime and a secure timestamp, which notarization requires. The app is what gives the background service its name and logo in System Settings.
+3. Joins them into a universal binary, wrapped and signed the same way, for the extension.
+4. Sends the three apps to Apple's notary service, waits for `Accepted`, then staples the ticket to each app so macOS can check it offline.
 5. Builds the Linux and Windows archives, packs the macOS tarballs and the `.mcpb`, validated by `@anthropic-ai/mcpb`, and writes `checksums.txt`.
 6. Adds the installer (`install.sh`) and the Homebrew formula (`askmywa.rb`) generated from `checksums.txt`.
 
 ## Homebrew
 
 [abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) holds `Formula/askmywa.rb`. A workflow in that repository checks every hour for a new release of this one and commits the release's `askmywa.rb`, so no token is shared between the two repositories. To publish a formula right away, run that workflow by hand from its Actions tab. GitHub pauses scheduled workflows after 60 days without activity in a repository: if a release does not reach Homebrew, re-enable the workflow there.
+
+## Icons
+
+`assets/logo.svg` (flat) and `assets/logo-macos.svg` (with the macOS margin and shadow) are the sources. `scripts/make-icons.sh` regenerates the macOS `.icns`, the extension icon, the site icons and `assets/icon-256.png`; `scripts/make-windows-resources.sh` turns that PNG into the `rsrc_windows_*.syso` files that give `askmywa.exe` its icon. The outputs are committed.

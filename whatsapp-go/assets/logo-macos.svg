@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>askmywa</title>
+  <defs>
+    <filter id="s" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6a45ff"/>
+      <stop offset="1" stop-color="#4f28e0"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(100 100) scale(0.8047)" filter="url(#s)">
+    <rect width="1024" height="1024" rx="232" fill="url(#g)"/>
+    <rect x="168" y="200" width="688" height="520" rx="240" fill="#ffffff"/>
+    <path d="M318 640 L262 842 L486 712 Z" fill="#ffffff" stroke="#ffffff" stroke-width="24" stroke-linejoin="round"/>
+    <path d="M352 336h300" stroke="#d6cbff" stroke-width="44" stroke-linecap="round"/>
+    <path d="M296 424 L738 400 L728 520 L286 544 Z" fill="#ffd43b" stroke="#ffd43b" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M352 472h330" stroke="#1b1240" stroke-width="50" stroke-linecap="round"/>
+    <path d="M352 608h200" stroke="#d6cbff" stroke-width="44" stroke-linecap="round"/>
+  </g>
+</svg>

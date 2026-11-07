@@ -130,8 +130,9 @@ func resolveBinary(binary string) (string, error) {
 	return abs, nil
 }
 
-// homebrewOpt maps <prefix>/Cellar/<formula>/<version>/bin/<name> to
-// <prefix>/opt/<formula>/bin/<name>, or returns "" for other paths.
+// homebrewOpt maps <prefix>/Cellar/<formula>/<version>/<path> to
+// <prefix>/opt/<formula>/<path>, or returns "" for other paths. On macOS
+// the formula keeps the binary inside askmywa.app under libexec.
 func homebrewOpt(exe string) string {
 	sep := string(filepath.Separator)
 	marker := sep + "Cellar" + sep
@@ -140,10 +141,10 @@ func homebrewOpt(exe string) string {
 		return ""
 	}
 	parts := strings.Split(exe[i+len(marker):], sep)
-	if len(parts) != 4 || parts[2] != "bin" {
+	if len(parts) < 3 || parts[0] == "" || parts[1] == "" {
 		return ""
 	}
-	return filepath.Join(exe[:i], "opt", parts[0], "bin", parts[3])
+	return filepath.Join(append([]string{exe[:i], "opt", parts[0]}, parts[2:]...)...)
 }
 
 func run(name string, args ...string) error {

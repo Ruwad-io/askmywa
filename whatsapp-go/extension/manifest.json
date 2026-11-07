@@ -29,9 +29,9 @@
   ],
   "server": {
     "type": "binary",
-    "entry_point": "server/askmywa",
+    "entry_point": "server/askmywa.app/Contents/MacOS/askmywa",
     "mcp_config": {
-      "command": "${__dirname}/server/askmywa",
+      "command": "${__dirname}/server/askmywa.app/Contents/MacOS/askmywa",
       "args": [
         "serve"
       ],

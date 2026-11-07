@@ -290,3 +290,5 @@ h1 .hl::before { left: -0.06em; right: -0.1em; bottom: -0.08em; height: 0.62em; 
 @media (min-width: 1000px) { .term-band { grid-template-columns: 1fr 1fr; gap: 64px; } }
 .term-band h2 { font-size: clamp(2.2rem, 3.8vw, 3.3rem); }
 .term-band > div { min-width: 0; }
+.wordmark { display: inline-flex; align-items: center; gap: 10px; }
+.wordmark img { width: 30px; height: 30px; border-radius: 8px; }

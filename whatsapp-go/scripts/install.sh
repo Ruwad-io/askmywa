@@ -13,7 +13,10 @@
 #   --dir DIR         install the binary in DIR instead of ~/.local/bin
 #   --version X.Y.Z   install that version instead of the latest
 #
-# Environment: ASKMYWA_INSTALL_DIR, ASKMYWA_VERSION, and
+# On macOS the program is askmywa.app, installed in ~/Applications
+# (ASKMYWA_APP_DIR), and the command is a link to the binary inside it.
+#
+# Environment: ASKMYWA_INSTALL_DIR, ASKMYWA_APP_DIR, ASKMYWA_VERSION, and
 # ASKMYWA_RELEASES (base URL of the releases, for testing).
 #
 # Everything is inside main, so a download cut short runs nothing.
@@ -67,11 +70,28 @@ main() {
 
   mkdir -p "$dir"
   bin="$dir/askmywa"
-  # Replace through a rename so a running daemon keeps its old file.
-  cp "$tmp/$pkg/askmywa" "$bin.new"
-  chmod 755 "$bin.new"
-  mv -f "$bin.new" "$bin"
-  say "Installed $bin"
+  if [ -d "$tmp/$pkg/askmywa.app" ]; then
+    # macOS: the app (which gives the background service its name and logo
+    # in System Settings) goes to ~/Applications; the command links into it.
+    apps="${ASKMYWA_APP_DIR:-$HOME/Applications}"
+    mkdir -p "$apps"
+    rm -rf "$apps/askmywa.app.new" "$apps/askmywa.app.old"
+    cp -R "$tmp/$pkg/askmywa.app" "$apps/askmywa.app.new"
+    # Swap through renames so a running daemon keeps its old files.
+    if [ -d "$apps/askmywa.app" ]; then mv "$apps/askmywa.app" "$apps/askmywa.app.old"; fi
+    mv "$apps/askmywa.app.new" "$apps/askmywa.app"
+    rm -rf "$apps/askmywa.app.old"
+    ln -sf "$apps/askmywa.app/Contents/MacOS/askmywa" "$bin.new"
+    mv -f "$bin.new" "$bin"
+    say "Installed $apps/askmywa.app"
+    say "Linked $bin"
+  else
+    # Replace through a rename so a running daemon keeps its old file.
+    cp "$tmp/$pkg/askmywa" "$bin.new"
+    chmod 755 "$bin.new"
+    mv -f "$bin.new" "$bin"
+    say "Installed $bin"
+  fi
   # Before the rename the command was whatsapp-mcp: point that name at the
   # new binary, so MCP client configs that use it keep working.
   if [ -f "$dir/whatsapp-mcp" ] && [ ! -L "$dir/whatsapp-mcp" ]; then
