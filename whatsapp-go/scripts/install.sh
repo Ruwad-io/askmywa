@@ -1,7 +1,7 @@
 #!/bin/sh
 # Installs askmywa on Linux (including Raspberry Pi) and macOS:
 #
-#   curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
+#   curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.sh | sh
 #
 # It downloads the release for this machine, checks its SHA-256 against the
 # release's checksums.txt, puts the binary in ~/.local/bin, installs the
@@ -28,7 +28,7 @@
 set -eu
 
 main() {
-  repo="abonur/askmywa"
+  repo="Ruwad-io/askmywa"
   releases="${ASKMYWA_RELEASES:-https://github.com/$repo/releases}"
   dir="${ASKMYWA_INSTALL_DIR:-$HOME/.local/bin}"
   version="${ASKMYWA_VERSION:-}"
@@ -129,7 +129,7 @@ detect_os() {
   case "$(uname -s)" in
     Linux) echo linux ;;
     Darwin) echo darwin ;;
-    MINGW*|MSYS*|CYGWIN*) die "on Windows, install the Claude Desktop extension or the windows zip from https://github.com/abonur/askmywa/releases" ;;
+    MINGW*|MSYS*|CYGWIN*) die "on Windows, install the Claude Desktop extension or the windows zip from https://github.com/Ruwad-io/askmywa/releases" ;;
     *) die "unsupported system $(uname -s); builds exist for Linux, macOS and Windows" ;;
   esac
 }
@@ -244,7 +244,7 @@ next_steps() {
     say "From Claude Desktop on another computer, over SSH (with an SSH key):"
     say "  \"command\": \"ssh\", \"args\": [\"$(id -un)@$(hostname)\", \"$bin\", \"serve\"]"
   fi
-  say "Documentation: https://github.com/abonur/askmywa"
+  say "Documentation: https://github.com/Ruwad-io/askmywa"
 }
 
 main "$@"
