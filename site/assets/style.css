@@ -111,6 +111,8 @@ h1 .hl::before { content: ""; position: absolute; left: -0.06em; right: -0.08em;
 .under a { color: var(--ink); }
 .alt-install { display: inline-block; margin-top: 10px; font-weight: 700; color: var(--violet); text-decoration: none; }
 .alt-install:hover { text-decoration: underline; }
+.alt-install:not(:last-child) { margin-right: 18px; }
+.steps code.cmd { display: block; margin-top: 6px; overflow-wrap: anywhere; user-select: all; }
 
 /* ——— The flood: a group chat that never stops, and Claude's three lines ——— */
 .flood { position: relative; height: 480px; }

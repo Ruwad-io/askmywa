@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>askmywa — WhatsApp MCP for Claude: ask your WhatsApp anything</title>
-<meta name="description" content="Free, open-source WhatsApp MCP server and Claude Desktop extension. Claude searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.">
+<title>askmywa — WhatsApp MCP for Claude and ChatGPT: ask your WhatsApp anything</title>
+<meta name="description" content="Free, open-source WhatsApp MCP server for Claude Desktop, ChatGPT and Codex. Your AI searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.">
 <link rel="canonical" href="https://askmywa.com/">
 <link rel="alternate" hreflang="en" href="https://askmywa.com/">
 <link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/">
@@ -19,7 +19,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="askmywa">
 <meta property="og:url" content="https://askmywa.com/">
-<meta property="og:title" content="askmywa — WhatsApp MCP for Claude: ask your WhatsApp anything">
+<meta property="og:title" content="askmywa — WhatsApp MCP for Claude and ChatGPT: ask your WhatsApp anything">
 <meta property="og:description" content="Ask Claude to find, sum up and answer your WhatsApp messages. Your chats stay on your computer; nothing is sent without your yes.">
 <meta property="og:image" content="https://askmywa.com/assets/og-en.png">
 <meta property="og:image:width" content="1200">
@@ -27,7 +27,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="fr_FR">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/", "inLanguage": "en", "description": "Free, open-source WhatsApp MCP server and Claude Desktop extension. Claude searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/abonur/askmywa", "downloadUrl": "https://github.com/abonur/askmywa/releases/latest", "image": "https://askmywa.com/assets/og-en.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/", "inLanguage": "en", "description": "Free, open-source WhatsApp MCP server for Claude Desktop, ChatGPT and Codex. Your AI searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, the ChatGPT desktop app, Codex, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/abonur/askmywa", "downloadUrl": "https://github.com/abonur/askmywa/releases/latest", "image": "https://askmywa.com/assets/og-en.png"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -47,7 +47,7 @@
   <main id="main">
   <div class="hero">
     <div>
-      <p class="eyebrow-mcp rise">WhatsApp MCP server · for Claude Desktop, Claude Code and Cursor</p>
+      <p class="eyebrow-mcp rise">WhatsApp MCP server · for Claude, ChatGPT, Codex and Cursor</p>
       <h1><span class="rise">Ask your</span><br><span class="rise d1">WhatsApp</span><br><span class="rise d2 hl">anything.</span></h1>
       <p class="lede rise d3">Claude reads your chats <strong>on your computer</strong> and answers in plain words. It never sends a thing <strong>without your yes</strong>.</p>
       <div class="rise d4">
@@ -56,7 +56,7 @@
           <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
         </a>
         <p class="under">Free, for Mac and Windows. Needs the <a href="https://claude.ai/download">Claude desktop app</a>: it does not work in the Claude phone app or on claude.ai.<br>
-        <a class="alt-install" href="#terminal">Linux, Raspberry Pi or Homebrew →</a></p>
+        <a class="alt-install" href="#chatgpt">With ChatGPT or Codex →</a> <a class="alt-install" href="#terminal">Linux, Raspberry Pi or Homebrew →</a></p>
       </div>
     </div>
 
@@ -168,6 +168,21 @@
   </div>
 </section>
 
+<section class="band" id="chatgpt" aria-labelledby="chatgpt-h" style="padding-top:0">
+  <div class="wrap setup">
+    <div>
+      <p class="kicker">ChatGPT and Codex</p>
+      <h2 id="chatgpt-h">Rather ask ChatGPT?</h2>
+      <p class="lead2">askmywa also works in the ChatGPT app on a Mac, and in Codex. There is no file to double-click for ChatGPT yet: you paste one line into Terminal instead. It does not work on chatgpt.com or in the ChatGPT phone app.</p>
+    </div>
+    <ol class="steps">
+      <li><div><h3>Paste this into Terminal</h3><p><code class="cmd">curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh</code></p></div></li>
+      <li><div><h3>Type the code on your phone</h3><p>Terminal shows it. <span class="path">WhatsApp › Linked devices › Link a device › Link with phone number instead</span></p></div></li>
+      <li><div><h3>Quit and reopen ChatGPT</h3><p>The installer added askmywa to ChatGPT and Codex. Ask away in a new chat.</p></div></li>
+    </ol>
+  </div>
+</section>
+
 <section class="band" id="privacy" aria-labelledby="privacy-h" style="padding-top:0">
   <div class="wrap">
     <p class="kicker">Privacy</p>
@@ -219,6 +234,7 @@
     <div class="qa">
       <div><h3>Is it really free?</h3><p>Yes. Open source under the MIT license, with no account, no subscription and no ads.</p></div>
       <div><h3>Does it work with Claude on my phone?</h3><p>No. The Claude phone app and claude.ai can't use an extension that lives on your computer. You need the Claude desktop app on a Mac or a Windows PC.</p></div>
+      <div><h3>Does it work with ChatGPT?</h3><p>Yes, in the ChatGPT app on a Mac and in Codex, once installed <a href="#chatgpt">from Terminal</a>. Not on chatgpt.com or in the phone app, which can't reach a program on your computer.</p></div>
       <div><h3>Can it send messages on its own?</h3><p>No. Every send first returns a preview. Claude sends only after you approve that exact message.</p></div>
       <div><h3>Will WhatsApp ban my account?</h3><p>We can't promise it won't. It uses the same kind of connection as WhatsApp Web, through an unofficial interface that WhatsApp's terms don't allow.</p></div>
       <div><h3>How do I remove it?</h3><p>Ask Claude: “Disconnect WhatsApp from this computer and delete the messages.” Then remove the extension in Claude's Settings › Extensions.</p></div>

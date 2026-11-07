@@ -79,7 +79,7 @@ if [[ $fetcher == wget ]]; then
 fi
 
 run() {
-  PATH="$path" ASKMYWA_RELEASES="http://127.0.0.1:$port" ASKMYWA_APP_DIR="$work/Applications" sh -s -- --no-service --dir "$work/bin" "$@" < scripts/install.sh
+  CODEX_HOME="$work/codex" PATH="$path" ASKMYWA_RELEASES="http://127.0.0.1:$port" ASKMYWA_APP_DIR="$work/Applications" sh -s -- --no-service --dir "$work/bin" "$@" < scripts/install.sh
 }
 
 echo "--- install the latest release ($fetcher), over a pre-rename whatsapp-mcp binary"
@@ -87,6 +87,22 @@ mkdir -p "$work/bin" && printf '#!/bin/sh\necho old\n' > "$work/bin/whatsapp-mcp
 run
 "$work/bin/askmywa" version | grep -qx "askmywa 1.0.0"
 [[ -L "$work/bin/whatsapp-mcp" ]] && "$work/bin/whatsapp-mcp" version | grep -qx "askmywa 1.0.0"
+
+[[ ! -e "$work/codex" ]]
+
+echo "--- adds askmywa to ChatGPT and Codex once, keeping the existing config"
+mkdir -p "$work/codex" && printf 'model = "x"\n[mcp_servers.other]\ncommand = "other"' > "$work/codex/config.toml"
+run
+run
+[[ $(grep -c '^\[mcp_servers\.askmywa\]' "$work/codex/config.toml") == 1 ]]
+grep -qx "command = \"$work/bin/askmywa\"" "$work/codex/config.toml"
+grep -qx 'command = "other"' "$work/codex/config.toml"
+if command -v python3 >/dev/null && python3 -c 'import tomllib' 2>/dev/null; then
+  python3 -c 'import sys, tomllib; c = tomllib.load(open(sys.argv[1], "rb")); assert c["mcp_servers"]["askmywa"]["args"] == ["serve"], c' "$work/codex/config.toml"
+fi
+rm -rf "$work/codex-no" && mkdir "$work/codex-no"
+CODEX_HOME="$work/codex-no" PATH="$path" ASKMYWA_RELEASES="http://127.0.0.1:$port" ASKMYWA_APP_DIR="$work/Applications" sh -s -- --no-service --no-codex --dir "$work/bin" < scripts/install.sh
+[[ ! -e "$work/codex-no/config.toml" ]]
 
 echo "--- upgrade"
 fake_release 1.1.0

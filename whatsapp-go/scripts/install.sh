@@ -5,19 +5,23 @@
 #
 # It downloads the release for this machine, checks its SHA-256 against the
 # release's checksums.txt, puts the binary in ~/.local/bin, installs the
-# background service and offers to link WhatsApp. Running it again upgrades.
+# background service and offers to link WhatsApp. If ChatGPT or Codex is set
+# up for this user (~/.codex), it adds askmywa to their MCP servers too.
+# Running it again upgrades.
 #
 # Options, after `sh -s --` when piped:
 #   --no-service      only install the binary
 #   --no-link         do not offer to link WhatsApp at the end
+#   --no-codex        do not add askmywa to ChatGPT and Codex
 #   --dir DIR         install the binary in DIR instead of ~/.local/bin
 #   --version X.Y.Z   install that version instead of the latest
 #
 # On macOS the program is askmywa.app, installed in ~/Applications
 # (ASKMYWA_APP_DIR), and the command is a link to the binary inside it.
 #
-# Environment: ASKMYWA_INSTALL_DIR, ASKMYWA_APP_DIR, ASKMYWA_VERSION, and
-# ASKMYWA_RELEASES (base URL of the releases, for testing).
+# Environment: ASKMYWA_INSTALL_DIR, ASKMYWA_APP_DIR, ASKMYWA_VERSION,
+# CODEX_HOME (default ~/.codex), and ASKMYWA_RELEASES (base URL of the
+# releases, for testing).
 #
 # Everything is inside main, so a download cut short runs nothing.
 
@@ -30,14 +34,16 @@ main() {
   version="${ASKMYWA_VERSION:-}"
   service=1
   offer_link=1
+  codex=1
 
   while [ $# -gt 0 ]; do
     case "$1" in
       --no-service) service=0 ;;
       --no-link) offer_link=0 ;;
+      --no-codex) codex=0 ;;
       --dir) [ $# -ge 2 ] || die "--dir needs a folder"; dir="$2"; shift ;;
       --version) [ $# -ge 2 ] || die "--version needs a version"; version="$2"; shift ;;
-      -h|--help) say "usage: install.sh [--no-service] [--no-link] [--dir DIR] [--version X.Y.Z]"; exit 0 ;;
+      -h|--help) say "usage: install.sh [--no-service] [--no-link] [--no-codex] [--dir DIR] [--version X.Y.Z]"; exit 0 ;;
       *) die "unknown option $1 (see --help)" ;;
     esac
     shift
@@ -111,6 +117,7 @@ main() {
        say "  echo 'export PATH=\"$dir:\$PATH\"' >> ~/.profile" ;;
   esac
 
+  add_to_codex "$bin"
   next_steps "$bin"
 }
 
@@ -189,6 +196,28 @@ install_service() {
   if ! "$1" install-service; then
     say "The service could not be installed; see the message above. The binary is installed."
     service=0
+  fi
+}
+
+# ChatGPT's desktop app and Codex share their MCP servers in
+# ~/.codex/config.toml. Add askmywa there once, if that folder exists and has
+# no askmywa entry yet; an entry the user edited is left alone.
+add_to_codex() {
+  [ "$codex" = 1 ] || return 0
+  home="${CODEX_HOME:-$HOME/.codex}"
+  [ -d "$home" ] || return 0
+  conf="$home/config.toml"
+  if [ -f "$conf" ] && grep -q '^[[:space:]]*\[mcp_servers\.askmywa\]' "$conf"; then
+    return 0
+  fi
+  {
+    [ -s "$conf" ] && printf '\n'
+    printf '[mcp_servers.askmywa]\ncommand = "%s"\nargs = ["serve"]\n' "$1"
+  } >> "$conf" || { say "Could not add askmywa to $conf"; return 0; }
+  if [ "$os" = darwin ]; then
+    say "Added askmywa to ChatGPT and Codex ($conf). Quit and reopen ChatGPT to use it."
+  else
+    say "Added askmywa to Codex ($conf)."
   fi
 }
 
