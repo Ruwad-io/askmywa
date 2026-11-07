@@ -171,7 +171,7 @@ cp "$dist/askmywa-${version}.mcpb" "$dist/askmywa.mcpb"
 
 rm -rf "${dist:?}/bin" "${dist:?}/mcpb"
 (cd "$dist" && shasum -a 256 ./*.tar.gz ./*.zip ./*.mcpb > checksums.txt)
-# The one-line installer and the Homebrew formula (copied by abonur/homebrew-tap).
+# The one-line installer and the Homebrew formula (copied by Ruwad-io/homebrew-tap).
 cp scripts/install.sh "$dist/install.sh"
 bash scripts/homebrew-formula.sh "$version" "$dist/checksums.txt" > "$dist/askmywa.rb"
 echo "done:"

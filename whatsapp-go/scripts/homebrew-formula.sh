@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Prints the Homebrew formula for a release, from its checksums.txt.
 # The release workflow attaches it to the release as askmywa.rb, and the
-# abonur/homebrew-tap repository copies it from there.
+# Ruwad-io/homebrew-tap repository copies it from there.
 #
 # Usage: scripts/homebrew-formula.sh VERSION CHECKSUMS [DOWNLOAD_BASE]
 #   DOWNLOAD_BASE defaults to https://github.com/Ruwad-io/askmywa/releases/download/vVERSION
