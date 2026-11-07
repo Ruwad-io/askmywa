@@ -85,9 +85,25 @@ Faites bien l'étape 1 avant l'étape 2 : sans l'extension, Claude ne peut plus 
 
 Un autre souci ? [Ouvrez un ticket](https://github.com/abonur/whatsapp-mcp/issues) en décrivant ce que vous avez fait et ce qui s'est passé.
 
-## Sans l'extension : Linux et Raspberry Pi
+## Sans l'extension : Linux, Raspberry Pi et Mac
 
-Le programme fonctionne aussi sous Linux, y compris sur un Raspberry Pi. Un Pi laissé allumé garde l'archive à jour même quand votre ordinateur dort. Cette installation demande un peu de pratique du terminal : elle est décrite en anglais dans le [README principal](README.md#on-a-raspberry-pi-or-another-always-on-machine).
+Le programme fonctionne aussi sous Linux, y compris sur un Raspberry Pi. Un Pi laissé allumé garde l'archive à jour même quand votre ordinateur dort.
+
+Dans un terminal (sur le Pi, en vous y connectant en SSH), une seule commande télécharge la bonne version, vérifie son intégrité, installe le service en arrière-plan et vous propose de lier WhatsApp avec un code à taper sur votre téléphone :
+
+```bash
+curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh
+```
+
+Relancez-la pour mettre à jour. Avec [Homebrew](https://brew.sh), sur Mac ou Linux :
+
+```bash
+brew install abonur/tap/whatsapp-mcp
+whatsapp-mcp install-service
+whatsapp-mcp link
+```
+
+Pour utiliser un Pi depuis Claude Desktop sur votre ordinateur, voir le [README principal](README.md#on-a-raspberry-pi-or-another-always-on-machine) (en anglais).
 
 ## Pour aller plus loin
 

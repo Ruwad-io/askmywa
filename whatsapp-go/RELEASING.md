@@ -72,4 +72,9 @@ export NOTARY_ISSUER_ID=00000000-0000-0000-0000-000000000000
 2. Signs each binary with the hardened runtime and a secure timestamp, which notarization requires.
 3. Joins them into a universal binary for the extension and signs it again.
 4. Sends all three binaries to Apple's notary service and waits for `Accepted`. Bare executables cannot be stapled, so macOS checks the notarization online the first time the binary runs.
-5. Packs the tarballs and the `.mcpb`, validated by `@anthropic-ai/mcpb`, and writes `checksums.txt`.
+5. Builds the Linux and Windows archives, packs the macOS tarballs and the `.mcpb`, validated by `@anthropic-ai/mcpb`, and writes `checksums.txt`.
+6. Adds the installer (`install.sh`) and the Homebrew formula (`whatsapp-mcp.rb`) generated from `checksums.txt`.
+
+## Homebrew
+
+[abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) holds `Formula/whatsapp-mcp.rb`. A workflow in that repository checks every hour for a new release of this one and commits the release's `whatsapp-mcp.rb`, so no token is shared between the two repositories. To publish a formula right away, run that workflow by hand from its Actions tab. GitHub pauses scheduled workflows after 60 days without activity in a repository: if a release does not reach Homebrew, re-enable the workflow there.

@@ -1,12 +1,13 @@
 # whatsapp-mcp
 
-One binary, five commands:
+One binary, six commands:
 
 | Command | Role |
 |---|---|
 | `whatsapp-mcp daemon` | Stays connected to WhatsApp, archives every message, serves sends and downloads over a Unix socket |
 | `whatsapp-mcp serve` | MCP server over stdio, started by Claude Desktop or Cursor |
-| `whatsapp-mcp install-service` / `uninstall-service` | Run the daemon as a launchd agent |
+| `whatsapp-mcp install-service` / `uninstall-service` | Run the daemon as a background service (launchd, systemd or a Windows scheduled task) |
+| `whatsapp-mcp link` | Link WhatsApp to the running service with a code typed on the phone |
 | `whatsapp-mcp import` | Import the session and history of an lharries/whatsapp-mcp install without connecting |
 | `whatsapp-mcp status` | Service state, connection and archive size |
 
@@ -14,7 +15,16 @@ Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go S
 
 ## Install
 
-The simplest install is the Claude Desktop extension (Mac and Windows): download `whatsapp-mcp-<version>.mcpb` from the [releases](https://github.com/abonur/whatsapp-mcp/releases), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi OS (`armv7`) are attached to the same releases.
+The simplest install is the Claude Desktop extension (Mac and Windows): download `whatsapp-mcp-<version>.mcpb` from the [releases](https://github.com/abonur/whatsapp-mcp/releases), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
+
+On Linux, a Raspberry Pi or a Mac, the installer picks the right archive, checks it against the release's `checksums.txt`, installs it in `~/.local/bin`, installs the service and offers to link WhatsApp. Run it again to upgrade:
+
+```bash
+curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh
+# options: sh -s -- --no-service | --no-link | --dir DIR | --version X.Y.Z
+```
+
+With Homebrew: `brew install abonur/tap/whatsapp-mcp`. The service then runs the formula's `opt` path, so it keeps working after `brew upgrade`; run `install-service` again after an upgrade to restart it on the new version.
 
 To build from source you need Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` to convert audio to Opus voice notes.
 
@@ -31,7 +41,7 @@ Build to a stable location you can write to without `sudo` (`/usr/local/bin` usu
 
 ## First pairing
 
-There are two ways to link the daemon to your WhatsApp account. Either way, the session is saved and reused on every later start.
+There are three ways to link the daemon to your WhatsApp account. Each way, the session is saved and reused on every later start.
 
 ### Pairing from Claude
 
@@ -39,7 +49,19 @@ With the service installed (or with the extension, which installs it on first us
 
 A daemon without a session that is not attached to a terminal (the service) waits for this request and does not connect to WhatsApp until then.
 
-### Pairing in a terminal
+### Pairing in a terminal, with a code
+
+With the service running, for example on a Raspberry Pi over SSH:
+
+```bash
+whatsapp-mcp link
+```
+
+It asks for the phone number (or takes `--phone`), prints the 8-character code and waits until the phone has entered it. This is the same request as `connect_whatsapp`, so it needs no screen and no QR code.
+
+### Pairing in a terminal, with a QR code
+
+Without the service running:
 
 ```bash
 whatsapp-mcp daemon
@@ -162,7 +184,7 @@ List tools return `has_more` and `next_cursor`; pass the cursor back as `cursor`
 | Linux: the service stops when you log out of the Pi | Run `sudo loginctl enable-linger $USER` once |
 | Linux: `install-service` says it cannot reach systemd | Log in to the machine (SSH is fine) so that a systemd user session exists, then retry |
 | Log says `stream replaced` | Another process uses the same session: stop the original bridge or any hand-started daemon |
-| Log says `logged out` | The phone removed this linked device: ask Claude to connect WhatsApp again, or restart the service and pair in a terminal |
+| Log says `logged out` | The phone removed this linked device: run `whatsapp-mcp link` (it restarts the service first) or ask Claude to connect WhatsApp again |
 | The pairing code is refused or expired | Codes last about two minutes; ask for a new one. Use the number in international format, without a leading 0 |
 | `download_media` fails with 403 | WhatsApp no longer stores that file; attachments expire after a few weeks |
 | `send_file` says the file is outside the send root | Copy the file into the send folder that `whatsapp_status` reports |
@@ -175,8 +197,8 @@ go vet ./... && go test ./...
 ./scripts/whatsmeow-parity.sh   # every whatsmeow method we call still exists
 ```
 
-`scripts/build-release.sh VERSION` builds the release artifacts into `dist/`: one tarball per architecture, the Claude Desktop extension with a universal binary, and `checksums.txt`. It needs macOS and Node.js (for `npx @anthropic-ai/mcpb`). The extension's manifest is `extension/manifest.json`.
+`scripts/build-release.sh VERSION` builds the release artifacts into `dist/`: one archive per system and architecture, the Claude Desktop extension with a universal binary, `checksums.txt`, the installer (`install.sh`) and the Homebrew formula (`whatsapp-mcp.rb`, generated by `scripts/homebrew-formula.sh`). The [abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) repository copies the formula from each new release. It needs macOS and Node.js (for `npx @anthropic-ai/mcpb`). The extension's manifest is `extension/manifest.json`.
 
 To publish a release, push a tag: `git tag v0.1.0 && git push origin v0.1.0`. The release workflow (`.github/workflows/release.yml`) runs the tests, builds, signs with a Developer ID certificate, notarizes with Apple and attaches the artifacts to a GitHub release. [RELEASING.md](RELEASING.md) lists the one-time setup: the certificate, the notary key and the repository secrets.
 
-CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets and runs the tests on Linux x64 (with the race detector), Linux ARM64, Windows and macOS. On each it runs `scripts/smoke.sh`, which starts an unpaired daemon on an empty folder and checks it answers on its socket without trying to pair, and it validates the service definition: `systemd-analyze verify` for the unit, `plutil -lint` for the property list, and a real register, query and delete of the Windows scheduled task. macOS also packages the release artifacts and the extension. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.
+CI (`.github/workflows/whatsapp-go.yml`) checks formatting, vets and runs the tests on Linux x64 (with the race detector), Linux ARM64, Windows and macOS. On each it runs `scripts/smoke.sh`, which starts an unpaired daemon on an empty folder and checks it answers on its socket without trying to pair, and it validates the service definition: `systemd-analyze verify` for the unit, `plutil -lint` for the property list, and a real register, query and delete of the Windows scheduled task. `scripts/test-install.sh` runs the installer against a fake release on localhost (install, upgrade, and refusal of a tampered archive, with curl and with wget), and on macOS `scripts/test-homebrew.sh` installs the formula from a throwaway tap, runs its test and checks the service would use the `opt` path. macOS also packages the release artifacts and the extension. A weekly job tries the latest whatsmeow and reports in a rolling issue when an upgrade is available.

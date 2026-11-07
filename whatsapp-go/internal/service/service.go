@@ -109,7 +109,30 @@ func resolveBinary(binary string) (string, error) {
 	} else {
 		return "", fmt.Errorf("resolve binary path: %w", err)
 	}
+	// A Homebrew install runs from the formula's stable opt link, so the
+	// service survives `brew upgrade` removing the old version's folder.
+	if opt := homebrewOpt(abs); opt != "" {
+		if _, err := os.Stat(opt); err == nil {
+			return opt, nil
+		}
+	}
 	return abs, nil
+}
+
+// homebrewOpt maps <prefix>/Cellar/<formula>/<version>/bin/<name> to
+// <prefix>/opt/<formula>/bin/<name>, or returns "" for other paths.
+func homebrewOpt(exe string) string {
+	sep := string(filepath.Separator)
+	marker := sep + "Cellar" + sep
+	i := strings.LastIndex(exe, marker)
+	if i < 0 {
+		return ""
+	}
+	parts := strings.Split(exe[i+len(marker):], sep)
+	if len(parts) != 4 || parts[2] != "bin" {
+		return ""
+	}
+	return filepath.Join(exe[:i], "opt", parts[0], "bin", parts[3])
 }
 
 func run(name string, args ...string) error {

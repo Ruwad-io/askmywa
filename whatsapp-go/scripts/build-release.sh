@@ -5,6 +5,8 @@
 #   whatsapp-mcp-<version>-windows-{amd64,arm64}.zip
 #   whatsapp-mcp-<version>.mcpb   Claude Desktop extension: macOS universal binary + Windows x64
 #   checksums.txt
+#   install.sh        one-line installer for Linux and macOS
+#   whatsapp-mcp.rb   Homebrew formula
 #
 # Usage: scripts/build-release.sh [version]   (default: git describe, without the leading v)
 # Needs macOS (lipo, codesign) and Node.js (npx) for the extension.
@@ -136,5 +138,8 @@ npx -y "$mcpb_cli" pack "$dist/mcpb" "$dist/whatsapp-mcp-${version}.mcpb"
 
 rm -rf "${dist:?}/bin" "${dist:?}/mcpb"
 (cd "$dist" && shasum -a 256 ./*.tar.gz ./*.zip ./*.mcpb > checksums.txt)
+# The one-line installer and the Homebrew formula (copied by abonur/homebrew-tap).
+cp scripts/install.sh "$dist/install.sh"
+bash scripts/homebrew-formula.sh "$version" "$dist/checksums.txt" > "$dist/whatsapp-mcp.rb"
 echo "done:"
 ls -l "$dist"

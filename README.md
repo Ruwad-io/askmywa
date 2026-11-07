@@ -54,14 +54,32 @@ To remove it, ask Claude to **disconnect WhatsApp from this computer** (it unlin
 
 ## Install without the extension (Mac, Windows, Linux)
 
-Download the archive for your system from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest), or build from source with Go 1.26 or newer:
+On Linux, a Raspberry Pi or a Mac, one command downloads the right build, checks its SHA-256, installs it in `~/.local/bin`, starts the background service and offers to link WhatsApp:
+
+```bash
+curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh
+```
+
+Run it again to upgrade. Add `sh -s -- --no-service` after the pipe to install only the binary.
+
+With [Homebrew](https://brew.sh) on Mac or Linux:
+
+```bash
+brew install abonur/tap/whatsapp-mcp
+whatsapp-mcp install-service
+whatsapp-mcp link
+```
+
+Or download the archive for your system from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest):
 
 | System | Archive |
 |---|---|
 | Mac (Apple Silicon / Intel) | `darwin-arm64` / `darwin-amd64` |
 | Windows (x64 / ARM) | `windows-amd64` / `windows-arm64` |
-| Linux, Raspberry Pi 4 and 5 with a 64-bit OS | `linux-amd64` / `linux-arm64` |
-| Raspberry Pi with a 32-bit OS (Pi 2, 3, Zero 2) | `linux-armv7` |
+| Linux, Raspberry Pi 3, 4 and 5 | `linux-amd64` / `linux-arm64` |
+| Raspberry Pi with a 32-bit kernel (Pi 2, older Pi OS) | `linux-armv7` |
+
+You can also build from source with Go 1.26 or newer:
 
 ```bash
 git clone https://github.com/abonur/whatsapp-mcp.git
@@ -70,13 +88,14 @@ mkdir -p ~/.local/bin
 go build -o ~/.local/bin/whatsapp-mcp .
 ```
 
-Install the background service, which starts at login (a launchd agent on Mac, a systemd user service on Linux, a scheduled task on Windows):
+After a manual download or a build, install the background service, which starts at login (a launchd agent on Mac, a systemd user service on Linux, a scheduled task on Windows), then link WhatsApp:
 
 ```bash
 ~/.local/bin/whatsapp-mcp install-service
+~/.local/bin/whatsapp-mcp link
 ```
 
-Then link WhatsApp, either by asking Claude to connect it as in the extension steps above, or in a terminal: uninstall the service, run `whatsapp-mcp daemon`, scan the QR code from WhatsApp (Linked devices > Link a device), stop it with Ctrl+C and install the service again.
+`link` asks for your phone number and prints an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code. You can also ask Claude to connect WhatsApp instead.
 
 Add the server to Claude Desktop's `claude_desktop_config.json` (Mac: `~/Library/Application Support/Claude/`, Windows: `%APPDATA%\Claude\`) and restart Claude Desktop. The path must be absolute: `~` is not expanded there.
 
@@ -95,7 +114,7 @@ On Windows, use the full path to `whatsapp-mcp.exe`, with doubled backslashes. C
 
 ### On a Raspberry Pi or another always-on machine
 
-A Pi left on keeps the archive complete even when your laptop sleeps. Install the Linux binary on the Pi, run `whatsapp-mcp install-service` there (it asks systemd to keep the service running after you log out), and link WhatsApp once over SSH with `whatsapp-mcp daemon` and its QR code.
+A Pi left on keeps the archive complete even when your laptop sleeps. Connect to the Pi over SSH and run the one-line installer above: it installs the service, asks systemd to keep it running after you log out, and links WhatsApp with a code typed on your phone, so no QR code or screen is needed.
 
 Claude Desktop on your laptop can then use the Pi over SSH, provided you log in to the Pi with an SSH key, without a password prompt:
 

@@ -46,6 +46,8 @@ Usage:
       Install and start the background service (` + "launchd on macOS, systemd on Linux, a scheduled task on Windows" + `).
   whatsapp-mcp uninstall-service
       Stop and remove the background service.
+  whatsapp-mcp link [--phone NUMBER] [--data-dir DIR]
+      Link WhatsApp to the running service with a phone-pairing code (no QR code needed).
   whatsapp-mcp status [--data-dir DIR]
       Show the daemon's connection state and database counts.
   whatsapp-mcp version
@@ -70,6 +72,8 @@ func main() {
 		err = runInstall(os.Args[2:])
 	case "uninstall-service":
 		err = runUninstall()
+	case "link":
+		err = runLink(os.Args[2:])
 	case "status":
 		err = runStatus(os.Args[2:])
 	case "version", "--version", "-v":
