@@ -41,7 +41,7 @@ An existing install of the original can switch without pairing again: the new da
 
 ## Install in Claude Desktop (Mac and Windows, no terminal)
 
-1. Download [`askmywa.mcpb`](https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb), the latest version, from [askmywa.com](https://askmywa.com) or the [releases](https://github.com/abonur/askmywa/releases/latest). The same file works on Mac and Windows.
+1. Download [`askmywa.mcpb`](https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb), the latest version, from [askmywa.com](https://askmywa.com) or the [releases](https://github.com/Ruwad-io/askmywa/releases/latest). The same file works on Mac and Windows.
 2. Double-click it. Claude Desktop opens and asks you to confirm the install.
 3. In a new conversation, write: **Connect my WhatsApp.**
 4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code.
@@ -59,7 +59,7 @@ To remove it, ask Claude to **disconnect WhatsApp from this computer** (it unlin
 On Linux, a Raspberry Pi or a Mac, one command downloads the right build, checks its SHA-256, installs it (on a Mac, `askmywa.app` in `~/Applications`, with the command linked in `~/.local/bin`), starts the background service and offers to link WhatsApp:
 
 ```bash
-curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.sh | sh
 ```
 
 Run it again to upgrade. Add `sh -s -- --no-service` after the pipe to install only the binary. If the ChatGPT desktop app or Codex is set up for your user (`~/.codex`), the installer also adds askmywa to their MCP servers; quit and reopen ChatGPT to use it, or pass `--no-codex` to skip this.
@@ -72,7 +72,7 @@ askmywa install-service
 askmywa link
 ```
 
-Or download the archive for your system from the [latest release](https://github.com/abonur/askmywa/releases/latest):
+Or download the archive for your system from the [latest release](https://github.com/Ruwad-io/askmywa/releases/latest):
 
 | System | Archive |
 |---|---|
@@ -84,7 +84,7 @@ Or download the archive for your system from the [latest release](https://github
 You can also build from source with Go 1.26 or newer:
 
 ```bash
-git clone https://github.com/abonur/askmywa.git
+git clone https://github.com/Ruwad-io/askmywa.git
 cd askmywa/whatsapp-go
 mkdir -p ~/.local/bin
 go build -o ~/.local/bin/askmywa .

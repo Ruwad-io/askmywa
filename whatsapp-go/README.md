@@ -17,12 +17,12 @@ Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go S
 
 ## Install
 
-The simplest install is the Claude Desktop extension (Mac and Windows): download [`askmywa.mcpb`](https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb) (also on [askmywa.com](https://askmywa.com)), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
+The simplest install is the Claude Desktop extension (Mac and Windows): download [`askmywa.mcpb`](https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb) (also on [askmywa.com](https://askmywa.com)), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
 
 On Linux, a Raspberry Pi or a Mac, the installer picks the right archive, checks it against the release's `checksums.txt`, installs it in `~/.local/bin`, installs the service and offers to link WhatsApp. Run it again to upgrade. On macOS the program is `askmywa.app`, installed in `~/Applications` with `~/.local/bin/askmywa` linked to the binary inside it: the app is what gives the background service its name and logo in System Settings.
 
 ```bash
-curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.sh | sh
 # options: sh -s -- --no-service | --no-link | --dir DIR | --version X.Y.Z
 ```
 
@@ -31,7 +31,7 @@ With Homebrew: `brew install abonur/tap/askmywa`. The service then runs the form
 To build from source you need Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` to convert audio to Opus voice notes.
 
 ```bash
-git clone https://github.com/abonur/askmywa.git
+git clone https://github.com/Ruwad-io/askmywa.git
 cd askmywa/whatsapp-go
 mkdir -p ~/.local/bin
 go build -o ~/.local/bin/askmywa .
