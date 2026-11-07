@@ -10,9 +10,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"whatsapp-mcp/internal/config"
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/config"
+	"askmywa/internal/ipc"
+	"askmywa/internal/store"
 )
 
 // ServiceManager installs and restarts the background daemon. The OS
@@ -183,7 +183,7 @@ func (s *Server) connect(ctx context.Context, _ *mcp.CallToolRequest, in Connect
 	switch {
 	case err != nil:
 		if s.svc == nil {
-			return nil, ConnectOutput{}, errors.New("the WhatsApp background service is not running and cannot be started from here: run `whatsapp-mcp install-service` in a terminal")
+			return nil, ConnectOutput{}, errors.New("the WhatsApp background service is not running and cannot be started from here: run `askmywa install-service` in a terminal")
 		}
 		if s.svc.Loaded() {
 			err = s.svc.Restart()

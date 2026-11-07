@@ -7,10 +7,10 @@ import (
 
 func TestHomebrewOpt(t *testing.T) {
 	cases := map[string]string{
-		"/opt/homebrew/Cellar/whatsapp-mcp/0.1.0/bin/whatsapp-mcp":                "/opt/homebrew/opt/whatsapp-mcp/bin/whatsapp-mcp",
-		"/home/linuxbrew/.linuxbrew/Cellar/whatsapp-mcp/0.2.0_1/bin/whatsapp-mcp": "/home/linuxbrew/.linuxbrew/opt/whatsapp-mcp/bin/whatsapp-mcp",
-		"/Users/me/.local/bin/whatsapp-mcp":                                       "",
-		"/opt/homebrew/Cellar/whatsapp-mcp/0.1.0/libexec/whatsapp-mcp":            "",
+		"/opt/homebrew/Cellar/askmywa/0.1.0/bin/askmywa":                "/opt/homebrew/opt/askmywa/bin/askmywa",
+		"/home/linuxbrew/.linuxbrew/Cellar/askmywa/0.2.0_1/bin/askmywa": "/home/linuxbrew/.linuxbrew/opt/askmywa/bin/askmywa",
+		"/Users/me/.local/bin/askmywa":                                  "",
+		"/opt/homebrew/Cellar/askmywa/0.1.0/libexec/askmywa":            "",
 	}
 	for in, want := range cases {
 		if got := homebrewOpt(filepath.FromSlash(in)); got != filepath.FromSlash(want) {

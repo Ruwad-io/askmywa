@@ -1,4 +1,4 @@
-// Command whatsapp-mcp is a single binary that archives a WhatsApp account
+// Command askmywa is a single binary that archives a WhatsApp account
 // (daemon), exposes it to MCP clients over stdio (serve), and installs
 // itself as a background service (install-service / uninstall-service):
 // a launchd agent on macOS, a systemd user service on Linux, a scheduled
@@ -22,37 +22,37 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"gopkg.in/natefinch/lumberjack.v2"
 
-	"whatsapp-mcp/internal/config"
-	"whatsapp-mcp/internal/daemon"
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/mcpserver"
-	"whatsapp-mcp/internal/service"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/config"
+	"askmywa/internal/daemon"
+	"askmywa/internal/ipc"
+	"askmywa/internal/mcpserver"
+	"askmywa/internal/service"
+	"askmywa/internal/store"
 )
 
 // version is overridden at build time with -ldflags "-X main.version=...".
 var version = "dev"
 
-const usage = `whatsapp-mcp — WhatsApp archive and MCP server in one binary
+const usage = `askmywa — WhatsApp archive and MCP server in one binary
 
 Usage:
-  whatsapp-mcp daemon [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--log-file FILE]
+  askmywa daemon [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--log-file FILE]
       Connect to WhatsApp (QR code on first run), archive messages, serve the socket.
-  whatsapp-mcp serve [--data-dir DIR]
+  askmywa serve [--data-dir DIR]
       MCP server over stdio (for claude_desktop_config.json).
-  whatsapp-mcp import --legacy-store DIR [--data-dir DIR]
+  askmywa import --legacy-store DIR [--data-dir DIR]
       Copy the old bridge's session, sync contact names and import its history, without connecting.
-  whatsapp-mcp install-service [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--dry-run] [--no-wait]
+  askmywa install-service [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--dry-run] [--no-wait]
       Install and start the background service (` + "launchd on macOS, systemd on Linux, a scheduled task on Windows" + `).
-  whatsapp-mcp uninstall-service
+  askmywa uninstall-service
       Stop and remove the background service.
-  whatsapp-mcp link [--phone NUMBER] [--data-dir DIR]
+  askmywa link [--phone NUMBER] [--data-dir DIR]
       Link WhatsApp to the running service with a phone-pairing code (no QR code needed).
-  whatsapp-mcp status [--data-dir DIR]
+  askmywa status [--data-dir DIR]
       Show the daemon's connection state and database counts.
-  whatsapp-mcp version
+  askmywa version
 
-Environment: WHATSAPP_MCP_DATA_DIR, WHATSAPP_MCP_SEND_ROOT.
+Environment: ASKMYWA_DATA_DIR, ASKMYWA_SEND_ROOT (WHATSAPP_MCP_* is still read).
 `
 
 func main() {
@@ -77,7 +77,7 @@ func main() {
 	case "status":
 		err = runStatus(os.Args[2:])
 	case "version", "--version", "-v":
-		fmt.Println("whatsapp-mcp", version)
+		fmt.Println("askmywa", version)
 	case "help", "--help", "-h":
 		fmt.Print(usage)
 	default:
@@ -91,8 +91,8 @@ func main() {
 }
 
 func pathFlags(fs *flag.FlagSet) (dataDir, sendRoot *string) {
-	dataDir = fs.String("data-dir", "", "data directory (default ~/Library/Application Support/whatsapp-mcp or $WHATSAPP_MCP_DATA_DIR)")
-	sendRoot = fs.String("send-root", "", "directory files may be sent from (default <data-dir>/files or $WHATSAPP_MCP_SEND_ROOT)")
+	dataDir = fs.String("data-dir", "", "data directory (default ~/Library/Application Support/askmywa or $ASKMYWA_DATA_DIR)")
+	sendRoot = fs.String("send-root", "", "directory files may be sent from (default <data-dir>/files or $ASKMYWA_SEND_ROOT)")
 	return
 }
 
@@ -109,7 +109,7 @@ func resolvePaths(dataDir, sendRoot string) (config.Paths, error) {
 		logDir := p.LogDir
 		p = config.FromDataDir(abs)
 		p.LogDir = logDir
-		if root := os.Getenv("WHATSAPP_MCP_SEND_ROOT"); root != "" {
+		if root := config.Getenv("SEND_ROOT"); root != "" {
 			p.SendRoot = root
 		}
 	}
@@ -154,7 +154,7 @@ func runDaemon(args []string) error {
 		level = slog.LevelDebug
 	}
 	log := slog.New(slog.NewTextHandler(out, &slog.HandlerOptions{Level: level}))
-	log.Info("whatsapp-mcp daemon starting", "version", version)
+	log.Info("askmywa daemon starting", "version", version)
 	ctx, cancel := signalContext()
 	defer cancel()
 	legacyDir := *legacy

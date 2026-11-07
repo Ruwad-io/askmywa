@@ -2,7 +2,7 @@
 
 package service
 
-import "whatsapp-mcp/internal/config"
+import "askmywa/internal/config"
 
 func platformName() string    { return "background service" }
 func platformSupported() bool { return false }
@@ -13,3 +13,4 @@ func platformInstall([]string, config.Paths) (Installed, error) { return Install
 func platformUninstall() error                                  { return ErrUnsupported }
 func platformStatus() State                                     { return State{} }
 func platformRestart() error                                    { return ErrUnsupported }
+func platformRemoveLegacy() error                               { return nil }

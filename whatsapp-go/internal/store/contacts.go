@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"whatsapp-mcp/internal/textfold"
+	"askmywa/internal/textfold"
 )
 
 // Name sources, best first. They mirror the priority of the Python

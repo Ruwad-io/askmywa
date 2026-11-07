@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"whatsapp-mcp/internal/ipc"
+	"askmywa/internal/ipc"
 )
 
 // fakeLinker returns the given statuses in order, repeating the last one.

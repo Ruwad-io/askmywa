@@ -1,15 +1,19 @@
 # Releasing
 
-A release is a GitHub release with three files: one tarball per Mac architecture and the Claude Desktop extension (`.mcpb`). Every binary is signed with a Developer ID certificate and notarized by Apple, so macOS opens it without a warning.
+A release is a GitHub release with an archive per system and architecture (macOS, Linux, Raspberry Pi, Windows), the Claude Desktop extension (`.mcpb`), the installer (`install.sh`), the Homebrew formula and `checksums.txt`. The macOS binaries are signed with a Developer ID certificate and notarized by Apple, so macOS opens them without a warning.
 
-Pushing a tag does everything:
+Write the notes in `release-notes/X.Y.Z.md`, then push a tag:
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The `release` workflow (`.github/workflows/release.yml`) runs the tests, builds, signs and notarizes, then publishes the release. It refuses to publish binaries that are not notarized.
+The `release` workflow (`.github/workflows/release.yml`) runs the tests, builds, signs and notarizes, then publishes the release with those notes (GitHub's generated notes when the file is missing). It refuses to publish binaries that are not notarized.
+
+## Pre-releases
+
+A tag with a suffix, such as `v0.1.0-rc1`, publishes a pre-release to test the whole chain before the real one: the macOS binaries are signed but not notarized, and the release is marked as a pre-release, so `/releases/latest`, the installer and the Homebrew tap ignore it. Test it with `install.sh --version 0.1.0-rc1`, then delete the pre-release and its tag.
 
 ## One-time setup
 
@@ -26,7 +30,7 @@ An "Apple Development" certificate is not enough: only "Developer ID Application
 ### 2. Create an App Store Connect API key for notarization
 
 1. Go to [App Store Connect](https://appstoreconnect.apple.com) > Users and Access > Integrations > App Store Connect API > **Team Keys**.
-2. Click **+**, name it `whatsapp-mcp notarization`, give it the **Developer** role, and generate it.
+2. Click **+**, name it `askmywa notarization`, give it the **Developer** role, and generate it.
 3. Download `AuthKey_XXXXXXXXXX.p8`. Apple lets you download it only once.
 4. Note the **Key ID** shown next to the key and the **Issuer ID** shown above the list.
 
@@ -35,11 +39,11 @@ An "Apple Development" certificate is not enough: only "Developer ID Application
 Run these from a terminal, in the folder holding the two files. `gh` prompts for the values that are not piped in.
 
 ```bash
-base64 -i developer-id.p12 | gh secret set MACOS_SIGN_P12_BASE64 --repo abonur/whatsapp-mcp
-gh secret set MACOS_SIGN_P12_PASSWORD --repo abonur/whatsapp-mcp
-base64 -i AuthKey_XXXXXXXXXX.p8 | gh secret set APPLE_API_KEY_P8_BASE64 --repo abonur/whatsapp-mcp
-gh secret set APPLE_API_KEY_ID --repo abonur/whatsapp-mcp
-gh secret set APPLE_API_ISSUER_ID --repo abonur/whatsapp-mcp
+base64 -i developer-id.p12 | gh secret set MACOS_SIGN_P12_BASE64 --repo abonur/askmywa
+gh secret set MACOS_SIGN_P12_PASSWORD --repo abonur/askmywa
+base64 -i AuthKey_XXXXXXXXXX.p8 | gh secret set APPLE_API_KEY_P8_BASE64 --repo abonur/askmywa
+gh secret set APPLE_API_KEY_ID --repo abonur/askmywa
+gh secret set APPLE_API_ISSUER_ID --repo abonur/askmywa
 ```
 
 Then delete `developer-id.p12` and keep the `.p8` file somewhere safe, such as a password manager.
@@ -73,8 +77,8 @@ export NOTARY_ISSUER_ID=00000000-0000-0000-0000-000000000000
 3. Joins them into a universal binary for the extension and signs it again.
 4. Sends all three binaries to Apple's notary service and waits for `Accepted`. Bare executables cannot be stapled, so macOS checks the notarization online the first time the binary runs.
 5. Builds the Linux and Windows archives, packs the macOS tarballs and the `.mcpb`, validated by `@anthropic-ai/mcpb`, and writes `checksums.txt`.
-6. Adds the installer (`install.sh`) and the Homebrew formula (`whatsapp-mcp.rb`) generated from `checksums.txt`.
+6. Adds the installer (`install.sh`) and the Homebrew formula (`askmywa.rb`) generated from `checksums.txt`.
 
 ## Homebrew
 
-[abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) holds `Formula/whatsapp-mcp.rb`. A workflow in that repository checks every hour for a new release of this one and commits the release's `whatsapp-mcp.rb`, so no token is shared between the two repositories. To publish a formula right away, run that workflow by hand from its Actions tab. GitHub pauses scheduled workflows after 60 days without activity in a repository: if a release does not reach Homebrew, re-enable the workflow there.
+[abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) holds `Formula/askmywa.rb`. A workflow in that repository checks every hour for a new release of this one and commits the release's `askmywa.rb`, so no token is shared between the two repositories. To publish a formula right away, run that workflow by hand from its Actions tab. GitHub pauses scheduled workflows after 60 days without activity in a repository: if a release does not reach Homebrew, re-enable the workflow there.

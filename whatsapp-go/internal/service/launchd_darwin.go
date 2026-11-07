@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"whatsapp-mcp/internal/config"
+	"askmywa/internal/config"
 )
 
 func platformName() string    { return "launchd agent " + config.ServiceLabel }
@@ -48,7 +48,7 @@ func platformInstall(args []string, paths config.Paths) (Installed, error) {
 	_ = run("launchctl", "bootout", launchdTarget())
 	// bootout returns before the job is gone; bootstrapping too early fails
 	// with "Input/output error", so wait for the job to disappear.
-	waitUntilGone(10 * time.Second)
+	waitUntilGone(launchdTarget(), 10*time.Second)
 	for attempt := 0; attempt < 5; attempt++ {
 		if err = run("launchctl", "bootstrap", launchdDomain(), path); err == nil {
 			break
@@ -64,14 +64,33 @@ func platformInstall(args []string, paths config.Paths) (Installed, error) {
 	return Installed{Path: path}, nil
 }
 
-func waitUntilGone(timeout time.Duration) {
+func waitUntilGone(target string, timeout time.Duration) {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		if exec.Command("launchctl", "print", launchdTarget()).Run() != nil {
+		if exec.Command("launchctl", "print", target).Run() != nil {
 			return
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
+}
+
+// platformRemoveLegacy stops and removes the agent installed as
+// com.whatsapp-mcp.daemon, waiting for its daemon to exit.
+func platformRemoveLegacy() error {
+	target := launchdDomain() + "/" + config.LegacyServiceLabel
+	if exec.Command("launchctl", "print", target).Run() == nil {
+		_ = run("launchctl", "bootout", target)
+		waitUntilGone(target, 10*time.Second)
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(home, "Library", "LaunchAgents", config.LegacyServiceLabel+".plist")
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }
 
 func platformUninstall() error {

@@ -20,10 +20,10 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"whatsapp-mcp/internal/config"
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/security"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/config"
+	"askmywa/internal/ipc"
+	"askmywa/internal/security"
+	"askmywa/internal/store"
 )
 
 // Version is set by main from the build.

@@ -26,7 +26,7 @@
 <meta property="og:locale" content="fr_FR">
 <meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/fr/", "inLanguage": "fr", "description": "Serveur MCP WhatsApp et extension Claude Desktop, gratuits et libres. Claude cherche et résume vos conversations WhatsApp sur votre ordinateur, et n'envoie rien sans votre oui. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/abonur/whatsapp-mcp", "downloadUrl": "https://github.com/abonur/whatsapp-mcp/releases/latest", "image": "https://askmywa.com/assets/og-fr.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/fr/", "inLanguage": "fr", "description": "Serveur MCP WhatsApp et extension Claude Desktop, gratuits et libres. Claude cherche et résume vos conversations WhatsApp sur votre ordinateur, et n'envoie rien sans votre oui. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/abonur/askmywa", "downloadUrl": "https://github.com/abonur/askmywa/releases/latest", "image": "https://askmywa.com/assets/og-fr.png"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Aller au contenu</a>
@@ -39,7 +39,7 @@
       <a class="lg" href="#vie-privee">Vie privée</a>
       <a class="lg" href="#questions">Questions</a>
       <a href="../" hreflang="en" lang="en">EN</a>
-      <a href="https://github.com/abonur/whatsapp-mcp">GitHub</a>
+      <a href="https://github.com/abonur/askmywa">GitHub</a>
     </nav>
   </header>
 
@@ -50,7 +50,7 @@
       <h1><span class="rise">Demandez</span><br><span class="rise d1">tout à votre</span><br><span class="rise d2 hl">WhatsApp.</span></h1>
       <p class="lede rise d3">Claude lit vos conversations <strong>sur votre ordinateur</strong> et vous répond simplement. Il n'envoie jamais rien <strong>sans votre oui</strong>.</p>
       <div class="rise d4">
-        <a class="composer" href="https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb">
+        <a class="composer" href="https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb">
           <span class="txt">Télécharger pour Claude Desktop</span>
           <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
         </a>
@@ -159,7 +159,7 @@
       </div>
     </div>
     <ol class="steps">
-      <li><div><h3>Téléchargez l'extension</h3><p>Un seul fichier, <code>whatsapp-mcp.mcpb</code>, pour Mac et Windows.</p></div></li>
+      <li><div><h3>Téléchargez l'extension</h3><p>Un seul fichier, <code>askmywa.mcpb</code>, pour Mac et Windows.</p></div></li>
       <li><div><h3>Double-cliquez dessus</h3><p>Claude s'ouvre et vous demande de confirmer l'installation.</p></div></li>
       <li><div><h3>Dites « Connecte mon WhatsApp »</h3><p>Dans une nouvelle conversation. Donnez votre numéro avec l'indicatif du pays.</p></div></li>
       <li><div><h3>Tapez le code sur le téléphone</h3><p><span class="path">WhatsApp › Appareils connectés › Connecter un appareil › Connecter avec un numéro de téléphone</span></p></div></li>
@@ -199,14 +199,14 @@
     <div>
       <p class="kicker">Pour les développeurs</p>
       <h2 id="terminal-h">Un serveur MCP WhatsApp en un seul programme.</h2>
-      <p class="lead2">Sous l'extension, il y a un serveur MCP : <code>whatsapp-mcp serve</code> parle MCP sur stdio, avec 15 outils typés comme <code>list_messages</code>, <code>search_contacts</code> et un <code>send_message</code> qui attend une confirmation. Sous Linux, sur un Raspberry Pi ou sur Mac, une commande choisit la bonne version, la vérifie, installe le service en arrière-plan et lie WhatsApp avec un code. Un Pi laissé allumé garde l'archive complète pendant que votre ordinateur dort. <a href="https://github.com/abonur/whatsapp-mcp/blob/main/README.fr.md">Guide complet</a></p>
+      <p class="lead2">Sous l'extension, il y a un serveur MCP : <code>askmywa serve</code> parle MCP sur stdio, avec 15 outils typés comme <code>list_messages</code>, <code>search_contacts</code> et un <code>send_message</code> qui attend une confirmation. Sous Linux, sur un Raspberry Pi ou sur Mac, une commande choisit la bonne version, la vérifie, installe le service en arrière-plan et lie WhatsApp avec un code. Un Pi laissé allumé garde l'archive complète pendant que votre ordinateur dort. <a href="https://github.com/abonur/askmywa/blob/main/README.fr.md">Guide complet</a></p>
     </div>
     <div>
-      <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh</code></pre>
-      <pre class="term"><code><span class="p">$ </span>brew install abonur/tap/whatsapp-mcp
-<span class="p">$ </span>whatsapp-mcp install-service
-<span class="p">$ </span>whatsapp-mcp link</code></pre>
-      <pre class="term"><code><span class="p">$ </span>claude mcp add whatsapp -- ~/.local/bin/whatsapp-mcp serve</code></pre>
+      <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh</code></pre>
+      <pre class="term"><code><span class="p">$ </span>brew install abonur/tap/askmywa
+<span class="p">$ </span>askmywa install-service
+<span class="p">$ </span>askmywa link</code></pre>
+      <pre class="term"><code><span class="p">$ </span>claude mcp add whatsapp -- ~/.local/bin/askmywa serve</code></pre>
     </div>
   </div>
 </section>
@@ -221,7 +221,7 @@
       <div><h3>Peut-il envoyer des messages tout seul ?</h3><p>Non. Chaque envoi renvoie d'abord un aperçu. Claude n'envoie qu'après votre accord sur ce message précis.</p></div>
       <div><h3>WhatsApp va-t-il bannir mon compte ?</h3><p>On ne peut pas promettre que non. L'outil utilise le même type de connexion que WhatsApp Web, par une interface non officielle que les conditions de WhatsApp n'autorisent pas.</p></div>
       <div><h3>Comment le retirer ?</h3><p>Demandez à Claude : « Déconnecte WhatsApp de cet ordinateur et efface les messages. » Puis retirez l'extension dans Réglages › Extensions de Claude.</p></div>
-      <div><h3>Qui est derrière ?</h3><p>Un projet libre et indépendant, sans lien avec WhatsApp, Meta ou Anthropic. Il est né d'une réécriture de lharries/whatsapp-mcp. Bugs et questions sur <a href="https://github.com/abonur/whatsapp-mcp/issues">GitHub</a>.</p></div>
+      <div><h3>Qui est derrière ?</h3><p>Un projet libre et indépendant, sans lien avec WhatsApp, Meta ou Anthropic. Il est né d'une réécriture de lharries/whatsapp-mcp. Bugs et questions sur <a href="https://github.com/abonur/askmywa/issues">GitHub</a>.</p></div>
     </div>
   </div>
 </section>
@@ -230,8 +230,8 @@
   <div class="wrap">
     <div class="foot">
       <nav aria-label="Pied de page">
-        <a href="https://github.com/abonur/whatsapp-mcp">GitHub</a>
-        <a href="https://github.com/abonur/whatsapp-mcp/releases">Tous les téléchargements</a>
+        <a href="https://github.com/abonur/askmywa">GitHub</a>
+        <a href="https://github.com/abonur/askmywa/releases">Tous les téléchargements</a>
         <a href="confidentialite/">Confidentialité</a>
         <a href="../" hreflang="en" lang="en">English</a>
       </nav>

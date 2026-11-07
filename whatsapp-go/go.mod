@@ -1,4 +1,4 @@
-module whatsapp-mcp
+module askmywa
 
 go 1.26.0
 

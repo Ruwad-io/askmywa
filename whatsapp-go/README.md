@@ -1,38 +1,38 @@
-# whatsapp-mcp
+# askmywa
 
 One binary, six commands:
 
 | Command | Role |
 |---|---|
-| `whatsapp-mcp daemon` | Stays connected to WhatsApp, archives every message, serves sends and downloads over a Unix socket |
-| `whatsapp-mcp serve` | MCP server over stdio, started by Claude Desktop or Cursor |
-| `whatsapp-mcp install-service` / `uninstall-service` | Run the daemon as a background service (launchd, systemd or a Windows scheduled task) |
-| `whatsapp-mcp link` | Link WhatsApp to the running service with a code typed on the phone |
-| `whatsapp-mcp import` | Import the session and history of an lharries/whatsapp-mcp install without connecting |
-| `whatsapp-mcp status` | Service state, connection and archive size |
+| `askmywa daemon` | Stays connected to WhatsApp, archives every message, serves sends and downloads over a Unix socket |
+| `askmywa serve` | MCP server over stdio, started by Claude Desktop or Cursor |
+| `askmywa install-service` / `uninstall-service` | Run the daemon as a background service (launchd, systemd or a Windows scheduled task) |
+| `askmywa link` | Link WhatsApp to the running service with a code typed on the phone |
+| `askmywa import` | Import the session and history of an lharries/whatsapp-mcp install without connecting |
+| `askmywa status` | Service state, connection and archive size |
 
 Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go SDK](https://github.com/modelcontextprotocol/go-sdk) and [modernc.org/sqlite](https://pkg.go.dev/modernc.org/sqlite) (pure Go, no cgo).
 
 ## Install
 
-The simplest install is the Claude Desktop extension (Mac and Windows): download [`whatsapp-mcp.mcpb`](https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb) (also on [askmywa.com](https://askmywa.com)), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
+The simplest install is the Claude Desktop extension (Mac and Windows): download [`askmywa.mcpb`](https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb) (also on [askmywa.com](https://askmywa.com)), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
 
 On Linux, a Raspberry Pi or a Mac, the installer picks the right archive, checks it against the release's `checksums.txt`, installs it in `~/.local/bin`, installs the service and offers to link WhatsApp. Run it again to upgrade:
 
 ```bash
-curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
 # options: sh -s -- --no-service | --no-link | --dir DIR | --version X.Y.Z
 ```
 
-With Homebrew: `brew install abonur/tap/whatsapp-mcp`. The service then runs the formula's `opt` path, so it keeps working after `brew upgrade`; run `install-service` again after an upgrade to restart it on the new version.
+With Homebrew: `brew install abonur/tap/askmywa`. The service then runs the formula's `opt` path, so it keeps working after `brew upgrade`; run `install-service` again after an upgrade to restart it on the new version.
 
 To build from source you need Go 1.26 or newer. Optional: `brew install ffmpeg`, used by `send_audio_message` to convert audio to Opus voice notes.
 
 ```bash
-git clone https://github.com/abonur/whatsapp-mcp.git
-cd whatsapp-mcp/whatsapp-go
+git clone https://github.com/abonur/askmywa.git
+cd askmywa/whatsapp-go
 mkdir -p ~/.local/bin
-go build -o ~/.local/bin/whatsapp-mcp .
+go build -o ~/.local/bin/askmywa .
 ```
 
 The commands below assume `~/.local/bin` is on your `PATH`; otherwise call the binary by its full path.
@@ -54,7 +54,7 @@ A daemon without a session that is not attached to a terminal (the service) wait
 With the service running, for example on a Raspberry Pi over SSH:
 
 ```bash
-whatsapp-mcp link
+askmywa link
 ```
 
 It asks for the phone number (or takes `--phone`), prints the 8-character code and waits until the phone has entered it. This is the same request as `connect_whatsapp`, so it needs no screen and no QR code.
@@ -64,7 +64,7 @@ It asks for the phone number (or takes `--phone`), prints the 8-character code a
 Without the service running:
 
 ```bash
-whatsapp-mcp daemon
+askmywa daemon
 ```
 
 A QR code appears in the terminal. Scan it from WhatsApp (Linked devices > Link a device). Stop with Ctrl+C once the log shows `connected to WhatsApp`. `--pair qr` or `--pair wait` forces either behaviour.
@@ -72,29 +72,29 @@ A QR code appears in the terminal. Scan it from WhatsApp (Linked devices > Link 
 ## Run as a service
 
 ```bash
-whatsapp-mcp install-service
-whatsapp-mcp status
+askmywa install-service
+askmywa status
 ```
 
 The service starts at login, restarts after a crash, and logs to `daemon.log` in the log folder (see [Files](#files)), rotated at 10 MB with 5 compressed files kept.
 
 | System | What `install-service` registers |
 |---|---|
-| macOS | launchd agent `~/Library/LaunchAgents/com.whatsapp-mcp.daemon.plist`, restarted 10 s after a crash |
-| Linux, Raspberry Pi | systemd user service `~/.config/systemd/user/whatsapp-mcp.service`, `Restart=always`. It also enables lingering (`loginctl enable-linger`) so the service runs at boot and after you log out; if that needs `sudo`, it says so |
-| Windows | scheduled task `whatsapp-mcp daemon`, started at logon and restarted every minute after a failure. The console window closes by itself right after it opens |
+| macOS | launchd agent `~/Library/LaunchAgents/com.askmywa.daemon.plist`, restarted 10 s after a crash |
+| Linux, Raspberry Pi | systemd user service `~/.config/systemd/user/askmywa.service`, `Restart=always`. It also enables lingering (`loginctl enable-linger`) so the service runs at boot and after you log out; if that needs `sudo`, it says so |
+| Windows | scheduled task `askmywa daemon`, started at logon and restarted every minute after a failure. The console window closes by itself right after it opens |
 
 `install-service --dry-run` prints the definition without installing anything, and `--no-wait` returns as soon as the service is started.
 
 ```bash
-whatsapp-mcp uninstall-service
+askmywa uninstall-service
 ```
 
 After rebuilding or moving the binary, run `install-service` again from its new location.
 
 `install-service` waits until the daemon is connected and prints the account, or tells you why it is not.
 
-Only one process may use a WhatsApp session at a time. Never run `whatsapp-mcp daemon` by hand while the service is loaded, and never run the original project's bridge alongside it: WhatsApp disconnects both.
+Only one process may use a WhatsApp session at a time. Never run `askmywa daemon` by hand while the service is loaded, and never run the original project's bridge alongside it: WhatsApp disconnects both.
 
 ## Claude Desktop
 
@@ -104,7 +104,7 @@ Only one process may use a WhatsApp session at a time. Never run `whatsapp-mcp d
 {
   "mcpServers": {
     "whatsapp": {
-      "command": "/Users/YOU/.local/bin/whatsapp-mcp",
+      "command": "/Users/YOU/.local/bin/askmywa",
       "args": ["serve"]
     }
   }
@@ -112,6 +112,15 @@ Only one process may use a WhatsApp session at a time. Never run `whatsapp-mcp d
 ```
 
 Use the absolute path: `~` is not expanded in this file. Restart Claude Desktop afterwards (Cmd+Q, then reopen). `serve` reads the archive directly, so reading works even when the daemon is down. Sending and downloading need the daemon.
+
+## Upgrading from the whatsapp-mcp name
+
+This project was called whatsapp-mcp until v0.1.0. An install made under that name keeps working after the upgrade, without pairing again:
+
+- **Data.** The old folders (`~/Library/Application Support/whatsapp-mcp` and so on) are used for as long as the new `askmywa` ones do not exist, so the session and the archive stay where they are.
+- **Service.** `askmywa install-service`, or the extension's first connection, stops and removes the old `com.whatsapp-mcp.daemon` agent, `whatsapp-mcp.service` unit or `whatsapp-mcp daemon` task before installing the new one. `uninstall-service` removes both.
+- **Command.** The installer replaces an old `~/.local/bin/whatsapp-mcp` with a link to `askmywa`, so MCP client configs that call `whatsapp-mcp serve` keep working.
+- **Environment.** `WHATSAPP_MCP_DATA_DIR` and `WHATSAPP_MCP_SEND_ROOT` are still read when the `ASKMYWA_` variables are not set.
 
 ## Migrating from the original project
 
@@ -122,26 +131,26 @@ If you already run [lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-
 2. Start the daemon once with the **absolute** path of the original store, inside your clone of the original project:
 
    ```bash
-   whatsapp-mcp daemon --legacy-store /path/to/lharries-whatsapp-mcp/whatsapp-bridge/store
+   askmywa daemon --legacy-store /path/to/lharries-askmywa/whatsapp-bridge/store
    ```
 
    The log should show `legacy session copied`, `legacy history imported`, then `connected to WhatsApp`. If a QR code appears instead, stop with Ctrl+C without scanning it: the path is wrong. The daemon refuses to start when the folder has no `whatsapp.db`.
 
 3. Stop it with Ctrl+C and install the service as above.
 
-4. Point Claude Desktop at `whatsapp-mcp serve` instead of `uv run main.py`.
+4. Point Claude Desktop at `askmywa serve` instead of `uv run main.py`.
 
-`whatsapp-mcp import --legacy-store DIR` does the copy and import of step 2 without connecting, which is safe while the original bridge still runs. Run it again right before switching: the original bridge keeps rotating its encryption keys, so an old copy goes stale. To start over, delete `~/Library/Application Support/whatsapp-mcp/` (with the service uninstalled).
+`askmywa import --legacy-store DIR` does the copy and import of step 2 without connecting, which is safe while the original bridge still runs. Run it again right before switching: the original bridge keeps rotating its encryption keys, so an old copy goes stale. To start over, delete `~/Library/Application Support/askmywa/` (with the service uninstalled).
 
 ## Files
 
-Everything lives in one data folder (override with `--data-dir` or `WHATSAPP_MCP_DATA_DIR`), and logs in a separate log folder:
+Everything lives in one data folder (override with `--data-dir` or `ASKMYWA_DATA_DIR`), and logs in a separate log folder:
 
 | System | Data folder | Log folder |
 |---|---|---|
-| macOS | `~/Library/Application Support/whatsapp-mcp` | `~/Library/Logs/whatsapp-mcp` |
-| Windows | `%LOCALAPPDATA%\whatsapp-mcp` | `%LOCALAPPDATA%\whatsapp-mcp\logs` |
-| Linux | `~/.local/share/whatsapp-mcp` (`$XDG_DATA_HOME`) | `~/.local/state/whatsapp-mcp` (`$XDG_STATE_HOME`) |
+| macOS | `~/Library/Application Support/askmywa` | `~/Library/Logs/askmywa` |
+| Windows | `%LOCALAPPDATA%\askmywa` | `%LOCALAPPDATA%\askmywa\logs` |
+| Linux | `~/.local/share/askmywa` (`$XDG_DATA_HOME`) | `~/.local/state/askmywa` (`$XDG_STATE_HOME`) |
 
 Inside the data folder:
 
@@ -150,7 +159,7 @@ Inside the data folder:
 | `whatsapp.db` | WhatsApp session keys. Keep it private; deleting it means pairing again |
 | `messages.db` | Contacts, chats and messages, with a full-text index |
 | `daemon.sock` | Socket used by `serve`, readable only by you (a Unix socket, also on Windows 10 and 11) |
-| `files/` | The only folder files can be sent from (`--send-root` or `WHATSAPP_MCP_SEND_ROOT` to change it) |
+| `files/` | The only folder files can be sent from (`--send-root` or `ASKMYWA_SEND_ROOT` to change it) |
 | `files/media/<chat>/` | Downloaded attachments |
 
 ### Archive schema
@@ -180,11 +189,11 @@ List tools return `has_more` and `next_cursor`; pass the cursor back as `cursor`
 
 | Symptom | Fix |
 |---|---|
-| `status` says the daemon is not reachable | `whatsapp-mcp install-service`, then read `daemon.log` in the log folder |
+| `status` says the daemon is not reachable | `askmywa install-service`, then read `daemon.log` in the log folder |
 | Linux: the service stops when you log out of the Pi | Run `sudo loginctl enable-linger $USER` once |
 | Linux: `install-service` says it cannot reach systemd | Log in to the machine (SSH is fine) so that a systemd user session exists, then retry |
 | Log says `stream replaced` | Another process uses the same session: stop the original bridge or any hand-started daemon |
-| Log says `logged out` | The phone removed this linked device: run `whatsapp-mcp link` (it restarts the service first) or ask Claude to connect WhatsApp again |
+| Log says `logged out` | The phone removed this linked device: run `askmywa link` (it restarts the service first) or ask Claude to connect WhatsApp again |
 | The pairing code is refused or expired | Codes last about two minutes; ask for a new one. Use the number in international format, without a leading 0 |
 | `download_media` fails with 403 | WhatsApp no longer stores that file; attachments expire after a few weeks |
 | `send_file` says the file is outside the send root | Copy the file into the send folder that `whatsapp_status` reports |
@@ -197,7 +206,7 @@ go vet ./... && go test ./...
 ./scripts/whatsmeow-parity.sh   # every whatsmeow method we call still exists
 ```
 
-`scripts/build-release.sh VERSION` builds the release artifacts into `dist/`: one archive per system and architecture, the Claude Desktop extension with a universal binary, `checksums.txt`, the installer (`install.sh`) and the Homebrew formula (`whatsapp-mcp.rb`, generated by `scripts/homebrew-formula.sh`). The [abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) repository copies the formula from each new release. It needs macOS and Node.js (for `npx @anthropic-ai/mcpb`). The extension's manifest is `extension/manifest.json`.
+`scripts/build-release.sh VERSION` builds the release artifacts into `dist/`: one archive per system and architecture, the Claude Desktop extension with a universal binary, `checksums.txt`, the installer (`install.sh`) and the Homebrew formula (`askmywa.rb`, generated by `scripts/homebrew-formula.sh`). The [abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) repository copies the formula from each new release. It needs macOS and Node.js (for `npx @anthropic-ai/mcpb`). The extension's manifest is `extension/manifest.json`.
 
 To publish a release, push a tag: `git tag v0.1.0 && git push origin v0.1.0`. The release workflow (`.github/workflows/release.yml`) runs the tests, builds, signs with a Developer ID certificate, notarizes with Apple and attaches the artifacts to a GitHub release. [RELEASING.md](RELEASING.md) lists the one-time setup: the certificate, the notary key and the repository secrets.
 

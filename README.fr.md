@@ -1,4 +1,4 @@
-# WhatsApp pour Claude
+# askmywa — WhatsApp pour Claude
 
 **[askmywa.com](https://askmywa.com/fr/)** · *[English version](README.md)* · [Politique de confidentialité](https://askmywa.com/fr/confidentialite/)
 
@@ -25,7 +25,7 @@ C'est tout. Pas de terminal, pas de code.
 
 ## Installer
 
-1. Téléchargez le fichier **[`whatsapp-mcp.mcpb`](https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb)**, la dernière version, sur [askmywa.com](https://askmywa.com/fr/) ou sur la [page des versions](https://github.com/abonur/whatsapp-mcp/releases/latest).
+1. Téléchargez le fichier **[`askmywa.mcpb`](https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb)**, la dernière version, sur [askmywa.com](https://askmywa.com/fr/) ou sur la [page des versions](https://github.com/abonur/askmywa/releases/latest).
 2. Double-cliquez dessus. Claude s'ouvre et vous demande de confirmer l'installation : acceptez. Le même fichier fonctionne sur Mac et sur Windows.
 3. Ouvrez une nouvelle conversation dans Claude et écrivez : **« Connecte mon WhatsApp »**.
 4. Claude vous demande votre numéro de téléphone, avec l'indicatif du pays (par exemple 33 6 12 34 56 78 pour la France). Il vous donne ensuite un **code de 8 caractères**.
@@ -83,7 +83,7 @@ Faites bien l'étape 1 avant l'étape 2 : sans l'extension, Claude ne peut plus 
 | WhatsApp a déconnecté l'appareil | Redemandez « Connecte mon WhatsApp » et refaites l'étape du code. |
 | Une photo ancienne ne se télécharge pas | WhatsApp ne garde les pièces jointes que quelques semaines sur ses serveurs. |
 
-Un autre souci ? [Ouvrez un ticket](https://github.com/abonur/whatsapp-mcp/issues) en décrivant ce que vous avez fait et ce qui s'est passé.
+Un autre souci ? [Ouvrez un ticket](https://github.com/abonur/askmywa/issues) en décrivant ce que vous avez fait et ce qui s'est passé.
 
 ## Sans l'extension : Linux, Raspberry Pi et Mac
 
@@ -92,15 +92,15 @@ Le programme fonctionne aussi sous Linux, y compris sur un Raspberry Pi. Un Pi l
 Dans un terminal (sur le Pi, en vous y connectant en SSH), une seule commande télécharge la bonne version, vérifie son intégrité, installe le service en arrière-plan et vous propose de lier WhatsApp avec un code à taper sur votre téléphone :
 
 ```bash
-curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
 ```
 
 Relancez-la pour mettre à jour. Avec [Homebrew](https://brew.sh), sur Mac ou Linux :
 
 ```bash
-brew install abonur/tap/whatsapp-mcp
-whatsapp-mcp install-service
-whatsapp-mcp link
+brew install abonur/tap/askmywa
+askmywa install-service
+askmywa link
 ```
 
 Pour utiliser un Pi depuis Claude Desktop sur votre ordinateur, voir le [README principal](README.md#on-a-raspberry-pi-or-another-always-on-machine) (en anglais).

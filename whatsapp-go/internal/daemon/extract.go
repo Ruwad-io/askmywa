@@ -7,8 +7,8 @@ import (
 
 	waE2E "go.mau.fi/whatsmeow/proto/waE2E"
 
-	"whatsapp-mcp/internal/security"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/security"
+	"askmywa/internal/store"
 )
 
 // unwrap removes the envelopes WhatsApp puts around a message (ephemeral,

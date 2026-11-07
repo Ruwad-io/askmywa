@@ -1,9 +1,9 @@
 // Package service registers the daemon with the operating system so that
 // it starts at login and restarts after a crash:
 //
-//	macOS          a launchd user agent    ~/Library/LaunchAgents/com.whatsapp-mcp.daemon.plist
-//	Linux          a systemd user service  ~/.config/systemd/user/whatsapp-mcp.service
-//	Windows        a scheduled task        "whatsapp-mcp daemon", at logon
+//	macOS          a launchd user agent    ~/Library/LaunchAgents/com.askmywa.daemon.plist
+//	Linux          a systemd user service  ~/.config/systemd/user/askmywa.service
+//	Windows        a scheduled task        "askmywa daemon", at logon
 //
 // The definitions are rendered by pure functions (Plist, SystemdUnit,
 // TaskXML) so they can be tested on any OS; the files named *_darwin.go,
@@ -18,11 +18,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"whatsapp-mcp/internal/config"
+	"askmywa/internal/config"
 )
 
 // ErrUnsupported is returned on systems without a service implementation.
-var ErrUnsupported = errors.New("installing the background service is not supported on this system: run `whatsapp-mcp daemon` yourself")
+var ErrUnsupported = errors.New("installing the background service is not supported on this system: run `askmywa daemon` yourself")
 
 // Installed describes a successful Install.
 type Installed struct {
@@ -77,6 +77,11 @@ func Install(binary string, paths config.Paths, extra []string) (Installed, erro
 	if err := paths.EnsureDirs(); err != nil {
 		return Installed{}, err
 	}
+	// A service installed as whatsapp-mcp would run a second daemon on the
+	// same session; it is stopped and removed first.
+	if err := platformRemoveLegacy(); err != nil {
+		return Installed{}, fmt.Errorf("remove the service installed as whatsapp-mcp: %w", err)
+	}
 	return platformInstall(DaemonArgs(abs, paths, extra), paths)
 }
 
@@ -90,8 +95,14 @@ func Definition(binary string, paths config.Paths, extra []string) (path, conten
 	return platformDefinition(DaemonArgs(abs, paths, extra), paths)
 }
 
-// Uninstall stops the service and removes its definition.
-func Uninstall() error { return platformUninstall() }
+// Uninstall stops the service and removes its definition, including one
+// installed under the pre-rename name.
+func Uninstall() error {
+	if err := platformRemoveLegacy(); err != nil {
+		return err
+	}
+	return platformUninstall()
+}
 
 // Status reports the service state.
 func Status() State { return platformStatus() }
@@ -157,7 +168,7 @@ func writeFile(path string, data []byte) error {
 
 // Manager adapts this package to the MCP server's ServiceManager.
 type Manager struct {
-	// Binary is the absolute path of the whatsapp-mcp executable to run.
+	// Binary is the absolute path of the askmywa executable to run.
 	Binary string
 }
 

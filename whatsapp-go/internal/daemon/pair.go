@@ -10,8 +10,8 @@ import (
 
 	"go.mau.fi/whatsmeow"
 
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/ipc"
+	"askmywa/internal/store"
 )
 
 // Pairing modes for a daemon that has no session yet.

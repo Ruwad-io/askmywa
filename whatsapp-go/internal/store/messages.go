@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"whatsapp-mcp/internal/textfold"
+	"askmywa/internal/textfold"
 )
 
 // Message is one stored message, as returned to the MCP client.

@@ -8,19 +8,19 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 version=0.0.1
-tap=whatsapp-mcp-ci/test
+tap=askmywa-ci/test
 work=$(mktemp -d)
 pid=""
 cleanup() {
-  brew uninstall --formula --force "$tap/whatsapp-mcp" >/dev/null 2>&1 || true
+  brew uninstall --formula --force "$tap/askmywa" >/dev/null 2>&1 || true
   brew untap "$tap" >/dev/null 2>&1 || true
   [[ -n "$pid" ]] && kill "$pid" 2>/dev/null || true
   rm -rf "$work"
 }
 trap cleanup EXIT
 
-if brew list --formula whatsapp-mcp >/dev/null 2>&1; then
-  echo "error: a whatsapp-mcp formula is already installed; not touching it" >&2
+if brew list --formula askmywa >/dev/null 2>&1; then
+  echo "error: an askmywa formula is already installed; not touching it" >&2
   exit 1
 fi
 
@@ -28,9 +28,9 @@ rel="$work/download/v$version"
 mkdir -p "$rel"
 for target in darwin/arm64 darwin/amd64 linux/arm64 linux/amd64; do
   os=${target%/*} arch=${target#*/}
-  pkg="whatsapp-mcp-$version-$os-$arch"
+  pkg="askmywa-$version-$os-$arch"
   mkdir -p "$work/pkg/$pkg"
-  CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -ldflags "-s -w -X main.version=$version" -o "$work/pkg/$pkg/whatsapp-mcp" .
+  CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -ldflags "-s -w -X main.version=$version" -o "$work/pkg/$pkg/askmywa" .
   tar -C "$work/pkg" -czf "$rel/$pkg.tar.gz" "$pkg"
 done
 sum="sha256sum"
@@ -46,20 +46,20 @@ for _ in $(seq 50); do
 done
 
 brew tap-new --no-git "$tap" >/dev/null
-formula="$(brew --repository "$tap")/Formula/whatsapp-mcp.rb"
+formula="$(brew --repository "$tap")/Formula/askmywa.rb"
 
 echo "--- brew style (formula as released)"
 scripts/homebrew-formula.sh "$version" "$rel/checksums.txt" > "$formula"
-brew style --formula "$tap/whatsapp-mcp"
+brew style --formula "$tap/askmywa"
 
 echo "--- brew install from the fake release"
 scripts/homebrew-formula.sh "$version" "$rel/checksums.txt" "http://127.0.0.1:$port/download/v$version" > "$formula"
-HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --formula "$tap/whatsapp-mcp"
-brew test "$tap/whatsapp-mcp"
+HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --formula "$tap/askmywa"
+brew test "$tap/askmywa"
 
 echo "--- the service would run the opt path, which survives upgrades"
-opt="$(brew --prefix)/opt/whatsapp-mcp/bin/whatsapp-mcp"
-def=$("$(brew --prefix)/bin/whatsapp-mcp" install-service --dry-run 2>/dev/null)
+opt="$(brew --prefix)/opt/askmywa/bin/askmywa"
+def=$("$(brew --prefix)/bin/askmywa" install-service --dry-run 2>/dev/null)
 grep -q "$opt" <<<"$def" || { echo "FAIL: service definition does not use $opt:"; echo "$def"; exit 1; } >&2
 if grep -q "/Cellar/" <<<"$def"; then
   echo "FAIL: service definition points into the Cellar" >&2

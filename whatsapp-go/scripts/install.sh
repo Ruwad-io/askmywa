@@ -1,7 +1,7 @@
 #!/bin/sh
-# Installs whatsapp-mcp on Linux (including Raspberry Pi) and macOS:
+# Installs askmywa on Linux (including Raspberry Pi) and macOS:
 #
-#   curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh
+#   curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
 #
 # It downloads the release for this machine, checks its SHA-256 against the
 # release's checksums.txt, puts the binary in ~/.local/bin, installs the
@@ -13,18 +13,18 @@
 #   --dir DIR         install the binary in DIR instead of ~/.local/bin
 #   --version X.Y.Z   install that version instead of the latest
 #
-# Environment: WHATSAPP_MCP_INSTALL_DIR, WHATSAPP_MCP_VERSION, and
-# WHATSAPP_MCP_RELEASES (base URL of the releases, for testing).
+# Environment: ASKMYWA_INSTALL_DIR, ASKMYWA_VERSION, and
+# ASKMYWA_RELEASES (base URL of the releases, for testing).
 #
 # Everything is inside main, so a download cut short runs nothing.
 
 set -eu
 
 main() {
-  repo="abonur/whatsapp-mcp"
-  releases="${WHATSAPP_MCP_RELEASES:-https://github.com/$repo/releases}"
-  dir="${WHATSAPP_MCP_INSTALL_DIR:-$HOME/.local/bin}"
-  version="${WHATSAPP_MCP_VERSION:-}"
+  repo="abonur/askmywa"
+  releases="${ASKMYWA_RELEASES:-https://github.com/$repo/releases}"
+  dir="${ASKMYWA_INSTALL_DIR:-$HOME/.local/bin}"
+  version="${ASKMYWA_VERSION:-}"
   service=1
   offer_link=1
 
@@ -55,10 +55,10 @@ main() {
     version=$(latest_version) || die "could not find the latest release on $releases"
   fi
   version="${version#v}"
-  pkg="whatsapp-mcp-$version-$os-$arch"
-  say "Installing whatsapp-mcp $version for $os/$arch"
+  pkg="askmywa-$version-$os-$arch"
+  say "Installing askmywa $version for $os/$arch"
 
-  tmp=$(mktemp -d 2>/dev/null || mktemp -d -t whatsapp-mcp)
+  tmp=$(mktemp -d 2>/dev/null || mktemp -d -t askmywa)
   trap 'rm -rf "$tmp"' EXIT INT TERM
   download "$releases/download/v$version/$pkg.tar.gz" "$tmp/$pkg.tar.gz"
   download "$releases/download/v$version/checksums.txt" "$tmp/checksums.txt"
@@ -66,12 +66,18 @@ main() {
   tar -xzf "$tmp/$pkg.tar.gz" -C "$tmp"
 
   mkdir -p "$dir"
-  bin="$dir/whatsapp-mcp"
+  bin="$dir/askmywa"
   # Replace through a rename so a running daemon keeps its old file.
-  cp "$tmp/$pkg/whatsapp-mcp" "$bin.new"
+  cp "$tmp/$pkg/askmywa" "$bin.new"
   chmod 755 "$bin.new"
   mv -f "$bin.new" "$bin"
   say "Installed $bin"
+  # Before the rename the command was whatsapp-mcp: point that name at the
+  # new binary, so MCP client configs that use it keep working.
+  if [ -f "$dir/whatsapp-mcp" ] && [ ! -L "$dir/whatsapp-mcp" ]; then
+    ln -sf askmywa "$dir/whatsapp-mcp"
+    say "Replaced $dir/whatsapp-mcp with a link to askmywa"
+  fi
   "$bin" version >/dev/null || die "$bin does not run on this machine"
 
   if [ "$service" = 1 ]; then
@@ -81,7 +87,7 @@ main() {
   case ":$PATH:" in
     *":$dir:"*) ;;
     *) say ""
-       say "Add $dir to your PATH to type whatsapp-mcp without its full path, for example:"
+       say "Add $dir to your PATH to type askmywa without its full path, for example:"
        say "  echo 'export PATH=\"$dir:\$PATH\"' >> ~/.profile" ;;
   esac
 
@@ -96,7 +102,7 @@ detect_os() {
   case "$(uname -s)" in
     Linux) echo linux ;;
     Darwin) echo darwin ;;
-    MINGW*|MSYS*|CYGWIN*) die "on Windows, install the Claude Desktop extension or the windows zip from https://github.com/abonur/whatsapp-mcp/releases" ;;
+    MINGW*|MSYS*|CYGWIN*) die "on Windows, install the Claude Desktop extension or the windows zip from https://github.com/abonur/askmywa/releases" ;;
     *) die "unsupported system $(uname -s); builds exist for Linux, macOS and Windows" ;;
   esac
 }
@@ -189,7 +195,7 @@ next_steps() {
     say "From Claude Desktop on another computer, over SSH (with an SSH key):"
     say "  \"command\": \"ssh\", \"args\": [\"$(id -un)@$(hostname)\", \"$bin\", \"serve\"]"
   fi
-  say "Documentation: https://github.com/abonur/whatsapp-mcp"
+  say "Documentation: https://github.com/abonur/askmywa"
 }
 
 main "$@"
