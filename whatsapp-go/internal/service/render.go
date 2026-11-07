@@ -27,8 +27,13 @@ func Plist(args []string, logDir, home string) string {
 	for _, a := range args {
 		b.WriteString("        <string>" + html.EscapeString(a) + "</string>\n")
 	}
-	b.WriteString(`    </array>
-    <key>EnvironmentVariables</key>
+	b.WriteString("    </array>\n")
+	if AppBundle(args[0]) != "" {
+		// Shows the agent in System Settings > Login Items under the app's
+		// name and icon rather than as its developer with a generic icon.
+		b.WriteString("    <key>AssociatedBundleIdentifiers</key>\n    <array>\n        <string>" + AppBundleID + "</string>\n    </array>\n")
+	}
+	b.WriteString(`    <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
         <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
@@ -51,6 +56,19 @@ func Plist(args []string, logDir, home string) string {
 </plist>
 `)
 	return b.String()
+}
+
+// AppBundleID is the bundle identifier of askmywa.app (scripts/macos-app.sh).
+const AppBundleID = "com.askmywa.app"
+
+// AppBundle returns the .app directory containing exe, or "" when exe is
+// not inside an app bundle.
+func AppBundle(exe string) string {
+	i := strings.LastIndex(exe, ".app/Contents/MacOS/")
+	if i < 0 {
+		return ""
+	}
+	return exe[:i+len(".app")]
 }
 
 // SystemdUnitName is the name of the Linux user service.

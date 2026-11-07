@@ -12,6 +12,8 @@ import (
 	"askmywa/internal/config"
 )
 
+const lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+
 func platformName() string    { return "launchd agent " + config.ServiceLabel }
 func platformSupported() bool { return true }
 func launchdDomain() string   { return "gui/" + strconv.Itoa(os.Getuid()) }
@@ -44,6 +46,12 @@ func platformInstall(args []string, paths config.Paths) (Installed, error) {
 	}
 	if err := writeFile(path, []byte(content)); err != nil {
 		return Installed{}, err
+	}
+	// System Settings finds the app named by AssociatedBundleIdentifiers
+	// through Launch Services; an app installed by copying (the extension,
+	// an archive) may not be registered yet.
+	if app := AppBundle(args[0]); app != "" {
+		_ = run(lsregister, "-f", app)
 	}
 	_ = run("launchctl", "bootout", launchdTarget())
 	// bootout returns before the job is gone; bootstrapping too early fails

@@ -98,3 +98,17 @@ func TestStateString(t *testing.T) {
 		t.Error("State.String")
 	}
 }
+
+func TestPlistAssociatesTheApp(t *testing.T) {
+	app := "/Users/x/Applications/askmywa.app/Contents/MacOS/askmywa"
+	p := Plist(DaemonArgs(app, config.FromDataDir("/d"), nil), "/l", "/Users/x")
+	if !strings.Contains(p, "<key>AssociatedBundleIdentifiers</key>\n    <array>\n        <string>com.askmywa.app</string>") {
+		t.Errorf("app binary: no AssociatedBundleIdentifiers:\n%s", p)
+	}
+	if strings.Contains(Plist(testArgs(), "/l", "/Users/x"), "AssociatedBundleIdentifiers") {
+		t.Error("bare binary: AssociatedBundleIdentifiers should be absent")
+	}
+	if got := AppBundle(app); got != "/Users/x/Applications/askmywa.app" {
+		t.Errorf("AppBundle = %q", got)
+	}
+}
