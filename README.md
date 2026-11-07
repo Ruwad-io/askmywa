@@ -62,7 +62,7 @@ On Linux, a Raspberry Pi or a Mac, one command downloads the right build, checks
 curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
 ```
 
-Run it again to upgrade. Add `sh -s -- --no-service` after the pipe to install only the binary.
+Run it again to upgrade. Add `sh -s -- --no-service` after the pipe to install only the binary. If the ChatGPT desktop app or Codex is set up for your user (`~/.codex`), the installer also adds askmywa to their MCP servers; quit and reopen ChatGPT to use it, or pass `--no-codex` to skip this.
 
 With [Homebrew](https://brew.sh) on Mac or Linux:
 
@@ -112,7 +112,7 @@ Add the server to Claude Desktop's `claude_desktop_config.json` (Mac: `~/Library
 }
 ```
 
-On Windows, use the full path to `askmywa.exe`, with doubled backslashes. Cursor uses the same block in `~/.cursor/mcp.json`, and Claude Code accepts it with `claude mcp add whatsapp -- /path/to/askmywa serve`.
+On Windows, use the full path to `askmywa.exe`, with doubled backslashes. Cursor uses the same block in `~/.cursor/mcp.json`, and Claude Code accepts it with `claude mcp add whatsapp -- /path/to/askmywa serve`. For Codex and the ChatGPT desktop app, which share `~/.codex/config.toml`: `codex mcp add askmywa -- /path/to/askmywa serve`.
 
 ### On a Raspberry Pi or another always-on machine
 
