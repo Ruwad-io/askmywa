@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"whatsapp-mcp/internal/textfold"
+	"askmywa/internal/textfold"
 )
 
 // Chat is a conversation (direct or group) with its latest message.

@@ -144,7 +144,7 @@ func DSN(path string, readOnly bool) string {
 func Open(ctx context.Context, path string, readOnly bool) (*Store, error) {
 	if readOnly {
 		if _, err := os.Stat(path); err != nil {
-			return nil, fmt.Errorf("message database %s not found: start `whatsapp-mcp daemon` first (%w)", path, err)
+			return nil, fmt.Errorf("message database %s not found: start `askmywa daemon` first (%w)", path, err)
 		}
 	}
 	db, err := sql.Open("sqlite", DSN(path, readOnly))

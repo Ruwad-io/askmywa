@@ -8,7 +8,7 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/store"
 )
 
 // handleMessage stores one message (live or from a history sync) with its

@@ -15,10 +15,10 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
 
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/media"
-	"whatsapp-mcp/internal/security"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/ipc"
+	"askmywa/internal/media"
+	"askmywa/internal/security"
+	"askmywa/internal/store"
 )
 
 // Handle implements ipc.Handler.
@@ -127,7 +127,7 @@ func ParseRecipient(to string) (types.JID, error) {
 
 func (d *Daemon) requireConnected() error {
 	if !d.isLoggedIn() {
-		return errors.New("WhatsApp is not paired yet: call connect_whatsapp with the user's phone number, or run `whatsapp-mcp daemon` in a terminal and scan the QR code")
+		return errors.New("WhatsApp is not paired yet: call connect_whatsapp with the user's phone number, or run `askmywa daemon` in a terminal and scan the QR code")
 	}
 	if !d.cli.IsConnected() {
 		return errors.New("the daemon is not connected to WhatsApp right now: retry in a few seconds")

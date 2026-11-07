@@ -13,9 +13,9 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"whatsapp-mcp/internal/config"
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/config"
+	"askmywa/internal/ipc"
+	"askmywa/internal/store"
 )
 
 // fakeSender records calls; the preview tests assert it is never called.

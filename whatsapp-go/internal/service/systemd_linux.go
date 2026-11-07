@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"whatsapp-mcp/internal/config"
+	"askmywa/internal/config"
 )
 
 func platformName() string    { return "systemd user service " + SystemdUnitName }
@@ -75,6 +75,25 @@ func lingering() bool {
 	}
 	out, err := output("loginctl", "show-user", u.Username, "--property=Linger", "--value")
 	return err == nil && strings.TrimSpace(out) == "yes"
+}
+
+// platformRemoveLegacy stops and removes the unit installed as
+// whatsapp-mcp.service.
+func platformRemoveLegacy() error {
+	path, err := unitPath()
+	if err != nil {
+		return err
+	}
+	legacy := filepath.Join(filepath.Dir(path), LegacySystemdUnitName)
+	if _, err := os.Stat(legacy); err != nil {
+		return nil
+	}
+	_ = systemctl("disable", "--now", LegacySystemdUnitName)
+	if err := os.Remove(legacy); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	_ = systemctl("daemon-reload")
+	return nil
 }
 
 func platformUninstall() error {

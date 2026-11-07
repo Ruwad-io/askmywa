@@ -1,16 +1,20 @@
 // Package config resolves the on-disk locations used by every subcommand.
 //
 // Everything lives under one data directory, by default
-// ~/Library/Application Support/whatsapp-mcp on macOS, %LOCALAPPDATA%\whatsapp-mcp
-// on Windows and ~/.local/share/whatsapp-mcp on Linux:
+// ~/Library/Application Support/askmywa on macOS, %LOCALAPPDATA%\askmywa
+// on Windows and ~/.local/share/askmywa on Linux:
 //
 //	whatsapp.db   whatsmeow session store (a copy of the legacy one, never the original)
 //	messages.db   message history, contacts and chats written by the daemon
 //	daemon.sock   Unix socket the MCP server uses to send and download
 //	files/        the only directory files may be sent from; downloads land in files/media
 //
-// The directory can be moved with WHATSAPP_MCP_DATA_DIR, and the send root
-// with WHATSAPP_MCP_SEND_ROOT.
+// The directory can be moved with ASKMYWA_DATA_DIR, and the send root
+// with ASKMYWA_SEND_ROOT.
+//
+// The project was called whatsapp-mcp before. Installs made under that name
+// keep working: their folders are used while the new ones do not exist, and
+// the old WHATSAPP_MCP_* variables are still read.
 package config
 
 import (
@@ -22,9 +26,14 @@ import (
 
 const (
 	// ServiceLabel is the launchd label of the daemon agent.
-	ServiceLabel = "com.whatsapp-mcp.daemon"
+	ServiceLabel = "com.askmywa.daemon"
 	// AppName is the folder name under Application Support and Logs.
-	AppName = "whatsapp-mcp"
+	AppName = "askmywa"
+
+	// LegacyServiceLabel and LegacyAppName are the names used before the
+	// rename to askmywa.
+	LegacyServiceLabel = "com.whatsapp-mcp.daemon"
+	LegacyAppName      = "whatsapp-mcp"
 )
 
 // Paths holds every path the binary uses.
@@ -47,33 +56,60 @@ func Default() (Paths, error) {
 	if err != nil {
 		return Paths{}, fmt.Errorf("resolve home directory: %w", err)
 	}
-	dataDir, logDir := defaultDirs(runtime.GOOS, home, os.Getenv)
-	if d := os.Getenv("WHATSAPP_MCP_DATA_DIR"); d != "" {
+	dataDir, logDir := pickDirs(runtime.GOOS, home, os.Getenv, exists)
+	if d := Getenv("DATA_DIR"); d != "" {
 		dataDir = d
 	}
 	p := FromDataDir(dataDir)
 	p.LogDir = logDir
-	if root := os.Getenv("WHATSAPP_MCP_SEND_ROOT"); root != "" {
+	if root := Getenv("SEND_ROOT"); root != "" {
 		p.SendRoot = root
 	}
 	return p, nil
 }
 
+// Getenv reads ASKMYWA_<name>, falling back to the pre-rename WHATSAPP_MCP_<name>.
+func Getenv(name string) string {
+	if v := os.Getenv("ASKMYWA_" + name); v != "" {
+		return v
+	}
+	return os.Getenv("WHATSAPP_MCP_" + name)
+}
+
+// pickDirs returns the default directories, or the pre-rename ones when
+// only those exist, so an install made as whatsapp-mcp keeps its session
+// and archive without any migration.
+func pickDirs(goos, home string, getenv func(string) string, exists func(string) bool) (dataDir, logDir string) {
+	dataDir, logDir = defaultDirs(goos, home, getenv, AppName)
+	if exists(dataDir) {
+		return dataDir, logDir
+	}
+	if oldData, oldLog := defaultDirs(goos, home, getenv, LegacyAppName); exists(oldData) {
+		return oldData, oldLog
+	}
+	return dataDir, logDir
+}
+
+func exists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
 // defaultDirs returns the data and log directories each OS expects:
 //
-//	macOS    ~/Library/Application Support/whatsapp-mcp, ~/Library/Logs/whatsapp-mcp
-//	Windows  %LOCALAPPDATA%\whatsapp-mcp, %LOCALAPPDATA%\whatsapp-mcp\logs
-//	Linux    $XDG_DATA_HOME/whatsapp-mcp (~/.local/share), $XDG_STATE_HOME/whatsapp-mcp (~/.local/state)
-func defaultDirs(goos, home string, getenv func(string) string) (dataDir, logDir string) {
+//	macOS    ~/Library/Application Support/askmywa, ~/Library/Logs/askmywa
+//	Windows  %LOCALAPPDATA%\askmywa, %LOCALAPPDATA%\askmywa\logs
+//	Linux    $XDG_DATA_HOME/askmywa (~/.local/share), $XDG_STATE_HOME/askmywa (~/.local/state)
+func defaultDirs(goos, home string, getenv func(string) string, name string) (dataDir, logDir string) {
 	switch goos {
 	case "darwin":
-		return filepath.Join(home, "Library", "Application Support", AppName), filepath.Join(home, "Library", "Logs", AppName)
+		return filepath.Join(home, "Library", "Application Support", name), filepath.Join(home, "Library", "Logs", name)
 	case "windows":
 		base := getenv("LOCALAPPDATA")
 		if base == "" {
 			base = filepath.Join(home, "AppData", "Local")
 		}
-		return filepath.Join(base, AppName), filepath.Join(base, AppName, "logs")
+		return filepath.Join(base, name), filepath.Join(base, name, "logs")
 	default:
 		data := getenv("XDG_DATA_HOME")
 		if data == "" {
@@ -83,7 +119,7 @@ func defaultDirs(goos, home string, getenv func(string) string) (dataDir, logDir
 		if state == "" {
 			state = filepath.Join(home, ".local", "state")
 		}
-		return filepath.Join(data, AppName), filepath.Join(state, AppName)
+		return filepath.Join(data, name), filepath.Join(state, name)
 	}
 }
 

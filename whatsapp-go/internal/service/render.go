@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf16"
 
-	"whatsapp-mcp/internal/config"
+	"askmywa/internal/config"
 )
 
 // Plist renders the launchd property list. Log rotation is done by the
@@ -54,7 +54,10 @@ func Plist(args []string, logDir, home string) string {
 }
 
 // SystemdUnitName is the name of the Linux user service.
-const SystemdUnitName = "whatsapp-mcp.service"
+const SystemdUnitName = "askmywa.service"
+
+// LegacySystemdUnitName is the unit installed before the rename to askmywa.
+const LegacySystemdUnitName = "whatsapp-mcp.service"
 
 // SystemdUnit renders the systemd user service.
 func SystemdUnit(args []string) string {
@@ -64,7 +67,7 @@ func SystemdUnit(args []string) string {
 	}
 	return `[Unit]
 Description=WhatsApp MCP daemon (archives WhatsApp messages for MCP clients)
-Documentation=https://github.com/abonur/whatsapp-mcp
+Documentation=https://github.com/abonur/askmywa
 After=network-online.target
 Wants=network-online.target
 
@@ -93,7 +96,10 @@ func systemdQuote(a string) string {
 }
 
 // TaskName is the name of the Windows scheduled task.
-const TaskName = "whatsapp-mcp daemon"
+const TaskName = "askmywa daemon"
+
+// LegacyTaskName is the task registered before the rename to askmywa.
+const LegacyTaskName = "whatsapp-mcp daemon"
 
 // TaskXML renders the Windows scheduled task: start at logon of user,
 // restart every minute after a failure, no time limit, run on battery.
@@ -106,7 +112,7 @@ func TaskXML(args []string, user string) string {
 	return `<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Description>Archives WhatsApp messages for MCP clients such as Claude Desktop. https://github.com/abonur/whatsapp-mcp</Description>
+    <Description>Archives WhatsApp messages for MCP clients such as Claude Desktop. https://github.com/abonur/askmywa</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>

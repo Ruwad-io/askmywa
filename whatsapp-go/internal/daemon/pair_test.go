@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"whatsapp-mcp/internal/ipc"
+	"askmywa/internal/ipc"
 )
 
 func TestPairPhoneValidatesNumbers(t *testing.T) {

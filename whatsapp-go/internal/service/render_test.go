@@ -7,11 +7,11 @@ import (
 	"testing"
 	"unicode/utf16"
 
-	"whatsapp-mcp/internal/config"
+	"askmywa/internal/config"
 )
 
 func testArgs() []string {
-	return DaemonArgs("/opt/whatsapp mcp/whatsapp-mcp", config.FromDataDir("/data dir/wm"), nil)
+	return DaemonArgs("/opt/whatsapp mcp/askmywa", config.FromDataDir("/data dir/wm"), nil)
 }
 
 func TestDaemonArgs(t *testing.T) {
@@ -25,8 +25,8 @@ func TestDaemonArgs(t *testing.T) {
 }
 
 func TestPlist(t *testing.T) {
-	p := Plist(testArgs(), "/Users/x/Library/Logs/whatsapp-mcp", "/Users/x")
-	for _, want := range []string{"<string>com.whatsapp-mcp.daemon</string>", "<key>KeepAlive</key>\n    <true/>", "<key>RunAtLoad</key>\n    <true/>", "<string>daemon</string>", "<string>/opt/whatsapp mcp/whatsapp-mcp</string>", "launchd.log"} {
+	p := Plist(testArgs(), "/Users/x/Library/Logs/askmywa", "/Users/x")
+	for _, want := range []string{"<string>com.askmywa.daemon</string>", "<key>KeepAlive</key>\n    <true/>", "<key>RunAtLoad</key>\n    <true/>", "<string>daemon</string>", "<string>/opt/whatsapp mcp/askmywa</string>", "launchd.log"} {
 		if !strings.Contains(p, want) {
 			t.Errorf("plist lacks %q", want)
 		}
@@ -38,7 +38,7 @@ func TestPlist(t *testing.T) {
 
 func TestSystemdUnit(t *testing.T) {
 	u := SystemdUnit(append(testArgs(), "--send-root", `/a "b" 100%$x`))
-	for _, want := range []string{`ExecStart="/opt/whatsapp mcp/whatsapp-mcp" daemon --background --data-dir "/data dir/wm"`, "Restart=always", "WantedBy=default.target", `"/a \"b\" 100%%$$x"`} {
+	for _, want := range []string{`ExecStart="/opt/whatsapp mcp/askmywa" daemon --background --data-dir "/data dir/wm"`, "Restart=always", "WantedBy=default.target", `"/a \"b\" 100%%$$x"`} {
 		if !strings.Contains(u, want) {
 			t.Errorf("unit lacks %q:\n%s", want, u)
 		}
@@ -46,10 +46,10 @@ func TestSystemdUnit(t *testing.T) {
 }
 
 func TestTaskXML(t *testing.T) {
-	x := TaskXML([]string{`C:\Program Files\wm\whatsapp-mcp.exe`, "daemon", "--data-dir", `C:\Users\A B\AppData\Local\whatsapp-mcp`, "--x", `a"b`, "--y", `C:\dir\`}, `PC\A & B`)
+	x := TaskXML([]string{`C:\Program Files\wm\askmywa.exe`, "daemon", "--data-dir", `C:\Users\A B\AppData\Local\askmywa`, "--x", `a"b`, "--y", `C:\dir\`}, `PC\A & B`)
 	for _, want := range []string{
-		`<Command>C:\Program Files\wm\whatsapp-mcp.exe</Command>`,
-		`<Arguments>daemon --data-dir &#34;C:\Users\A B\AppData\Local\whatsapp-mcp&#34; --x &#34;a\&#34;b&#34; --y C:\dir\</Arguments>`,
+		`<Command>C:\Program Files\wm\askmywa.exe</Command>`,
+		`<Arguments>daemon --data-dir &#34;C:\Users\A B\AppData\Local\askmywa&#34; --x &#34;a\&#34;b&#34; --y C:\dir\</Arguments>`,
 		`<UserId>PC\A &amp; B</UserId>`,
 		"<LogonTrigger>", "<RestartOnFailure>", "<ExecutionTimeLimit>PT0S</ExecutionTimeLimit>",
 	} {

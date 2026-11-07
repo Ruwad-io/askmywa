@@ -22,9 +22,9 @@ arch=$(go env GOARCH)
 
 # fake_release VERSION: a release laid out like GitHub's download URLs.
 fake_release() {
-  local v=$1 pkg="whatsapp-mcp-$1-$os-$arch"
+  local v=$1 pkg="askmywa-$1-$os-$arch"
   mkdir -p "$work/pkg/$pkg" "$work/rel/download/v$v"
-  CGO_ENABLED=0 go build -ldflags "-X main.version=$v" -o "$work/pkg/$pkg/whatsapp-mcp" .
+  CGO_ENABLED=0 go build -ldflags "-X main.version=$v" -o "$work/pkg/$pkg/askmywa" .
   tar -C "$work/pkg" -czf "$work/rel/download/v$v/$pkg.tar.gz" "$pkg"
   local sum="sha256sum"
   command -v sha256sum >/dev/null || sum="shasum -a 256"
@@ -72,18 +72,20 @@ if [[ $fetcher == wget ]]; then
 fi
 
 run() {
-  PATH="$path" WHATSAPP_MCP_RELEASES="http://127.0.0.1:$port" sh -s -- --no-service --dir "$work/bin" "$@" < scripts/install.sh
+  PATH="$path" ASKMYWA_RELEASES="http://127.0.0.1:$port" sh -s -- --no-service --dir "$work/bin" "$@" < scripts/install.sh
 }
 
-echo "--- install the latest release ($fetcher)"
+echo "--- install the latest release ($fetcher), over a pre-rename whatsapp-mcp binary"
+mkdir -p "$work/bin" && printf '#!/bin/sh\necho old\n' > "$work/bin/whatsapp-mcp" && chmod +x "$work/bin/whatsapp-mcp"
 run
-"$work/bin/whatsapp-mcp" version | grep -qx "whatsapp-mcp 1.0.0"
+"$work/bin/askmywa" version | grep -qx "askmywa 1.0.0"
+[[ -L "$work/bin/whatsapp-mcp" ]] && "$work/bin/whatsapp-mcp" version | grep -qx "askmywa 1.0.0"
 
 echo "--- upgrade"
 fake_release 1.1.0
 echo 1.1.0 > "$work/rel/LATEST"
 run
-"$work/bin/whatsapp-mcp" version | grep -qx "whatsapp-mcp 1.1.0"
+"$work/bin/askmywa" version | grep -qx "askmywa 1.1.0"
 
 echo "--- tampered archive is refused"
 sums="$work/rel/download/v1.1.0/checksums.txt"
@@ -93,6 +95,6 @@ if out=$(run --dir "$work/bin-bad" 2>&1); then
   exit 1
 fi
 grep -q "checksum mismatch" <<<"$out"
-[[ ! -e "$work/bin-bad/whatsapp-mcp" ]]
+[[ ! -e "$work/bin-bad/askmywa" ]]
 
 echo "install test passed ($fetcher)"

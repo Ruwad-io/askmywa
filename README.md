@@ -1,4 +1,4 @@
-# WhatsApp MCP
+# askmywa — WhatsApp MCP for Claude
 
 **[askmywa.com](https://askmywa.com)** · *[Version française](README.fr.md)* · [Privacy policy](https://askmywa.com/privacy/)
 
@@ -39,7 +39,7 @@ An existing install of the original can switch without pairing again: the new da
 
 ## Install in Claude Desktop (Mac and Windows, no terminal)
 
-1. Download [`whatsapp-mcp.mcpb`](https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb), the latest version, from [askmywa.com](https://askmywa.com) or the [releases](https://github.com/abonur/whatsapp-mcp/releases/latest). The same file works on Mac and Windows.
+1. Download [`askmywa.mcpb`](https://github.com/abonur/askmywa/releases/latest/download/askmywa.mcpb), the latest version, from [askmywa.com](https://askmywa.com) or the [releases](https://github.com/abonur/askmywa/releases/latest). The same file works on Mac and Windows.
 2. Double-click it. Claude Desktop opens and asks you to confirm the install.
 3. In a new conversation, write: **Connect my WhatsApp.**
 4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code.
@@ -57,7 +57,7 @@ To remove it, ask Claude to **disconnect WhatsApp from this computer** (it unlin
 On Linux, a Raspberry Pi or a Mac, one command downloads the right build, checks its SHA-256, installs it in `~/.local/bin`, starts the background service and offers to link WhatsApp:
 
 ```bash
-curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh
 ```
 
 Run it again to upgrade. Add `sh -s -- --no-service` after the pipe to install only the binary.
@@ -65,12 +65,12 @@ Run it again to upgrade. Add `sh -s -- --no-service` after the pipe to install o
 With [Homebrew](https://brew.sh) on Mac or Linux:
 
 ```bash
-brew install abonur/tap/whatsapp-mcp
-whatsapp-mcp install-service
-whatsapp-mcp link
+brew install abonur/tap/askmywa
+askmywa install-service
+askmywa link
 ```
 
-Or download the archive for your system from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest):
+Or download the archive for your system from the [latest release](https://github.com/abonur/askmywa/releases/latest):
 
 | System | Archive |
 |---|---|
@@ -82,17 +82,17 @@ Or download the archive for your system from the [latest release](https://github
 You can also build from source with Go 1.26 or newer:
 
 ```bash
-git clone https://github.com/abonur/whatsapp-mcp.git
-cd whatsapp-mcp/whatsapp-go
+git clone https://github.com/abonur/askmywa.git
+cd askmywa/whatsapp-go
 mkdir -p ~/.local/bin
-go build -o ~/.local/bin/whatsapp-mcp .
+go build -o ~/.local/bin/askmywa .
 ```
 
 After a manual download or a build, install the background service, which starts at login (a launchd agent on Mac, a systemd user service on Linux, a scheduled task on Windows), then link WhatsApp:
 
 ```bash
-~/.local/bin/whatsapp-mcp install-service
-~/.local/bin/whatsapp-mcp link
+~/.local/bin/askmywa install-service
+~/.local/bin/askmywa link
 ```
 
 `link` asks for your phone number and prints an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code. You can also ask Claude to connect WhatsApp instead.
@@ -103,14 +103,14 @@ Add the server to Claude Desktop's `claude_desktop_config.json` (Mac: `~/Library
 {
   "mcpServers": {
     "whatsapp": {
-      "command": "/Users/YOU/.local/bin/whatsapp-mcp",
+      "command": "/Users/YOU/.local/bin/askmywa",
       "args": ["serve"]
     }
   }
 }
 ```
 
-On Windows, use the full path to `whatsapp-mcp.exe`, with doubled backslashes. Cursor uses the same block in `~/.cursor/mcp.json`, and Claude Code accepts it with `claude mcp add whatsapp -- /path/to/whatsapp-mcp serve`.
+On Windows, use the full path to `askmywa.exe`, with doubled backslashes. Cursor uses the same block in `~/.cursor/mcp.json`, and Claude Code accepts it with `claude mcp add whatsapp -- /path/to/askmywa serve`.
 
 ### On a Raspberry Pi or another always-on machine
 
@@ -123,7 +123,7 @@ Claude Desktop on your laptop can then use the Pi over SSH, provided you log in 
   "mcpServers": {
     "whatsapp": {
       "command": "ssh",
-      "args": ["pi@raspberrypi.local", "/home/pi/.local/bin/whatsapp-mcp", "serve"]
+      "args": ["pi@raspberrypi.local", "/home/pi/.local/bin/askmywa", "serve"]
     }
   }
 }

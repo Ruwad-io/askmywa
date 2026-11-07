@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/service"
+	"askmywa/internal/ipc"
+	"askmywa/internal/service"
 )
 
 // linker is the part of the daemon client that link needs.
@@ -112,10 +112,10 @@ Waiting for the phone (the code is valid until %s)…
 			return nil
 		}
 		if st.PairError != "" {
-			return fmt.Errorf("pairing failed: %s; run `whatsapp-mcp link` again for a new code", st.PairError)
+			return fmt.Errorf("pairing failed: %s; run `askmywa link` again for a new code", st.PairError)
 		}
 		if time.Now().After(deadline) {
-			return errors.New("the code expired before it was entered; run `whatsapp-mcp link` again for a new one")
+			return errors.New("the code expired before it was entered; run `askmywa link` again for a new one")
 		}
 	}
 }
@@ -128,7 +128,7 @@ func waitReady(ctx context.Context, c linker, timeout time.Duration) error {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return errors.New("the service did not come back after the restart; see `whatsapp-mcp status`")
+			return errors.New("the service did not come back after the restart; see `askmywa status`")
 		}
 		select {
 		case <-ctx.Done():

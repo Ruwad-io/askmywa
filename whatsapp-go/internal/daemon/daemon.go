@@ -21,9 +21,9 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 
-	"whatsapp-mcp/internal/config"
-	"whatsapp-mcp/internal/ipc"
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/config"
+	"askmywa/internal/ipc"
+	"askmywa/internal/store"
 )
 
 // Options configures Run.
@@ -257,7 +257,7 @@ func (d *Daemon) connect(ctx context.Context) error {
 			fmt.Fprintln(d.opts.QROut, "Paired.")
 			return nil
 		case "timeout":
-			return errors.New("pairing timed out: run `whatsapp-mcp daemon` again and scan the code")
+			return errors.New("pairing timed out: run `askmywa daemon` again and scan the code")
 		case "error":
 			return fmt.Errorf("pairing failed: %w", item.Error)
 		default:
@@ -310,12 +310,12 @@ func (d *Daemon) handleEvent(evt any) {
 	case *events.Disconnected:
 		d.log.Warn("disconnected, whatsmeow will reconnect")
 	case *events.StreamReplaced:
-		d.log.Error("stream replaced: another process is using this session; stop the old bridge or any other whatsapp-mcp daemon using the same session")
+		d.log.Error("stream replaced: another process is using this session; stop the old bridge or any other askmywa daemon using the same session")
 	case *events.LoggedOut:
 		d.mu.Lock()
 		d.loggedOut = true
 		d.mu.Unlock()
-		d.log.Error("logged out by WhatsApp: pair again with the connect_whatsapp tool or `whatsapp-mcp daemon`", "reason", v.Reason.String())
+		d.log.Error("logged out by WhatsApp: pair again with the connect_whatsapp tool or `askmywa daemon`", "reason", v.Reason.String())
 	case *events.TemporaryBan:
 		d.log.Error("temporary ban", "code", v.Code, "expire", v.Expire)
 	case *events.KeepAliveTimeout:

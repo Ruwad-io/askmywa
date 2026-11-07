@@ -36,16 +36,16 @@ jobs:
           fi
       - run: go vet ./...
       - run: go test -race ./...
-      - run: go build -o whatsapp-mcp .
+      - run: go build -o askmywa .
       - name: whatsmeow API parity
         run: bash ./scripts/whatsmeow-parity.sh
       - name: Smoke test (unpaired daemon answers on its socket)
-        run: bash ./scripts/smoke.sh ./whatsapp-mcp
+        run: bash ./scripts/smoke.sh ./askmywa
       - name: Check the systemd unit
         run: |
-          ./whatsapp-mcp install-service --dry-run > "$RUNNER_TEMP/whatsapp-mcp.service"
-          cat "$RUNNER_TEMP/whatsapp-mcp.service"
-          systemd-analyze verify --man=no "$RUNNER_TEMP/whatsapp-mcp.service"
+          ./askmywa install-service --dry-run > "$RUNNER_TEMP/askmywa.service"
+          cat "$RUNNER_TEMP/askmywa.service"
+          systemd-analyze verify --man=no "$RUNNER_TEMP/askmywa.service"
       - name: Installer (curl)
         run: bash ./scripts/test-install.sh curl
       - name: Installer (wget)
@@ -70,25 +70,25 @@ jobs:
           cache-dependency-path: whatsapp-go/go.sum
       - run: go vet ./...
       - run: go test ./...
-      - run: go build -o whatsapp-mcp${{ runner.os == 'Windows' && '.exe' || '' }} .
+      - run: go build -o askmywa${{ runner.os == 'Windows' && '.exe' || '' }} .
       - name: Smoke test (unpaired daemon answers on its socket)
-        run: bash ./scripts/smoke.sh ./whatsapp-mcp${{ runner.os == 'Windows' && '.exe' || '' }}
+        run: bash ./scripts/smoke.sh ./askmywa${{ runner.os == 'Windows' && '.exe' || '' }}
       - name: Check the systemd unit
         if: runner.os == 'Linux'
         run: |
-          ./whatsapp-mcp install-service --dry-run > "$RUNNER_TEMP/whatsapp-mcp.service"
-          systemd-analyze verify --man=no "$RUNNER_TEMP/whatsapp-mcp.service"
+          ./askmywa install-service --dry-run > "$RUNNER_TEMP/askmywa.service"
+          systemd-analyze verify --man=no "$RUNNER_TEMP/askmywa.service"
       - name: Installer
         if: runner.os == 'Linux'
         run: bash ./scripts/test-install.sh curl
       - name: Install, query and remove the scheduled task
         if: runner.os == 'Windows'
         run: |
-          ./whatsapp-mcp.exe install-service --data-dir svc-data --no-wait
-          schtasks //Query //TN "whatsapp-mcp daemon" //V //FO LIST
-          ./whatsapp-mcp.exe status --data-dir svc-data || echo "(the task may not start on a CI runner without an interactive session)"
-          ./whatsapp-mcp.exe uninstall-service
-          if schtasks //Query //TN "whatsapp-mcp daemon" >/dev/null 2>&1; then
+          ./askmywa.exe install-service --data-dir svc-data --no-wait
+          schtasks //Query //TN "askmywa daemon" //V //FO LIST
+          ./askmywa.exe status --data-dir svc-data || echo "(the task may not start on a CI runner without an interactive session)"
+          ./askmywa.exe uninstall-service
+          if schtasks //Query //TN "askmywa daemon" >/dev/null 2>&1; then
             echo "the scheduled task is still registered"; exit 1
           fi
 
@@ -100,11 +100,11 @@ jobs:
         with:
           go-version-file: whatsapp-go/go.mod
           cache-dependency-path: whatsapp-go/go.sum
-      - run: go build -o whatsapp-mcp .
+      - run: go build -o askmywa .
       - run: go test ./...
-      - run: ./whatsapp-mcp version
+      - run: ./askmywa version
       - name: Check the launchd property list
-        run: ./whatsapp-mcp install-service --dry-run | plutil -lint -
+        run: ./askmywa install-service --dry-run | plutil -lint -
       - name: Installer
         run: bash ./scripts/test-install.sh curl
       - name: Homebrew formula (style, install, test, service path)

@@ -3,7 +3,7 @@
 # empty data directory, check that it answers on its socket without trying
 # to pair, then stop it. Runs on macOS, Linux and Windows (Git Bash).
 #
-# Usage: scripts/smoke.sh path/to/whatsapp-mcp
+# Usage: scripts/smoke.sh path/to/askmywa
 set -euo pipefail
 bin=$1
 work=$(mktemp -d smoke.XXXX)

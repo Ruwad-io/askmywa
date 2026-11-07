@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.3",
-  "name": "whatsapp-mcp",
-  "display_name": "WhatsApp",
+  "name": "askmywa",
+  "display_name": "askmywa for WhatsApp",
   "version": "0.0.0",
   "description": "Read, search and send your WhatsApp messages from Claude on Mac and Windows. Nothing is sent without your approval.",
   "long_description": "Links to your personal WhatsApp account as a linked device, like WhatsApp Web, and keeps a private archive of your messages on this computer. Claude can search it, read conversations, save attachments and, after showing you a preview you approve, send messages, files and voice notes.\n\nTo start, ask Claude to connect WhatsApp: it asks for your phone number and gives you a code to type in WhatsApp > Linked devices > Link with phone number.\n\nThis uses an unofficial WhatsApp interface. Your messages stay on your computer and only reach Claude when it calls a tool.",
@@ -11,11 +11,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/abonur/whatsapp-mcp"
+    "url": "https://github.com/abonur/askmywa"
   },
   "homepage": "https://askmywa.com",
-  "documentation": "https://github.com/abonur/whatsapp-mcp#readme",
-  "support": "https://github.com/abonur/whatsapp-mcp/issues",
+  "documentation": "https://github.com/abonur/askmywa#readme",
+  "support": "https://github.com/abonur/askmywa/issues",
   "privacy_policies": [
     "https://askmywa.com/privacy/"
   ],
@@ -29,18 +29,18 @@
   ],
   "server": {
     "type": "binary",
-    "entry_point": "server/whatsapp-mcp",
+    "entry_point": "server/askmywa",
     "mcp_config": {
-      "command": "${__dirname}/server/whatsapp-mcp",
+      "command": "${__dirname}/server/askmywa",
       "args": [
         "serve"
       ],
       "env": {
-        "WHATSAPP_MCP_SEND_ROOT": "${user_config.send_folder}"
+        "ASKMYWA_SEND_ROOT": "${user_config.send_folder}"
       },
       "platform_overrides": {
         "win32": {
-          "command": "${__dirname}/server/whatsapp-mcp.exe"
+          "command": "${__dirname}/server/askmywa.exe"
         }
       }
     }

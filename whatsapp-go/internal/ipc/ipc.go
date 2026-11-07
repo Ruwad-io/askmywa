@@ -17,7 +17,7 @@ import (
 	"runtime"
 	"time"
 
-	"whatsapp-mcp/internal/store"
+	"askmywa/internal/store"
 )
 
 // Methods.
@@ -216,7 +216,7 @@ func (c *Client) Call(ctx context.Context, method string, params, out any) error
 	d := net.Dialer{Timeout: 5 * time.Second}
 	conn, err := d.DialContext(ctx, "unix", c.Path)
 	if err != nil {
-		return fmt.Errorf("the whatsapp-mcp daemon is not reachable at %s: start it with `whatsapp-mcp daemon` or `whatsapp-mcp install-service` (%w)", c.Path, err)
+		return fmt.Errorf("the askmywa daemon is not reachable at %s: start it with `askmywa daemon` or `askmywa install-service` (%w)", c.Path, err)
 	}
 	defer conn.Close()
 	timeout := c.Timeout

@@ -4,11 +4,13 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 
-	"whatsapp-mcp/internal/config"
+	"askmywa/internal/config"
 )
 
 func platformName() string    { return "scheduled task \"" + TaskName + "\"" }
@@ -41,6 +43,18 @@ func platformInstall(args []string, paths config.Paths) (Installed, error) {
 		return res, fmt.Errorf("start the scheduled task: %w", err)
 	}
 	return res, nil
+}
+
+// platformRemoveLegacy ends and deletes the task registered as
+// "whatsapp-mcp daemon".
+func platformRemoveLegacy() error {
+	if exec.Command("schtasks", "/Query", "/TN", LegacyTaskName).Run() != nil {
+		return nil
+	}
+	_ = run("schtasks", "/End", "/TN", LegacyTaskName)
+	// Give the old daemon time to exit and release its files.
+	time.Sleep(2 * time.Second)
+	return run("schtasks", "/Delete", "/TN", LegacyTaskName, "/F")
 }
 
 func platformUninstall() error {

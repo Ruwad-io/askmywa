@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Builds the release artifacts into dist/:
-#   whatsapp-mcp-<version>-darwin-{arm64,amd64}.tar.gz   macOS, signed and notarized
-#   whatsapp-mcp-<version>-linux-{amd64,arm64,armv7}.tar.gz  Linux and Raspberry Pi
-#   whatsapp-mcp-<version>-windows-{amd64,arm64}.zip
-#   whatsapp-mcp-<version>.mcpb   Claude Desktop extension: macOS universal binary + Windows x64
-#   whatsapp-mcp.mcpb             the same, under a stable name for direct download links
+#   askmywa-<version>-darwin-{arm64,amd64}.tar.gz   macOS, signed and notarized
+#   askmywa-<version>-linux-{amd64,arm64,armv7}.tar.gz  Linux and Raspberry Pi
+#   askmywa-<version>-windows-{amd64,arm64}.zip
+#   askmywa-<version>.mcpb   Claude Desktop extension: macOS universal binary + Windows x64
+#   askmywa.mcpb             the same, under a stable name for direct download links
 #   checksums.txt
 #   install.sh        one-line installer for Linux and macOS
-#   whatsapp-mcp.rb   Homebrew formula
+#   askmywa.rb   Homebrew formula
 #
 # Usage: scripts/build-release.sh [version]   (default: git describe, without the leading v)
 # Needs macOS (lipo, codesign) and Node.js (npx) for the extension.
@@ -48,7 +48,7 @@ fi
 # (both required by notarization), or ad hoc when no identity is configured.
 sign() {
   if [[ -n "${SIGN_IDENTITY:-}" ]]; then
-    codesign --force --options runtime --timestamp --identifier com.whatsapp-mcp.cli --sign "$SIGN_IDENTITY" "$1"
+    codesign --force --options runtime --timestamp --identifier com.askmywa.cli --sign "$SIGN_IDENTITY" "$1"
   else
     codesign --force --sign - "$1"
   fi
@@ -58,22 +58,22 @@ sign() {
 ldflags="-s -w -X main.version=${version}"
 for arch in arm64 amd64; do
   echo "building darwin/${arch}"
-  CGO_ENABLED=0 GOOS=darwin GOARCH="$arch" go build -trimpath -ldflags "$ldflags" -o "$dist/bin/whatsapp-mcp-$arch" .
-  sign "$dist/bin/whatsapp-mcp-$arch"
+  CGO_ENABLED=0 GOOS=darwin GOARCH="$arch" go build -trimpath -ldflags "$ldflags" -o "$dist/bin/askmywa-$arch" .
+  sign "$dist/bin/askmywa-$arch"
 done
 
 echo "building the universal binary"
 # lipo drops the per-architecture signatures, so the result is signed again.
-lipo -create -output "$dist/mcpb/server/whatsapp-mcp" "$dist/bin/whatsapp-mcp-arm64" "$dist/bin/whatsapp-mcp-amd64"
-chmod +x "$dist/mcpb/server/whatsapp-mcp"
-sign "$dist/mcpb/server/whatsapp-mcp"
+lipo -create -output "$dist/mcpb/server/askmywa" "$dist/bin/askmywa-arm64" "$dist/bin/askmywa-amd64"
+chmod +x "$dist/mcpb/server/askmywa"
+sign "$dist/mcpb/server/askmywa"
 
 if [[ $notarize == 1 ]]; then
   echo "notarizing (usually a few minutes; a team's first submissions can take an hour or more)"
   submission="$dist/notarize.zip"
   mkdir -p "$dist/notarize"
-  cp "$dist/bin/whatsapp-mcp-arm64" "$dist/bin/whatsapp-mcp-amd64" "$dist/notarize/"
-  cp "$dist/mcpb/server/whatsapp-mcp" "$dist/notarize/whatsapp-mcp-universal"
+  cp "$dist/bin/askmywa-arm64" "$dist/bin/askmywa-amd64" "$dist/notarize/"
+  cp "$dist/mcpb/server/askmywa" "$dist/notarize/askmywa-universal"
   ditto -c -k --keepParent "$dist/notarize" "$submission"
   xcrun notarytool submit "$submission" --key "$NOTARY_KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" \
     --wait --timeout 2h --output-format json | tee "$dist/notarize.json"
@@ -92,9 +92,9 @@ else
 fi
 
 for arch in arm64 amd64; do
-  pkg="whatsapp-mcp-${version}-darwin-${arch}"
+  pkg="askmywa-${version}-darwin-${arch}"
   mkdir -p "$dist/$pkg"
-  cp "$dist/bin/whatsapp-mcp-$arch" "$dist/$pkg/whatsapp-mcp"
+  cp "$dist/bin/askmywa-$arch" "$dist/$pkg/askmywa"
   cp README.md ../LICENSE "$dist/$pkg/"
   tar -C "$dist" -czf "$dist/$pkg.tar.gz" "$pkg"
   rm -rf "${dist:?}/$pkg"
@@ -108,13 +108,13 @@ for target in linux/amd64 linux/arm64 linux/arm windows/amd64 windows/arm64; do
   [[ $arch == arm ]] && name=armv7
   ext=""
   [[ $os == windows ]] && ext=".exe"
-  pkg="whatsapp-mcp-${version}-${os}-${name}"
+  pkg="askmywa-${version}-${os}-${name}"
   mkdir -p "$dist/$pkg"
-  CGO_ENABLED=0 GOOS=$os GOARCH=$arch GOARM=7 go build -trimpath -ldflags "$ldflags" -o "$dist/$pkg/whatsapp-mcp$ext" .
+  CGO_ENABLED=0 GOOS=$os GOARCH=$arch GOARM=7 go build -trimpath -ldflags "$ldflags" -o "$dist/$pkg/askmywa$ext" .
   cp README.md ../LICENSE "$dist/$pkg/"
   if [[ $os == windows ]]; then
     # The extension runs the x64 build on every Windows PC (ARM PCs emulate it).
-    [[ $arch == amd64 ]] && cp "$dist/$pkg/whatsapp-mcp.exe" "$dist/mcpb/server/"
+    [[ $arch == amd64 ]] && cp "$dist/$pkg/askmywa.exe" "$dist/mcpb/server/"
     (cd "$dist" && zip -qr "$pkg.zip" "$pkg")
   else
     tar -C "$dist" -czf "$dist/$pkg.tar.gz" "$pkg"
@@ -135,15 +135,15 @@ PY
 cp extension/icon.png "$dist/mcpb/"
 cp ../LICENSE "$dist/mcpb/"
 npx -y "$mcpb_cli" validate "$dist/mcpb/manifest.json"
-npx -y "$mcpb_cli" pack "$dist/mcpb" "$dist/whatsapp-mcp-${version}.mcpb"
-# The same file without the version, so /releases/latest/download/whatsapp-mcp.mcpb
+npx -y "$mcpb_cli" pack "$dist/mcpb" "$dist/askmywa-${version}.mcpb"
+# The same file without the version, so /releases/latest/download/askmywa.mcpb
 # always serves the newest extension (the website's download button).
-cp "$dist/whatsapp-mcp-${version}.mcpb" "$dist/whatsapp-mcp.mcpb"
+cp "$dist/askmywa-${version}.mcpb" "$dist/askmywa.mcpb"
 
 rm -rf "${dist:?}/bin" "${dist:?}/mcpb"
 (cd "$dist" && shasum -a 256 ./*.tar.gz ./*.zip ./*.mcpb > checksums.txt)
 # The one-line installer and the Homebrew formula (copied by abonur/homebrew-tap).
 cp scripts/install.sh "$dist/install.sh"
-bash scripts/homebrew-formula.sh "$version" "$dist/checksums.txt" > "$dist/whatsapp-mcp.rb"
+bash scripts/homebrew-formula.sh "$version" "$dist/checksums.txt" > "$dist/askmywa.rb"
 echo "done:"
 ls -l "$dist"
