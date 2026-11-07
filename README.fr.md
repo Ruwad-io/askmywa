@@ -100,7 +100,7 @@ curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.
 Relancez-la pour mettre à jour. Avec [Homebrew](https://brew.sh), sur Mac ou Linux :
 
 ```bash
-brew install abonur/tap/askmywa
+brew install ruwad-io/tap/askmywa
 askmywa install-service
 askmywa link
 ```

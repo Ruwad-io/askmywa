@@ -137,7 +137,7 @@ The Windows programs are built unsigned unless `WINDOWS_BIN_DIR` points to a fol
 
 ## Homebrew
 
-[abonur/homebrew-tap](https://github.com/abonur/homebrew-tap) holds `Formula/askmywa.rb`. A workflow in that repository checks every hour for a new release of this one and commits the release's `askmywa.rb`, so no token is shared between the two repositories. To publish a formula right away, run that workflow by hand from its Actions tab. GitHub pauses scheduled workflows after 60 days without activity in a repository: if a release does not reach Homebrew, re-enable the workflow there.
+[Ruwad-io/homebrew-tap](https://github.com/Ruwad-io/homebrew-tap) holds `Formula/askmywa.rb`. A workflow in that repository checks every hour for a new release of this one and commits the release's `askmywa.rb`, so no token is shared between the two repositories. To publish a formula right away, run that workflow by hand from its Actions tab. GitHub pauses scheduled workflows after 60 days without activity in a repository: if a release does not reach Homebrew, re-enable the workflow there.
 
 ## Icons
 

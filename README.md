@@ -67,7 +67,7 @@ Run it again to upgrade. Add `sh -s -- --no-service` after the pipe to install o
 With [Homebrew](https://brew.sh) on Mac or Linux:
 
 ```bash
-brew install abonur/tap/askmywa
+brew install ruwad-io/tap/askmywa
 askmywa install-service
 askmywa link
 ```
