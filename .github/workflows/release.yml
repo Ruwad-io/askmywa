@@ -9,6 +9,11 @@ name: release
 # A tag with a suffix, such as v0.1.0-rc1, publishes a pre-release for
 # testing: signed but not notarized, and ignored by /releases/latest, the
 # installer and Homebrew.
+#
+# The Windows programs are code-signed with Azure Artifact Signing once the
+# repository variable AZURE_SIGNING_ACCOUNT is set (see RELEASING.md). Until
+# then they ship unsigned, as before. Once it is set, a signing failure stops
+# the release.
 on:
   push:
     tags: ['v*']
@@ -22,7 +27,73 @@ permissions:
   contents: write
 
 jobs:
+  windows:
+    # Microsoft's signing action runs only on Windows.
+    if: vars.AZURE_SIGNING_ACCOUNT != ''
+    runs-on: windows-latest
+    # The Azure app registration trusts this environment (its federated
+    # credential), so no Azure password or key is stored in GitHub.
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: whatsapp-go/go.mod
+          cache-dependency-path: whatsapp-go/go.sum
+      - name: Build
+        shell: bash
+        run: bash whatsapp-go/scripts/build-windows.sh "$TAG" windows-signed
+      # The app registration only holds the signer role on the signing
+      # account, not on a subscription.
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+      - name: Sign
+        uses: azure/artifact-signing-action@v2
+        with:
+          endpoint: ${{ vars.AZURE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.AZURE_SIGNING_PROFILE }}
+          files-folder: ${{ github.workspace }}\windows-signed
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          description: askmywa
+          description-url: https://askmywa.com
+          # Sign as the app registration that azure/login signed in with.
+          exclude-environment-credential: true
+      - name: Check the signatures
+        shell: pwsh
+        run: |
+          foreach ($f in Get-ChildItem windows-signed -Filter *.exe) {
+            $sig = Get-AuthenticodeSignature $f.FullName
+            if ($sig.Status -ne 'Valid' -or -not $sig.TimeStamperCertificate) {
+              Write-Output "::error::$($f.Name) is not validly signed and timestamped: $($sig.Status) $($sig.StatusMessage)"
+              exit 1
+            }
+            Write-Output "$($f.Name): $($sig.SignerCertificate.Subject)"
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-signed
+          path: windows-signed/*.exe
+          if-no-files-found: error
+          retention-days: 1
+
   release:
+    needs: windows
+    # Runs after the Windows job, or without it when signing is not set up.
+    if: ${{ !cancelled() && (needs.windows.result == 'success' || needs.windows.result == 'skipped') }}
     runs-on: macos-latest
     defaults:
       run:
@@ -80,8 +151,19 @@ jobs:
             echo "RELEASE_KEYCHAIN=$keychain"
           } >> "$GITHUB_ENV"
 
+      - uses: actions/download-artifact@v4
+        if: needs.windows.result == 'success'
+        with:
+          name: windows-signed
+          path: ${{ runner.temp }}/windows-signed
+
       - name: Build, sign and notarize
+        env:
+          SIGNED_WINDOWS: ${{ needs.windows.result == 'success' && format('{0}/windows-signed', runner.temp) || '' }}
         run: |
+          if [ -n "$SIGNED_WINDOWS" ]; then
+            export WINDOWS_BIN_DIR="$SIGNED_WINDOWS"
+          fi
           if [[ "$TAG" == *-* ]]; then
             echo "pre-release: signed, not notarized"
             unset NOTARY_KEY_PATH NOTARY_KEY_ID NOTARY_ISSUER_ID
