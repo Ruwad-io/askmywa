@@ -29,7 +29,7 @@ C'est tout. Pas de terminal, pas de code.
 
 1. Téléchargez le fichier **[`askmywa.mcpb`](https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb)**, la dernière version, sur [askmywa.com](https://askmywa.com/fr/) ou sur la [page des versions](https://github.com/Ruwad-io/askmywa/releases/latest).
 2. Double-cliquez dessus. Claude s'ouvre et vous demande de confirmer l'installation : acceptez. Le même fichier fonctionne sur Mac et sur Windows.
-3. Ouvrez une nouvelle conversation dans Claude et écrivez : **« Connecte mon WhatsApp »**.
+3. Ouvrez une nouvelle conversation dans Claude et écrivez : **« Connecte mon WhatsApp »**. La première fois, Claude vous demande l'autorisation d'utiliser les outils d'askmywa : choisissez de toujours les autoriser, pour ne plus avoir à le refaire. Les envois restent protégés : chaque message attend votre accord.
 4. Claude vous demande votre numéro de téléphone, avec l'indicatif du pays (par exemple 33 6 12 34 56 78 pour la France). Il vous donne ensuite un **code de 8 caractères**.
 5. Sur votre téléphone, ouvrez WhatsApp :
    - **iPhone** : Réglages > Appareils connectés > Connecter un appareil.
