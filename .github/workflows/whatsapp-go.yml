@@ -46,6 +46,10 @@ jobs:
           ./whatsapp-mcp install-service --dry-run > "$RUNNER_TEMP/whatsapp-mcp.service"
           cat "$RUNNER_TEMP/whatsapp-mcp.service"
           systemd-analyze verify --man=no "$RUNNER_TEMP/whatsapp-mcp.service"
+      - name: Installer (curl)
+        run: bash ./scripts/test-install.sh curl
+      - name: Installer (wget)
+        run: bash ./scripts/test-install.sh wget
 
   # Raspberry Pi 4/5 and other 64-bit ARM Linux machines, and Windows.
   cross:
@@ -74,6 +78,9 @@ jobs:
         run: |
           ./whatsapp-mcp install-service --dry-run > "$RUNNER_TEMP/whatsapp-mcp.service"
           systemd-analyze verify --man=no "$RUNNER_TEMP/whatsapp-mcp.service"
+      - name: Installer
+        if: runner.os == 'Linux'
+        run: bash ./scripts/test-install.sh curl
       - name: Install, query and remove the scheduled task
         if: runner.os == 'Windows'
         run: |
@@ -98,6 +105,10 @@ jobs:
       - run: ./whatsapp-mcp version
       - name: Check the launchd property list
         run: ./whatsapp-mcp install-service --dry-run | plutil -lint -
+      - name: Installer
+        run: bash ./scripts/test-install.sh curl
+      - name: Homebrew formula (style, install, test, service path)
+        run: bash ./scripts/test-homebrew.sh
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
