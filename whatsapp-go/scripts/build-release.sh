@@ -21,6 +21,10 @@
 #   NOTARY_ISSUER_ID       and issuer ID. All three are needed to notarize; notarization
 #                          requires SIGN_IDENTITY.
 #   REQUIRE_NOTARIZATION=1 fail instead of shipping unnotarized binaries (release CI).
+#   WINDOWS_BIN_DIR        a folder holding askmywa-windows-{amd64,arm64}.exe already built
+#                          for this version by scripts/build-windows.sh and code-signed
+#                          (the release workflow signs them on a Windows runner). Without it
+#                          the Windows programs are built here, unsigned.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
@@ -108,17 +112,34 @@ for arch in arm64 amd64; do
   rm -rf "${dist:?}/$pkg" "${dist:?}/app-$arch"
 done
 
-echo "building Linux and Windows"
+if [[ -n "${WINDOWS_BIN_DIR:-}" ]]; then
+  windows_bin="$WINDOWS_BIN_DIR"
+  for arch in amd64 arm64; do
+    if [[ ! -f "$windows_bin/askmywa-windows-$arch.exe" ]]; then
+      echo "error: WINDOWS_BIN_DIR has no askmywa-windows-$arch.exe" >&2
+      exit 1
+    fi
+  done
+  echo "using the signed Windows programs from $windows_bin"
+else
+  windows_bin="$dist/bin/windows"
+  bash scripts/build-windows.sh "$version" "$windows_bin"
+  echo "warning: the Windows programs are not code-signed; SmartScreen may warn when they are downloaded" >&2
+fi
+
+echo "building Linux and packing Windows"
 for target in linux/amd64 linux/arm64 linux/arm windows/amd64 windows/arm64; do
   os=${target%/*}
   arch=${target#*/}
   name=$arch
   [[ $arch == arm ]] && name=armv7
-  ext=""
-  [[ $os == windows ]] && ext=".exe"
   pkg="askmywa-${version}-${os}-${name}"
   mkdir -p "$dist/$pkg"
-  CGO_ENABLED=0 GOOS=$os GOARCH=$arch GOARM=7 go build -trimpath -ldflags "$ldflags" -o "$dist/$pkg/askmywa$ext" .
+  if [[ $os == windows ]]; then
+    cp "$windows_bin/askmywa-windows-$arch.exe" "$dist/$pkg/askmywa.exe"
+  else
+    CGO_ENABLED=0 GOOS=$os GOARCH=$arch GOARM=7 go build -trimpath -ldflags "$ldflags" -o "$dist/$pkg/askmywa" .
+  fi
   cp README.md ../LICENSE "$dist/$pkg/"
   if [[ $os == windows ]]; then
     # The extension runs the x64 build on every Windows PC (ARM PCs emulate it).
