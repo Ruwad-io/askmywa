@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>askmywa — ask your WhatsApp anything</title>
+<meta name="description" content="Claude reads your WhatsApp chats on your computer and answers in plain words. It never sends a thing without your yes. Free and open source.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="alternate" hreflang="fr" href="fr/">
+<meta property="og:title" content="askmywa — ask your WhatsApp anything">
+<meta property="og:description" content="Free, open-source WhatsApp extension for Claude Desktop. Your chats stay on your computer; nothing is sent without your yes.">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="wordmark" href="./">askmy<b>wa</b></a>
+    <nav class="links" aria-label="Main">
+      <a class="lg" href="#setup">Setup</a>
+      <a class="lg" href="#privacy">Privacy</a>
+      <a class="lg" href="#questions">Questions</a>
+      <a href="fr/" hreflang="fr" lang="fr">FR</a>
+      <a href="https://github.com/abonur/whatsapp-mcp">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main">
+  <div class="hero">
+    <div>
+      <h1><span class="rise">Ask your</span><br><span class="rise d1">WhatsApp</span><br><span class="rise d2 hl">anything.</span></h1>
+      <p class="lede rise d3">Claude reads your chats <strong>on your computer</strong> and answers in plain words. It never sends a thing <strong>without your yes</strong>.</p>
+      <div class="rise d4">
+        <a class="composer" href="https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb">
+          <span class="txt">Download for Claude Desktop</span>
+          <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+        </a>
+        <p class="under">Free, for Mac and Windows. Needs the <a href="https://claude.ai/download">Claude desktop app</a>: it does not work in the Claude phone app or on claude.ai.<br>
+        <a class="alt-install" href="#terminal">Linux, Raspberry Pi or Homebrew →</a></p>
+      </div>
+    </div>
+
+    <figure class="flood" aria-label="A busy group chat, and Claude's summary of it" style="margin:0">
+      <div class="chat-head">
+        <span class="avatar" aria-hidden="true">RV</span>
+        <div><b>Rue Voltaire 12</b><span>Sophie, Karim, Paul, Inès and 18 others</span></div>
+        <span class="unread">347</span>
+      </div>
+      <div class="stream" aria-hidden="true">
+        <div class="reel">
+          <div class="m"><i>Sophie</i>Has anyone heard about the elevator?? <small>08:02</small></div>
+          <div class="m"><i>Paul</i>Still broken on the 4th 😩 <small>08:03</small></div>
+          <div class="m"><i>Inès</i>The technician comes Thursday I think <small>08:11</small></div>
+          <div class="m"><i>Karim</i>Thursday morning or afternoon? <small>08:12</small></div>
+          <div class="m"><i>Mme Laurent</i>I can't do stairs with the shopping. Who pays for this? <small>08:20</small></div>
+          <div class="m me">Following 👀 <small>08:21</small></div>
+          <div class="m"><i>Paul</i>The syndic said split by flat size <small>08:34</small></div>
+          <div class="m"><i>Inès</i>9 to noon, confirmed!! <small>09:47</small></div>
+          <div class="m"><i>Thomas</i>Someone needs to let them into the basement <small>09:52</small></div>
+          <div class="m"><i>Sophie</i>I'll grab the ground-floor keys 🙋‍♀️ <small>09:55</small></div>
+          <div class="m"><i>Karim</i>👍👍 <small>09:56</small></div>
+          <div class="m"><i>Mme Laurent</i>And the invoice? <small>10:30</small></div>
+          <div class="m"><i>Paul</i>December apparently <small>10:41</small></div>
+          <div class="m"><i>Lucas</i>also whose bike is in the hall 🚲 <small>11:02</small></div>
+          <div class="m"><i>Sophie</i>Has anyone heard about the elevator?? <small>08:02</small></div>
+          <div class="m"><i>Paul</i>Still broken on the 4th 😩 <small>08:03</small></div>
+          <div class="m"><i>Inès</i>The technician comes Thursday I think <small>08:11</small></div>
+          <div class="m"><i>Karim</i>Thursday morning or afternoon? <small>08:12</small></div>
+          <div class="m"><i>Mme Laurent</i>I can't do stairs with the shopping. Who pays for this? <small>08:20</small></div>
+          <div class="m me">Following 👀 <small>08:21</small></div>
+          <div class="m"><i>Paul</i>The syndic said split by flat size <small>08:34</small></div>
+          <div class="m"><i>Inès</i>9 to noon, confirmed!! <small>09:47</small></div>
+          <div class="m"><i>Thomas</i>Someone needs to let them into the basement <small>09:52</small></div>
+          <div class="m"><i>Sophie</i>I'll grab the ground-floor keys 🙋‍♀️ <small>09:55</small></div>
+          <div class="m"><i>Karim</i>👍👍 <small>09:56</small></div>
+          <div class="m"><i>Mme Laurent</i>And the invoice? <small>10:30</small></div>
+          <div class="m"><i>Paul</i>December apparently <small>10:41</small></div>
+          <div class="m"><i>Lucas</i>also whose bike is in the hall 🚲 <small>11:02</small></div>
+        </div>
+      </div>
+      <figcaption class="answer">
+        <span class="who">Claude · 347 messages read</span>
+        <p>The elevator gets fixed Thursday.</p>
+        <ul>
+          <li>9 am to noon; Sophie has the ground-floor keys.</li>
+          <li>Cost split by flat size, invoice in December.</li>
+          <li>Nobody has claimed the bike in the hall.</li>
+        </ul>
+      </figcaption>
+    </figure>
+  </div>
+  </main>
+</div>
+
+<section class="band night" aria-labelledby="yes-h">
+  <div class="wrap yes">
+    <div>
+      <p class="kicker">Sending</p>
+      <h2 id="yes-h">Nothing leaves without <em>your yes.</em></h2>
+      <p class="lead2">Every message and every file is shown to you first: who it goes to, and exactly what it says. Claude sends it only after you approve that exact preview.</p>
+    </div>
+    <div class="thread" aria-label="Example: sending a message">
+      <div class="b you">Tell Karim I'll be there at 7.</div>
+      <div class="b claude">
+        <span class="stamp">NOT SENT YET</span>
+        <dl><dt>To</dt><dd>Karim Benali · direct chat</dd><dt>Says</dt><dd>I'll be there at 7.</dd></dl>
+        <p class="ask-yes">Shall I send it?</p>
+      </div>
+      <div class="b ok">Yes</div>
+      <div class="sent"><b>✓✓</b>Sent to Karim · 18:42</div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="asks-h">
+  <div class="wrap">
+    <p class="kicker">What people ask</p>
+    <h2 id="asks-h">Talk to it like a person.</h2>
+    <p class="lead2">Claude searches your chats when it needs to. Capitals and accents don't matter: “ecole” finds “école”.</p>
+    <div class="asks">
+      <p class="ask">What did Paul ask me on Tuesday?</p>
+      <p class="ask">Sum up the family group this weekend.</p>
+      <p class="ask">Find the plumber's quote someone sent.</p>
+      <p class="ask">Anything important today?</p>
+      <p class="ask">Download the photo Marc sent yesterday.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="setup" aria-labelledby="setup-h" style="padding-top:0">
+  <div class="wrap setup">
+    <div>
+      <p class="kicker">Setup</p>
+      <h2 id="setup-h">Two minutes. One code.</h2>
+      <p class="lead2">No terminal, no QR code. You link your computer the way you'd link WhatsApp Web, by typing a code on your phone.</p>
+      <div class="ticket" aria-label="Example pairing code">
+        <div class="lbl">Your code · valid 2 minutes</div>
+        <div class="code">K7QM<span>-</span>2XPA</div>
+        <p class="fine">Claude shows you a code like this one. Each code is new and works once.</p>
+      </div>
+    </div>
+    <ol class="steps">
+      <li><div><h3>Download the extension</h3><p>One file, <code>whatsapp-mcp.mcpb</code>, for Mac and Windows.</p></div></li>
+      <li><div><h3>Double-click it</h3><p>Claude opens and asks you to confirm the install.</p></div></li>
+      <li><div><h3>Say “Connect my WhatsApp”</h3><p>In a new chat. Give your number with its country code.</p></div></li>
+      <li><div><h3>Type the code on your phone</h3><p><span class="path">WhatsApp › Linked devices › Link a device › Link with phone number instead</span></p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" id="privacy" aria-labelledby="privacy-h" style="padding-top:0">
+  <div class="wrap">
+    <p class="kicker">Privacy</p>
+    <h2 id="privacy-h">Where your messages go.</h2>
+    <div class="where">
+      <div><span class="place">Your computer</span><p class="what">Everything.</p><p>Your chats are copied into a private file on your computer, the way WhatsApp Web keeps them in your browser.</p></div>
+      <div><span class="place">Claude</span><p class="what">Only what it looks up.</p><p>A message reaches Claude only when Claude reads it to answer your question.</p></div>
+      <div><span class="place">Us</span><p class="what">Nothing.</p><p>There is no askmywa server, no account and no tracking. The program talks to WhatsApp directly.</p></div>
+    </div>
+    <p class="guarantees"><span>Files only from one folder you choose</span><span>Open source, MIT license</span><span>Removed in one sentence</span><span><a href="privacy/">Privacy policy</a></span></p>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="honest-h" style="padding-top:0">
+  <div class="wrap">
+    <div class="honest">
+      <h2 id="honest-h">Read this before you install.</h2>
+      <ul>
+        <li><b>It is not made by WhatsApp.</b> It connects as a linked device, like WhatsApp Web, through an interface WhatsApp has not officially opened. WhatsApp's terms do not allow this, and WhatsApp could restrict or ban an account that uses it.</li>
+        <li><b>Watch for trick messages.</b> A message you receive could try to fool the assistant. That is why every send waits for your yes: read the preview first.</li>
+        <li><b>Your computer has to be on</b> for new messages to arrive. Whatever came in while it slept is caught up when it wakes.</li>
+        <li><b>On Windows</b>, the program isn't code-signed yet. If SmartScreen warns you, choose <i>More info</i> › <i>Run anyway</i>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="band night" id="terminal" aria-labelledby="terminal-h">
+  <div class="wrap term-band">
+    <div>
+      <p class="kicker">With a terminal</p>
+      <h2 id="terminal-h">Linux, Raspberry Pi, Mac.</h2>
+      <p class="lead2">One command picks the right build, checks it, installs the background service and links WhatsApp with a code. Run it again to upgrade. A Pi left on keeps your archive complete while your laptop sleeps. <a href="https://github.com/abonur/whatsapp-mcp#install-without-the-extension-mac-windows-linux">Full guide</a></p>
+    </div>
+    <div>
+      <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh</code></pre>
+      <pre class="term"><code><span class="p">$ </span>brew install abonur/tap/whatsapp-mcp
+<span class="p">$ </span>whatsapp-mcp install-service
+<span class="p">$ </span>whatsapp-mcp link</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="questions" aria-labelledby="q-h">
+  <div class="wrap">
+    <p class="kicker">Questions</p>
+    <h2 id="q-h">Fair questions.</h2>
+    <div class="qa">
+      <div><h3>Is it really free?</h3><p>Yes. Open source under the MIT license, with no account, no subscription and no ads.</p></div>
+      <div><h3>Does it work with Claude on my phone?</h3><p>No. The Claude phone app and claude.ai can't use an extension that lives on your computer. You need the Claude desktop app on a Mac or a Windows PC.</p></div>
+      <div><h3>Can it send messages on its own?</h3><p>No. Every send first returns a preview. Claude sends only after you approve that exact message.</p></div>
+      <div><h3>Will WhatsApp ban my account?</h3><p>We can't promise it won't. It uses the same kind of connection as WhatsApp Web, through an unofficial interface that WhatsApp's terms don't allow.</p></div>
+      <div><h3>How do I remove it?</h3><p>Ask Claude: “Disconnect WhatsApp from this computer and delete the messages.” Then remove the extension in Claude's Settings › Extensions.</p></div>
+      <div><h3>Who makes it?</h3><p>An independent open-source project, not affiliated with WhatsApp, Meta or Anthropic. It started as a rewrite of lharries/whatsapp-mcp. Bugs and questions go to <a href="https://github.com/abonur/whatsapp-mcp/issues">GitHub</a>.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <nav aria-label="Footer">
+        <a href="https://github.com/abonur/whatsapp-mcp">GitHub</a>
+        <a href="https://github.com/abonur/whatsapp-mcp/releases">All downloads</a>
+        <a href="privacy/">Privacy</a>
+        <a href="fr/" hreflang="fr" lang="fr">Français</a>
+      </nav>
+      <p class="legal">askmywa is not affiliated with, endorsed by or sponsored by WhatsApp, Meta or Anthropic. WhatsApp is a trademark of WhatsApp LLC. Claude is a trademark of Anthropic, PBC. No cookies, no analytics.</p>
+    </div>
+    <p class="big-mark" aria-hidden="true">askmy<b>wa</b></p>
+  </div>
+</footer>
+<script src="assets/site.js" defer></script>
+</body>
+</html>
