@@ -1,9 +1,14 @@
 name: release
 
-# Push a tag such as v0.1.0 to publish the macOS binaries and the Claude
-# Desktop extension (.mcpb) as a GitHub release. The binaries are signed with
-# a Developer ID certificate and notarized by Apple; see
-# whatsapp-go/RELEASING.md for the repository secrets this needs.
+# Push a tag such as v0.1.0 to publish the binaries, the Claude Desktop
+# extension (.mcpb), the installer and the Homebrew formula as a GitHub
+# release. The macOS binaries are signed with a Developer ID certificate and
+# notarized by Apple; see whatsapp-go/RELEASING.md for the repository secrets
+# this needs.
+#
+# A tag with a suffix, such as v0.1.0-rc1, publishes a pre-release for
+# testing: signed but not notarized, and ignored by /releases/latest, the
+# installer and Homebrew.
 on:
   push:
     tags: ['v*']
@@ -76,18 +81,43 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Build, sign and notarize
-        env:
-          REQUIRE_NOTARIZATION: '1'
-        run: bash ./scripts/build-release.sh "$TAG"
+        run: |
+          if [[ "$TAG" == *-* ]]; then
+            echo "pre-release: signed, not notarized"
+            unset NOTARY_KEY_PATH NOTARY_KEY_ID NOTARY_ISSUER_ID
+            export REQUIRE_NOTARIZATION=0
+          else
+            export REQUIRE_NOTARIZATION=1
+          fi
+          bash ./scripts/build-release.sh "$TAG"
 
       - name: Publish the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Notes come from release-notes/X.Y.Z.md when it exists.
+          base="${TAG#v}"
+          base="${base%%-*}"
+          notes="$RUNNER_TEMP/notes.md"
+          flags=()
+          if [[ "$TAG" == *-* ]]; then
+            flags+=(--prerelease)
+            printf '%s\n\n' "> Pre-release for testing. The macOS binaries are signed but not notarized, so macOS may block them when opened from a browser download." > "$notes"
+          else
+            : > "$notes"
+          fi
+          if [ -f "release-notes/$base.md" ]; then
+            cat "release-notes/$base.md" >> "$notes"
+            flags+=(--notes-file "$notes")
+          elif [[ "$TAG" == *-* ]]; then
+            flags+=(--notes-file "$notes")
+          else
+            flags+=(--generate-notes)
+          fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/* --clobber
           else
-            gh release create "$TAG" dist/* --title "$TAG" --generate-notes
+            gh release create "$TAG" dist/* --title "$TAG" "${flags[@]}"
           fi
 
       - name: Remove the keychain and the key

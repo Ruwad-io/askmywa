@@ -1,15 +1,19 @@
 # Releasing
 
-A release is a GitHub release with three files: one tarball per Mac architecture and the Claude Desktop extension (`.mcpb`). Every binary is signed with a Developer ID certificate and notarized by Apple, so macOS opens it without a warning.
+A release is a GitHub release with an archive per system and architecture (macOS, Linux, Raspberry Pi, Windows), the Claude Desktop extension (`.mcpb`), the installer (`install.sh`), the Homebrew formula and `checksums.txt`. The macOS binaries are signed with a Developer ID certificate and notarized by Apple, so macOS opens them without a warning.
 
-Pushing a tag does everything:
+Write the notes in `release-notes/X.Y.Z.md`, then push a tag:
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The `release` workflow (`.github/workflows/release.yml`) runs the tests, builds, signs and notarizes, then publishes the release. It refuses to publish binaries that are not notarized.
+The `release` workflow (`.github/workflows/release.yml`) runs the tests, builds, signs and notarizes, then publishes the release with those notes (GitHub's generated notes when the file is missing). It refuses to publish binaries that are not notarized.
+
+## Pre-releases
+
+A tag with a suffix, such as `v0.1.0-rc1`, publishes a pre-release to test the whole chain before the real one: the macOS binaries are signed but not notarized, and the release is marked as a pre-release, so `/releases/latest`, the installer and the Homebrew tap ignore it. Test it with `install.sh --version 0.1.0-rc1`, then delete the pre-release and its tag.
 
 ## One-time setup
 
