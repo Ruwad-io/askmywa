@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politique de confidentialité — askmywa, le WhatsApp MCP pour Claude</title>
+<meta name="description" content="Comment askmywa (whatsapp-mcp) traite vos données : l'archive WhatsApp reste sur votre ordinateur, seul ce que l'assistant consulte lui parvient, et le projet ne collecte rien.">
+<link rel="canonical" href="https://askmywa.com/fr/confidentialite/">
+<link rel="alternate" hreflang="en" href="https://askmywa.com/privacy/">
+<link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/confidentialite/">
+<link rel="alternate" hreflang="x-default" href="https://askmywa.com/privacy/">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#efeaff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120a2e" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="askmywa">
+<meta property="og:url" content="https://askmywa.com/fr/confidentialite/">
+<meta property="og:title" content="Politique de confidentialité — askmywa, le WhatsApp MCP pour Claude">
+<meta property="og:description" content="Votre archive WhatsApp reste sur votre ordinateur, et le projet ne collecte rien.">
+<meta property="og:image" content="https://askmywa.com/assets/og-fr.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<div class="wrap">
+<header class="bar">
+  <a class="wordmark" href="../">askmy<b>wa</b></a>
+  <nav class="links" aria-label="Principal">
+    <a href="../../privacy/" hreflang="en" lang="en">EN</a>
+    <a href="https://github.com/abonur/whatsapp-mcp">GitHub</a>
+  </nav>
+</header>
+<main>
+<article class="doc">
+<h1>Politique de confidentialité</h1>
+<p class="updated">Dernière mise à jour : 7 novembre 2026</p>
+
+<p>Cette politique couvre whatsapp-mcp, le logiciel libre présenté sur ce site (l'extension Claude Desktop, le programme en ligne de commande et le script d'installation), ainsi que ce site. En bref : <b>le logiciel fonctionne sur votre ordinateur, et le projet ne collecte aucune donnée.</b></p>
+
+<h2>Qui sommes-nous</h2>
+<p>whatsapp-mcp est un projet libre et indépendant, publié sous licence MIT sur <a href="https://github.com/abonur/whatsapp-mcp">github.com/abonur/whatsapp-mcp</a>. Il n'a aucun lien avec WhatsApp, Meta ou Anthropic. Contact : <a href="https://github.com/abonur/whatsapp-mcp/issues">tickets GitHub</a>.</p>
+
+<h2>Ce que le projet collecte</h2>
+<p>Rien. Il n'y a ni compte, ni serveur exploité par le projet, ni télémétrie, ni mesure d'audience, ni rapport de plantage. Le projet ne reçoit jamais vos messages, vos contacts, votre numéro ou vos fichiers.</p>
+
+<h2>Ce qui est stocké sur votre ordinateur</h2>
+<p>Pour fonctionner, le logiciel conserve sur votre propre ordinateur, dans des dossiers qui appartiennent à votre compte utilisateur :</p>
+<ul>
+  <li>les clés de la session d'appareil lié WhatsApp, comme WhatsApp Web les garde dans votre navigateur ;</li>
+  <li>une archive de vos messages, conversations et noms de contacts, pour pouvoir y chercher ;</li>
+  <li>les pièces jointes que vous demandez de télécharger, dans un dossier <code>media</code> à l'intérieur de votre dossier d'envoi, pour pouvoir les renvoyer ;</li>
+  <li>des journaux techniques sur la connexion et le service en arrière-plan.</li>
+</ul>
+<p>À part les pièces jointes, tout se trouve dans <code>~/Library/Application Support/whatsapp-mcp</code> sur Mac, <code>%LOCALAPPDATA%\whatsapp-mcp</code> sous Windows et <code>~/.local/share/whatsapp-mcp</code> sous Linux.</p>
+
+<h2>Connexions établies par le logiciel</h2>
+<ul>
+  <li><b>Les serveurs de WhatsApp</b>, en tant qu'appareil lié, pour recevoir et envoyer vos messages. La politique de confidentialité de WhatsApp s'applique à cette connexion.</li>
+  <li><b>GitHub</b>, uniquement quand vous téléchargez, installez ou mettez à jour le logiciel.</li>
+</ul>
+<p>Il n'établit aucune autre connexion réseau.</p>
+
+<h2>Votre assistant IA</h2>
+<p>Quand vous demandez quelque chose à votre assistant, il peut appeler les outils du logiciel, par exemple pour chercher dans vos messages. Les résultats de ces appels, qui peuvent contenir le texte des messages, des noms de contacts et des numéros de téléphone, font alors partie de votre conversation et sont transmis au fournisseur de l'assistant : Anthropic pour Claude. Il les traite selon sa propre politique de confidentialité, comme tout ce que vous écrivez dans la conversation. Les messages que l'assistant ne consulte pas ne sont pas transmis.</p>
+<p>Le logiciel n'envoie un message ou un fichier WhatsApp qu'après avoir montré un aperçu à l'assistant et reçu une seconde confirmation explicite de ce contenu précis, que l'assistant doit obtenir de vous.</p>
+
+<h2>Supprimer vos données</h2>
+<p>Demandez à l'assistant de déconnecter WhatsApp de cet ordinateur et d'effacer les messages : il retire l'appareil de votre compte WhatsApp, arrête le service en arrière-plan et efface l'archive. Vous pouvez aussi retirer l'appareil depuis votre téléphone (WhatsApp › Appareils connectés) et supprimer le dossier indiqué plus haut. Votre dossier d'envoi, pièces jointes téléchargées comprises, n'est jamais supprimé automatiquement : supprimez-le vous-même si vous le souhaitez.</p>
+
+<h2>Ce site</h2>
+<p>Ce site est un ensemble de pages statiques hébergées par GitHub Pages. Il n'utilise ni cookies, ni mesure d'audience, ni scripts ou polices de tiers. GitHub, en tant qu'hébergeur, peut enregistrer des données techniques comme les adresses IP pour des raisons de sécurité ; voir la <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">déclaration de confidentialité de GitHub</a>. Les liens de téléchargement mènent à GitHub.</p>
+
+<h2>Modifications</h2>
+<p>Les modifications de cette politique sont publiées sur cette page, et chaque version est conservée dans l'<a href="https://github.com/abonur/whatsapp-mcp/commits/main/site/fr/confidentialite/index.html">historique public</a> du projet.</p>
+</article>
+</main>
+</div>
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <nav aria-label="Footer"><a href="../">Accueil</a><a href="https://github.com/abonur/whatsapp-mcp">GitHub</a></nav>
+      <p class="legal">askmywa n'est ni affilié, ni approuvé, ni soutenu par WhatsApp, Meta ou Anthropic. WhatsApp est une marque de WhatsApp LLC. Claude est une marque d'Anthropic, PBC.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

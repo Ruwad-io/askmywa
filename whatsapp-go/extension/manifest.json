@@ -13,8 +13,12 @@
     "type": "git",
     "url": "https://github.com/abonur/whatsapp-mcp"
   },
-  "homepage": "https://github.com/abonur/whatsapp-mcp",
+  "homepage": "https://askmywa.com",
+  "documentation": "https://github.com/abonur/whatsapp-mcp#readme",
   "support": "https://github.com/abonur/whatsapp-mcp/issues",
+  "privacy_policies": [
+    "https://askmywa.com/privacy/"
+  ],
   "license": "MIT",
   "icon": "icon.png",
   "keywords": [

@@ -1,6 +1,6 @@
 # WhatsApp MCP
 
-*[Version française](README.fr.md)*
+**[askmywa.com](https://askmywa.com)** · *[Version française](README.fr.md)* · [Privacy policy](https://askmywa.com/privacy/)
 
 An [MCP](https://modelcontextprotocol.io) server for your personal WhatsApp account, as a single Go binary for Mac, Windows and Linux, including Raspberry Pi.
 
@@ -39,7 +39,7 @@ An existing install of the original can switch without pairing again: the new da
 
 ## Install in Claude Desktop (Mac and Windows, no terminal)
 
-1. Download `whatsapp-mcp-<version>.mcpb` from the [latest release](https://github.com/abonur/whatsapp-mcp/releases/latest). The same file works on Mac and Windows.
+1. Download [`whatsapp-mcp.mcpb`](https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb), the latest version, from [askmywa.com](https://askmywa.com) or the [releases](https://github.com/abonur/whatsapp-mcp/releases/latest). The same file works on Mac and Windows.
 2. Double-click it. Claude Desktop opens and asks you to confirm the install.
 3. In a new conversation, write: **Connect my WhatsApp.**
 4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code.

@@ -15,7 +15,7 @@ Built on [whatsmeow](https://github.com/tulir/whatsmeow), the official [MCP Go S
 
 ## Install
 
-The simplest install is the Claude Desktop extension (Mac and Windows): download `whatsapp-mcp-<version>.mcpb` from the [releases](https://github.com/abonur/whatsapp-mcp/releases), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
+The simplest install is the Claude Desktop extension (Mac and Windows): download [`whatsapp-mcp.mcpb`](https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb) (also on [askmywa.com](https://askmywa.com)), double-click it, then ask Claude to connect WhatsApp (see [Pairing from Claude](#pairing-from-claude)). Prebuilt binaries for macOS, Windows (x64, ARM), Linux (x64, ARM64) and 32-bit Raspberry Pi kernels (`armv7`) are attached to the same releases.
 
 On Linux, a Raspberry Pi or a Mac, the installer picks the right archive, checks it against the release's `checksums.txt`, installs it in `~/.local/bin`, installs the service and offers to link WhatsApp. Run it again to upgrade:
 

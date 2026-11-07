@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>askmywa — WhatsApp MCP pour Claude : demandez tout à votre WhatsApp</title>
+<meta name="description" content="Serveur MCP WhatsApp et extension Claude Desktop, gratuits et libres. Claude cherche et résume vos conversations WhatsApp sur votre ordinateur, et n'envoie rien sans votre oui. Mac, Windows, Linux, Raspberry Pi.">
+<link rel="canonical" href="https://askmywa.com/fr/">
+<link rel="alternate" hreflang="en" href="https://askmywa.com/">
+<link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/">
+<link rel="alternate" hreflang="x-default" href="https://askmywa.com/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#efeaff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120a2e" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="askmywa">
+<meta property="og:url" content="https://askmywa.com/fr/">
+<meta property="og:title" content="askmywa — WhatsApp MCP pour Claude : demandez tout à votre WhatsApp">
+<meta property="og:description" content="Demandez à Claude de retrouver, résumer et répondre à vos messages WhatsApp. Vos conversations restent sur votre ordinateur ; rien ne part sans votre oui.">
+<meta property="og:image" content="https://askmywa.com/assets/og-fr.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/fr/", "inLanguage": "fr", "description": "Serveur MCP WhatsApp et extension Claude Desktop, gratuits et libres. Claude cherche et résume vos conversations WhatsApp sur votre ordinateur, et n'envoie rien sans votre oui. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/abonur/whatsapp-mcp", "downloadUrl": "https://github.com/abonur/whatsapp-mcp/releases/latest", "image": "https://askmywa.com/assets/og-fr.png"}</script>
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="wordmark" href="./">askmy<b>wa</b></a>
+    <nav class="links" aria-label="Principal">
+      <a class="lg" href="#installer">Installer</a>
+      <a class="lg" href="#vie-privee">Vie privée</a>
+      <a class="lg" href="#questions">Questions</a>
+      <a href="../" hreflang="en" lang="en">EN</a>
+      <a href="https://github.com/abonur/whatsapp-mcp">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="main">
+  <div class="hero">
+    <div>
+      <p class="eyebrow-mcp rise">Serveur MCP WhatsApp · pour Claude Desktop, Claude Code et Cursor</p>
+      <h1><span class="rise">Demandez</span><br><span class="rise d1">tout à votre</span><br><span class="rise d2 hl">WhatsApp.</span></h1>
+      <p class="lede rise d3">Claude lit vos conversations <strong>sur votre ordinateur</strong> et vous répond simplement. Il n'envoie jamais rien <strong>sans votre oui</strong>.</p>
+      <div class="rise d4">
+        <a class="composer" href="https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb">
+          <span class="txt">Télécharger pour Claude Desktop</span>
+          <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+        </a>
+        <p class="under">Gratuit, pour Mac et Windows. Nécessite l'<a href="https://claude.ai/download">application Claude pour ordinateur</a> : ne fonctionne pas dans l'application Claude du téléphone ni sur claude.ai.<br>
+        <a class="alt-install" href="#terminal">Linux, Raspberry Pi ou Homebrew →</a></p>
+      </div>
+    </div>
+
+    <figure class="flood" aria-label="Un groupe très bavard, et le résumé qu'en fait Claude" style="margin:0">
+      <div class="chat-head">
+        <span class="avatar" aria-hidden="true">RV</span>
+        <div><b>12 rue Voltaire</b><span>Sophie, Karim, Paul, Inès et 18 autres</span></div>
+        <span class="unread">347</span>
+      </div>
+      <div class="stream" aria-hidden="true">
+        <div class="reel">
+          <div class="m"><i>Sophie</i>Quelqu'un a des nouvelles de l'ascenseur ?? <small>08:02</small></div>
+          <div class="m"><i>Paul</i>Toujours en panne au 4e 😩 <small>08:03</small></div>
+          <div class="m"><i>Inès</i>Le technicien passe jeudi je crois <small>08:11</small></div>
+          <div class="m"><i>Karim</i>Jeudi matin ou après-midi ? <small>08:12</small></div>
+          <div class="m"><i>Mme Laurent</i>Je ne peux pas monter les courses à pied. Qui paie ? <small>08:20</small></div>
+          <div class="m me">Je suis 👀 <small>08:21</small></div>
+          <div class="m"><i>Paul</i>Le syndic dit au prorata des surfaces <small>08:34</small></div>
+          <div class="m"><i>Inès</i>9 h à midi, confirmé !! <small>09:47</small></div>
+          <div class="m"><i>Thomas</i>Il faut quelqu'un pour leur ouvrir la cave <small>09:52</small></div>
+          <div class="m"><i>Sophie</i>Je récupère les clés du rez-de-chaussée 🙋‍♀️ <small>09:55</small></div>
+          <div class="m"><i>Karim</i>👍👍 <small>09:56</small></div>
+          <div class="m"><i>Mme Laurent</i>Et la facture ? <small>10:30</small></div>
+          <div class="m"><i>Paul</i>En décembre apparemment <small>10:41</small></div>
+          <div class="m"><i>Lucas</i>au fait c'est à qui le vélo dans le hall 🚲 <small>11:02</small></div>
+          <div class="m"><i>Sophie</i>Quelqu'un a des nouvelles de l'ascenseur ?? <small>08:02</small></div>
+          <div class="m"><i>Paul</i>Toujours en panne au 4e 😩 <small>08:03</small></div>
+          <div class="m"><i>Inès</i>Le technicien passe jeudi je crois <small>08:11</small></div>
+          <div class="m"><i>Karim</i>Jeudi matin ou après-midi ? <small>08:12</small></div>
+          <div class="m"><i>Mme Laurent</i>Je ne peux pas monter les courses à pied. Qui paie ? <small>08:20</small></div>
+          <div class="m me">Je suis 👀 <small>08:21</small></div>
+          <div class="m"><i>Paul</i>Le syndic dit au prorata des surfaces <small>08:34</small></div>
+          <div class="m"><i>Inès</i>9 h à midi, confirmé !! <small>09:47</small></div>
+          <div class="m"><i>Thomas</i>Il faut quelqu'un pour leur ouvrir la cave <small>09:52</small></div>
+          <div class="m"><i>Sophie</i>Je récupère les clés du rez-de-chaussée 🙋‍♀️ <small>09:55</small></div>
+          <div class="m"><i>Karim</i>👍👍 <small>09:56</small></div>
+          <div class="m"><i>Mme Laurent</i>Et la facture ? <small>10:30</small></div>
+          <div class="m"><i>Paul</i>En décembre apparemment <small>10:41</small></div>
+          <div class="m"><i>Lucas</i>au fait c'est à qui le vélo dans le hall 🚲 <small>11:02</small></div>
+        </div>
+      </div>
+      <figcaption class="answer">
+        <span class="who">Claude · 347 messages lus</span>
+        <p>L'ascenseur est réparé jeudi.</p>
+        <ul>
+          <li>De 9 h à midi ; Sophie a les clés du rez-de-chaussée.</li>
+          <li>Frais au prorata des surfaces, facture en décembre.</li>
+          <li>Personne n'a réclamé le vélo du hall.</li>
+        </ul>
+      </figcaption>
+    </figure>
+  </div>
+  </main>
+</div>
+
+<section class="band night" aria-labelledby="oui-h">
+  <div class="wrap yes">
+    <div>
+      <p class="kicker">Envoyer</p>
+      <h2 id="oui-h">Rien ne part sans <em>votre oui.</em></h2>
+      <p class="lead2">Chaque message et chaque fichier vous est d'abord montré : à qui il part, et ce qu'il dit exactement. Claude ne l'envoie qu'après votre accord sur cet aperçu précis.</p>
+    </div>
+    <div class="thread" aria-label="Exemple : envoyer un message">
+      <div class="b you">Dis à Karim que je serai là à 19 h.</div>
+      <div class="b claude">
+        <span class="stamp">PAS ENCORE ENVOYÉ</span>
+        <dl><dt>À</dt><dd>Karim Benali · conversation privée</dd><dt>Texte</dt><dd>Je serai là à 19 h.</dd></dl>
+        <p class="ask-yes">Je l'envoie ?</p>
+      </div>
+      <div class="b ok">Oui</div>
+      <div class="sent"><b>✓✓</b>Envoyé à Karim · 18:42</div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="demandes-h">
+  <div class="wrap">
+    <p class="kicker">Ce qu'on lui demande</p>
+    <h2 id="demandes-h">Parlez-lui normalement.</h2>
+    <p class="lead2">Claude cherche dans vos conversations quand il en a besoin. Majuscules et accents ne comptent pas : « ecole » trouve « école ».</p>
+    <div class="asks">
+      <p class="ask">Qu'est-ce que Paul m'a demandé mardi ?</p>
+      <p class="ask">Résume le groupe de la famille ce week-end.</p>
+      <p class="ask">Retrouve le devis du plombier.</p>
+      <p class="ask">Rien d'important aujourd'hui ?</p>
+      <p class="ask">Télécharge la photo que Marc m'a envoyée hier.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="installer" aria-labelledby="installer-h" style="padding-top:0">
+  <div class="wrap setup">
+    <div>
+      <p class="kicker">Installer</p>
+      <h2 id="installer-h">Deux minutes. Un code.</h2>
+      <p class="lead2">Pas de terminal, pas de QR code. Vous liez votre ordinateur comme pour WhatsApp Web, en tapant un code sur votre téléphone.</p>
+      <div class="ticket" aria-label="Exemple de code de liaison">
+        <div class="lbl">Votre code · valable 2 minutes</div>
+        <div class="code">K7QM<span>-</span>2XPA</div>
+        <p class="fine">Claude vous affiche un code comme celui-ci. Chaque code est nouveau et ne sert qu'une fois.</p>
+      </div>
+    </div>
+    <ol class="steps">
+      <li><div><h3>Téléchargez l'extension</h3><p>Un seul fichier, <code>whatsapp-mcp.mcpb</code>, pour Mac et Windows.</p></div></li>
+      <li><div><h3>Double-cliquez dessus</h3><p>Claude s'ouvre et vous demande de confirmer l'installation.</p></div></li>
+      <li><div><h3>Dites « Connecte mon WhatsApp »</h3><p>Dans une nouvelle conversation. Donnez votre numéro avec l'indicatif du pays.</p></div></li>
+      <li><div><h3>Tapez le code sur le téléphone</h3><p><span class="path">WhatsApp › Appareils connectés › Connecter un appareil › Connecter avec un numéro de téléphone</span></p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" id="vie-privee" aria-labelledby="vie-privee-h" style="padding-top:0">
+  <div class="wrap">
+    <p class="kicker">Vie privée</p>
+    <h2 id="vie-privee-h">Où vont vos messages.</h2>
+    <div class="where">
+      <div><span class="place">Votre ordinateur</span><p class="what">Tout.</p><p>Vos conversations sont copiées dans un fichier privé de votre ordinateur, comme WhatsApp Web les garde dans votre navigateur.</p></div>
+      <div><span class="place">Claude</span><p class="what">Ce qu'il consulte.</p><p>Un message n'arrive à Claude que quand il le lit pour répondre à votre question.</p></div>
+      <div><span class="place">Nous</span><p class="what">Rien.</p><p>Il n'y a ni serveur askmywa, ni compte, ni pistage. Le programme parle directement à WhatsApp.</p></div>
+    </div>
+    <p class="guarantees"><span>Fichiers envoyés depuis un seul dossier</span><span>Code ouvert, licence MIT</span><span>Se retire en une phrase</span><span><a href="confidentialite/">Politique de confidentialité</a></span></p>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="honnete-h" style="padding-top:0">
+  <div class="wrap">
+    <div class="honest">
+      <h2 id="honnete-h">À lire avant d'installer.</h2>
+      <ul>
+        <li><b>Ce n'est pas un produit de WhatsApp.</b> L'extension se connecte comme un appareil lié, à la manière de WhatsApp Web, par une interface que WhatsApp n'a pas officiellement ouverte. Les conditions de WhatsApp ne l'autorisent pas, et WhatsApp pourrait restreindre ou bannir un compte qui l'utilise.</li>
+        <li><b>Méfiez-vous des messages piégés.</b> Un message reçu pourrait tenter de tromper l'assistant. C'est pour cela que chaque envoi attend votre oui : lisez l'aperçu d'abord.</li>
+        <li><b>L'ordinateur doit être allumé</b> pour que les nouveaux messages arrivent. Ceux reçus pendant qu'il dort sont rattrapés au réveil.</li>
+        <li><b>Sous Windows</b>, le programme n'est pas encore signé. Si SmartScreen s'affiche, choisissez <i>Informations complémentaires</i> › <i>Exécuter quand même</i>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="band night" id="terminal" aria-labelledby="terminal-h">
+  <div class="wrap term-band">
+    <div>
+      <p class="kicker">Pour les développeurs</p>
+      <h2 id="terminal-h">Un serveur MCP WhatsApp en un seul programme.</h2>
+      <p class="lead2">Sous l'extension, il y a un serveur MCP : <code>whatsapp-mcp serve</code> parle MCP sur stdio, avec 15 outils typés comme <code>list_messages</code>, <code>search_contacts</code> et un <code>send_message</code> qui attend une confirmation. Sous Linux, sur un Raspberry Pi ou sur Mac, une commande choisit la bonne version, la vérifie, installe le service en arrière-plan et lie WhatsApp avec un code. Un Pi laissé allumé garde l'archive complète pendant que votre ordinateur dort. <a href="https://github.com/abonur/whatsapp-mcp/blob/main/README.fr.md">Guide complet</a></p>
+    </div>
+    <div>
+      <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/abonur/whatsapp-mcp/releases/latest/download/install.sh | sh</code></pre>
+      <pre class="term"><code><span class="p">$ </span>brew install abonur/tap/whatsapp-mcp
+<span class="p">$ </span>whatsapp-mcp install-service
+<span class="p">$ </span>whatsapp-mcp link</code></pre>
+      <pre class="term"><code><span class="p">$ </span>claude mcp add whatsapp -- ~/.local/bin/whatsapp-mcp serve</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="questions" aria-labelledby="q-h">
+  <div class="wrap">
+    <p class="kicker">Questions</p>
+    <h2 id="q-h">Bonnes questions.</h2>
+    <div class="qa">
+      <div><h3>C'est vraiment gratuit ?</h3><p>Oui. Logiciel libre sous licence MIT, sans compte, sans abonnement et sans publicité.</p></div>
+      <div><h3>Ça marche avec Claude sur mon téléphone ?</h3><p>Non. L'application Claude du téléphone et claude.ai ne peuvent pas utiliser une extension installée sur votre ordinateur. Il faut l'application Claude pour ordinateur, sur Mac ou PC Windows.</p></div>
+      <div><h3>Peut-il envoyer des messages tout seul ?</h3><p>Non. Chaque envoi renvoie d'abord un aperçu. Claude n'envoie qu'après votre accord sur ce message précis.</p></div>
+      <div><h3>WhatsApp va-t-il bannir mon compte ?</h3><p>On ne peut pas promettre que non. L'outil utilise le même type de connexion que WhatsApp Web, par une interface non officielle que les conditions de WhatsApp n'autorisent pas.</p></div>
+      <div><h3>Comment le retirer ?</h3><p>Demandez à Claude : « Déconnecte WhatsApp de cet ordinateur et efface les messages. » Puis retirez l'extension dans Réglages › Extensions de Claude.</p></div>
+      <div><h3>Qui est derrière ?</h3><p>Un projet libre et indépendant, sans lien avec WhatsApp, Meta ou Anthropic. Il est né d'une réécriture de lharries/whatsapp-mcp. Bugs et questions sur <a href="https://github.com/abonur/whatsapp-mcp/issues">GitHub</a>.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <nav aria-label="Pied de page">
+        <a href="https://github.com/abonur/whatsapp-mcp">GitHub</a>
+        <a href="https://github.com/abonur/whatsapp-mcp/releases">Tous les téléchargements</a>
+        <a href="confidentialite/">Confidentialité</a>
+        <a href="../" hreflang="en" lang="en">English</a>
+      </nav>
+      <p class="legal">askmywa n'est ni affilié, ni approuvé, ni soutenu par WhatsApp, Meta ou Anthropic. WhatsApp est une marque de WhatsApp LLC. Claude est une marque d'Anthropic, PBC. Ni cookies, ni mesure d'audience.</p>
+    </div>
+    <p class="big-mark" aria-hidden="true">askmy<b>wa</b></p>
+  </div>
+</footer>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

@@ -4,6 +4,7 @@
 #   whatsapp-mcp-<version>-linux-{amd64,arm64,armv7}.tar.gz  Linux and Raspberry Pi
 #   whatsapp-mcp-<version>-windows-{amd64,arm64}.zip
 #   whatsapp-mcp-<version>.mcpb   Claude Desktop extension: macOS universal binary + Windows x64
+#   whatsapp-mcp.mcpb             the same, under a stable name for direct download links
 #   checksums.txt
 #   install.sh        one-line installer for Linux and macOS
 #   whatsapp-mcp.rb   Homebrew formula
@@ -135,6 +136,9 @@ cp extension/icon.png "$dist/mcpb/"
 cp ../LICENSE "$dist/mcpb/"
 npx -y "$mcpb_cli" validate "$dist/mcpb/manifest.json"
 npx -y "$mcpb_cli" pack "$dist/mcpb" "$dist/whatsapp-mcp-${version}.mcpb"
+# The same file without the version, so /releases/latest/download/whatsapp-mcp.mcpb
+# always serves the newest extension (the website's download button).
+cp "$dist/whatsapp-mcp-${version}.mcpb" "$dist/whatsapp-mcp.mcpb"
 
 rm -rf "${dist:?}/bin" "${dist:?}/mcpb"
 (cd "$dist" && shasum -a 256 ./*.tar.gz ./*.zip ./*.mcpb > checksums.txt)
