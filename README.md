@@ -1,3 +1,5 @@
+<img src="whatsapp-go/assets/logo.svg" width="96" height="96" alt="askmywa logo">
+
 # askmywa — WhatsApp MCP for Claude
 
 **[askmywa.com](https://askmywa.com)** · *[Version française](README.fr.md)* · [Privacy policy](https://askmywa.com/privacy/)
@@ -54,7 +56,7 @@ To remove it, ask Claude to **disconnect WhatsApp from this computer** (it unlin
 
 ## Install without the extension (Mac, Windows, Linux)
 
-On Linux, a Raspberry Pi or a Mac, one command downloads the right build, checks its SHA-256, installs it in `~/.local/bin`, starts the background service and offers to link WhatsApp:
+On Linux, a Raspberry Pi or a Mac, one command downloads the right build, checks its SHA-256, installs it (on a Mac, `askmywa.app` in `~/Applications`, with the command linked in `~/.local/bin`), starts the background service and offers to link WhatsApp:
 
 ```bash
 curl -fsSL https://github.com/abonur/askmywa/releases/latest/download/install.sh | sh

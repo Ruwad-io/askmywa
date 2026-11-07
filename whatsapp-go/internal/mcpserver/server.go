@@ -29,6 +29,10 @@ import (
 // Version is set by main from the build.
 var Version = "dev"
 
+// Icons are the server's logo, shown by MCP clients that display server
+// icons; main sets them from the embedded assets/logo.svg.
+var Icons []mcp.Icon
+
 // Server holds the dependencies of the tool handlers.
 type Server struct {
 	store  *store.Store
@@ -56,7 +60,8 @@ the first call. Contacts can be given as a phone number, a JID or a name.`
 // svc may be nil when the service cannot be managed (tests, other OSes).
 func New(st *store.Store, sender ipc.Sender, svc ServiceManager, paths config.Paths, log *slog.Logger) *mcp.Server {
 	s := &Server{store: st, sender: sender, svc: svc, paths: paths, log: log}
-	srv := mcp.NewServer(&mcp.Implementation{Name: "whatsapp", Title: "WhatsApp", Version: Version},
+	srv := mcp.NewServer(&mcp.Implementation{Name: "askmywa", Title: "askmywa for WhatsApp", Version: Version,
+		WebsiteURL: "https://askmywa.com", Icons: Icons},
 		&mcp.ServerOptions{Instructions: Instructions, Logger: log})
 	s.registerSetup(srv)
 	s.register(srv)

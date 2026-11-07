@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Builds the release artifacts into dist/:
-#   askmywa-<version>-darwin-{arm64,amd64}.tar.gz   macOS, signed and notarized
+#   askmywa-<version>-darwin-{arm64,amd64}.tar.gz   macOS askmywa.app, signed, notarized and stapled
 #   askmywa-<version>-linux-{amd64,arm64,armv7}.tar.gz  Linux and Raspberry Pi
 #   askmywa-<version>-windows-{amd64,arm64}.zip
-#   askmywa-<version>.mcpb   Claude Desktop extension: macOS universal binary + Windows x64
+#   askmywa-<version>.mcpb   Claude Desktop extension: macOS universal askmywa.app + Windows x64
 #   askmywa.mcpb             the same, under a stable name for direct download links
 #   checksums.txt
 #   install.sh        one-line installer for Linux and macOS
@@ -44,36 +44,41 @@ if [[ "${REQUIRE_NOTARIZATION:-0}" == 1 && $notarize == 0 ]]; then
   exit 1
 fi
 
-# sign BINARY: Developer ID with the hardened runtime and a secure timestamp
-# (both required by notarization), or ad hoc when no identity is configured.
+# sign APP: signs askmywa.app with Developer ID, the hardened runtime and a
+# secure timestamp (all required by notarization), or ad hoc when no
+# identity is configured. The bundle identifier is com.askmywa.app.
 sign() {
   if [[ -n "${SIGN_IDENTITY:-}" ]]; then
-    codesign --force --options runtime --timestamp --identifier com.askmywa.cli --sign "$SIGN_IDENTITY" "$1"
+    codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$1"
   else
     codesign --force --sign - "$1"
   fi
-  codesign --verify --strict "$1"
+  codesign --verify --deep --strict "$1"
 }
 
+# On macOS every build ships inside askmywa.app (scripts/macos-app.sh), so
+# that System Settings shows the logo for the background service.
 ldflags="-s -w -X main.version=${version}"
 for arch in arm64 amd64; do
   echo "building darwin/${arch}"
   CGO_ENABLED=0 GOOS=darwin GOARCH="$arch" go build -trimpath -ldflags "$ldflags" -o "$dist/bin/askmywa-$arch" .
-  sign "$dist/bin/askmywa-$arch"
+  bash scripts/macos-app.sh "$dist/bin/askmywa-$arch" "$dist/app-$arch" "$version" >/dev/null
+  sign "$dist/app-$arch/askmywa.app"
 done
 
-echo "building the universal binary"
-# lipo drops the per-architecture signatures, so the result is signed again.
-lipo -create -output "$dist/mcpb/server/askmywa" "$dist/bin/askmywa-arm64" "$dist/bin/askmywa-amd64"
-chmod +x "$dist/mcpb/server/askmywa"
-sign "$dist/mcpb/server/askmywa"
+echo "building the universal app for the extension"
+lipo -create -output "$dist/bin/askmywa-universal" "$dist/bin/askmywa-arm64" "$dist/bin/askmywa-amd64"
+bash scripts/macos-app.sh "$dist/bin/askmywa-universal" "$dist/mcpb/server" "$version" >/dev/null
+sign "$dist/mcpb/server/askmywa.app"
+apps=("$dist/app-arm64/askmywa.app" "$dist/app-amd64/askmywa.app" "$dist/mcpb/server/askmywa.app")
 
 if [[ $notarize == 1 ]]; then
   echo "notarizing (usually a few minutes; a team's first submissions can take an hour or more)"
   submission="$dist/notarize.zip"
-  mkdir -p "$dist/notarize"
-  cp "$dist/bin/askmywa-arm64" "$dist/bin/askmywa-amd64" "$dist/notarize/"
-  cp "$dist/mcpb/server/askmywa" "$dist/notarize/askmywa-universal"
+  for a in arm64 amd64 universal; do mkdir -p "$dist/notarize/$a"; done
+  ditto "${apps[0]}" "$dist/notarize/arm64/askmywa.app"
+  ditto "${apps[1]}" "$dist/notarize/amd64/askmywa.app"
+  ditto "${apps[2]}" "$dist/notarize/universal/askmywa.app"
   ditto -c -k --keepParent "$dist/notarize" "$submission"
   xcrun notarytool submit "$submission" --key "$NOTARY_KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" \
     --wait --timeout 2h --output-format json | tee "$dist/notarize.json"
@@ -84,20 +89,23 @@ if [[ $notarize == 1 ]]; then
     [[ -n "$id" ]] && xcrun notarytool log "$id" --key "$NOTARY_KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID" >&2 || true
     exit 1
   fi
-  # Bare executables cannot be stapled: Gatekeeper fetches the ticket online
-  # the first time the binary runs.
+  # Apps can carry their ticket, so macOS does not need to go online the
+  # first time they run.
+  for app in "${apps[@]}"; do xcrun stapler staple "$app"; done
   rm -rf "${dist:?}/notarize" "$submission" "$dist/notarize.json"
 else
-  echo "warning: binaries are not notarized; Gatekeeper will block them when downloaded" >&2
+  echo "warning: the apps are not notarized; Gatekeeper will block them when downloaded" >&2
 fi
 
 for arch in arm64 amd64; do
   pkg="askmywa-${version}-darwin-${arch}"
   mkdir -p "$dist/$pkg"
-  cp "$dist/bin/askmywa-$arch" "$dist/$pkg/askmywa"
+  ditto "$dist/app-$arch/askmywa.app" "$dist/$pkg/askmywa.app"
+  # The command line keeps working from the archive: askmywa -> the app's binary.
+  ln -s askmywa.app/Contents/MacOS/askmywa "$dist/$pkg/askmywa"
   cp README.md ../LICENSE "$dist/$pkg/"
   tar -C "$dist" -czf "$dist/$pkg.tar.gz" "$pkg"
-  rm -rf "${dist:?}/$pkg"
+  rm -rf "${dist:?}/$pkg" "${dist:?}/app-$arch"
 done
 
 echo "building Linux and Windows"

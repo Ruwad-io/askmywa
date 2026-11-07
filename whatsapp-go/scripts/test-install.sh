@@ -25,6 +25,13 @@ fake_release() {
   local v=$1 pkg="askmywa-$1-$os-$arch"
   mkdir -p "$work/pkg/$pkg" "$work/rel/download/v$v"
   CGO_ENABLED=0 go build -ldflags "-X main.version=$v" -o "$work/pkg/$pkg/askmywa" .
+  if [[ $os == darwin ]]; then
+    # Like the release: askmywa.app plus a link to its binary.
+    bash scripts/macos-app.sh "$work/pkg/$pkg/askmywa" "$work/pkg/$pkg" "$v" >/dev/null
+    codesign --force --sign - "$work/pkg/$pkg/askmywa.app" 2>/dev/null
+    rm "$work/pkg/$pkg/askmywa"
+    ln -s askmywa.app/Contents/MacOS/askmywa "$work/pkg/$pkg/askmywa"
+  fi
   tar -C "$work/pkg" -czf "$work/rel/download/v$v/$pkg.tar.gz" "$pkg"
   local sum="sha256sum"
   command -v sha256sum >/dev/null || sum="shasum -a 256"
@@ -72,7 +79,7 @@ if [[ $fetcher == wget ]]; then
 fi
 
 run() {
-  PATH="$path" ASKMYWA_RELEASES="http://127.0.0.1:$port" sh -s -- --no-service --dir "$work/bin" "$@" < scripts/install.sh
+  PATH="$path" ASKMYWA_RELEASES="http://127.0.0.1:$port" ASKMYWA_APP_DIR="$work/Applications" sh -s -- --no-service --dir "$work/bin" "$@" < scripts/install.sh
 }
 
 echo "--- install the latest release ($fetcher), over a pre-rename whatsapp-mcp binary"
@@ -86,6 +93,10 @@ fake_release 1.1.0
 echo 1.1.0 > "$work/rel/LATEST"
 run
 "$work/bin/askmywa" version | grep -qx "askmywa 1.1.0"
+if [[ $os == darwin ]]; then
+  [[ -L "$work/bin/askmywa" && -x "$work/Applications/askmywa.app/Contents/MacOS/askmywa" ]]
+  [[ ! -e "$work/Applications/askmywa.app.old" && ! -e "$work/Applications/askmywa.app.new" ]]
+fi
 
 echo "--- tampered archive is refused"
 sums="$work/rel/download/v1.1.0/checksums.txt"

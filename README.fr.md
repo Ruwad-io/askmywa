@@ -1,3 +1,5 @@
+<img src="whatsapp-go/assets/logo.svg" width="96" height="96" alt="askmywa logo">
+
 # askmywa — WhatsApp pour Claude
 
 **[askmywa.com](https://askmywa.com/fr/)** · *[English version](README.md)* · [Politique de confidentialité](https://askmywa.com/fr/confidentialite/)

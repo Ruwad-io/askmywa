@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M8 10h48a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H26l-14 10v-10H8a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z" fill="#5b34f2"/><path d="M18 24h28M18 34h18" stroke="#ffd43b" stroke-width="6" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>askmywa</title>
+  <rect width="1024" height="1024" rx="232" fill="#5b34f2"/>
+  <rect x="168" y="200" width="688" height="520" rx="240" fill="#ffffff"/>
+  <path d="M318 640 L262 842 L486 712 Z" fill="#ffffff" stroke="#ffffff" stroke-width="24" stroke-linejoin="round"/>
+  <path d="M352 336h300" stroke="#d6cbff" stroke-width="44" stroke-linecap="round"/>
+  <path d="M296 424 L738 400 L728 520 L286 544 Z" fill="#ffd43b" stroke="#ffd43b" stroke-width="20" stroke-linejoin="round"/>
+  <path d="M352 472h330" stroke="#1b1240" stroke-width="50" stroke-linecap="round"/>
+  <path d="M352 608h200" stroke="#d6cbff" stroke-width="44" stroke-linecap="round"/>
+</svg>
