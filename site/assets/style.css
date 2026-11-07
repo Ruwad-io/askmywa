@@ -284,3 +284,9 @@ footer { padding: 64px 0 40px; overflow: hidden; }
 .big-mark { letter-spacing: -0.025em; }
 h1 .hl { color: var(--yellow-ink); }
 h1 .hl::before { left: -0.06em; right: -0.1em; bottom: -0.08em; height: 0.62em; }
+.eyebrow-mcp { display: block; font: 500 0.76rem/1.4 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--violet); margin: 0 0 22px; }
+.lead2 code { font: 500 0.82em var(--mono); background: var(--night-2); color: var(--night-text); border-radius: 6px; padding: 1px 6px; }
+.term-band h2 { font-size: clamp(2.2rem, 4.4vw, 3.8rem); }
+@media (min-width: 1000px) { .term-band { grid-template-columns: 1fr 1fr; gap: 64px; } }
+.term-band h2 { font-size: clamp(2.2rem, 3.8vw, 3.3rem); }
+.term-band > div { min-width: 0; }
