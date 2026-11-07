@@ -1,6 +1,6 @@
 # WhatsApp pour Claude
 
-*[English version](README.md)*
+**[askmywa.com](https://askmywa.com/fr/)** · *[English version](README.md)* · [Politique de confidentialité](https://askmywa.com/fr/confidentialite/)
 
 Cette extension permet à Claude de lire, chercher et envoyer vos messages WhatsApp, depuis l'application Claude sur votre Mac ou votre PC Windows.
 
@@ -25,7 +25,7 @@ C'est tout. Pas de terminal, pas de code.
 
 ## Installer
 
-1. Téléchargez le fichier **`whatsapp-mcp-….mcpb`** sur la [page des versions](https://github.com/abonur/whatsapp-mcp/releases/latest).
+1. Téléchargez le fichier **[`whatsapp-mcp.mcpb`](https://github.com/abonur/whatsapp-mcp/releases/latest/download/whatsapp-mcp.mcpb)**, la dernière version, sur [askmywa.com](https://askmywa.com/fr/) ou sur la [page des versions](https://github.com/abonur/whatsapp-mcp/releases/latest).
 2. Double-cliquez dessus. Claude s'ouvre et vous demande de confirmer l'installation : acceptez. Le même fichier fonctionne sur Mac et sur Windows.
 3. Ouvrez une nouvelle conversation dans Claude et écrivez : **« Connecte mon WhatsApp »**.
 4. Claude vous demande votre numéro de téléphone, avec l'indicatif du pays (par exemple 33 6 12 34 56 78 pour la France). Il vous donne ensuite un **code de 8 caractères**.
