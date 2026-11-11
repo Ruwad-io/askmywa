@@ -11,6 +11,8 @@ git push origin v0.1.0
 
 The `release` workflow (`.github/workflows/release.yml`) runs the tests, builds, signs and notarizes, then publishes the release with those notes (GitHub's generated notes when the file is missing). It refuses to publish binaries that are not notarized.
 
+Once the release is published, the `mcp-registry` workflow lists it in the [official MCP Registry](https://registry.modelcontextprotocol.io) as `io.github.Ruwad-io/askmywa`, from `server.json` at the repository root. It fills in the version, the `.mcpb` download URL and its SHA-256 itself, and signs in with GitHub's OIDC token, so it needs no secret. To list a release that is already out, run the workflow by hand with its tag.
+
 ## Pre-releases
 
 A tag with a suffix, such as `v0.1.0-rc1`, publishes a pre-release to test the whole chain before the real one: the macOS binaries are signed but not notarized, and the release is marked as a pre-release, so `/releases/latest`, the installer and the Homebrew tap ignore it. Test it with `install.sh --version 0.1.0-rc1`, then delete the pre-release and its tag.

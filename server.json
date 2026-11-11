@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Ruwad-io/askmywa",
+  "title": "askmywa for WhatsApp",
+  "description": "Read, search and send your personal WhatsApp messages. Local archive, every send needs your yes.",
+  "websiteUrl": "https://askmywa.com",
+  "repository": {
+    "url": "https://github.com/Ruwad-io/askmywa",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://askmywa.com/assets/icon-512.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/Ruwad-io/askmywa/releases/download/v0.1.0/askmywa-0.1.0.mcpb",
+      "fileSha256": "b64dc861e4f1037875937fc8b8fd0bfe0e2f2f94d4a5961447602cd8fd0ceac8",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
