@@ -1,0 +1,71 @@
+name: Something doesn't work
+description: Report a bug in askmywa
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Check the [troubleshooting table](https://github.com/Ruwad-io/askmywa/blob/main/whatsapp-go/README.md#troubleshooting) first: it covers the most common ones.
+
+        **This page is public.** Don't paste message contents, contact names or phone numbers. Replace them with placeholders such as `Contact A` or `33600000000`.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+      placeholder: I asked Claude to "connect my WhatsApp", entered my number, and…
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: Computer
+      options:
+        - Mac (Apple Silicon)
+        - Mac (Intel)
+        - Windows
+        - Linux
+        - Raspberry Pi
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: Assistant
+      options:
+        - Claude Desktop (extension)
+        - Claude Code
+        - ChatGPT or Codex
+        - Cursor
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you installed askmywa
+      options:
+        - Claude Desktop extension (.mcpb)
+        - install.sh
+        - Homebrew
+        - Archive from the release page
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: askmywa version
+      description: Run `askmywa --version`, or look at the extension's version in Claude Desktop > Settings > Extensions.
+      placeholder: "0.1.0"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log lines
+      description: |
+        The last lines of `daemon.log` around the problem, after removing any message text, names or numbers. The log folder is:
+        - Mac: `~/Library/Logs/askmywa`
+        - Windows: `%LOCALAPPDATA%\askmywa\logs`
+        - Linux and Raspberry Pi: `~/.local/state/askmywa`
+      render: text
