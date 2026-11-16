@@ -36,6 +36,7 @@
   <header class="bar">
     <a class="wordmark" href="./"><img src="assets/favicon.svg" alt="" width="30" height="30">askmy<b>wa</b></a>
     <nav class="links" aria-label="Main">
+      <a class="lg" href="#demo">Demo</a>
       <a class="lg" href="#setup">Setup</a>
       <a class="lg" href="#privacy">Privacy</a>
       <a class="lg" href="#questions">Questions</a>
@@ -57,6 +58,7 @@
           <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
         </a>
         <p class="under">Free · Mac and Windows · needs the <a href="https://claude.ai/download">Claude desktop app</a>. <a href="#setup">Installation steps →</a></p>
+        <p class="demo-cta"><a href="#demo">▶ Watch the demo · 53 sec</a><span>Silent video · fictional data</span></p>
         <a class="other-assistant" href="#chatgpt"><strong>Using ChatGPT or Codex? →</strong><span>Install from Terminal · ChatGPT on Mac</span></a>
         <p class="under">Desktop only; no phone or browser app. <a href="#terminal">Linux, Raspberry Pi and other assistants →</a></p>
       </div>
@@ -114,6 +116,36 @@
   </div>
   </main>
 </div>
+
+<section class="band demo-band" id="demo" aria-labelledby="demo-h">
+  <div class="wrap">
+    <p class="kicker">The demo · 53 seconds · silent video</p>
+    <h2 id="demo-h">From messages to a useful answer.</h2>
+    <p class="lead2">Search a group, check the sources, then prepare a reply. Switch to full screen to read the messages.</p>
+    <figure class="demo-player">
+      <video controls playsinline preload="none" width="1280" height="720" poster="assets/demo-en.jpg" aria-label="Illustrated askmywa demonstration using fictional data" aria-describedby="demo-note">
+        <source src="assets/demo-en.mp4" type="video/mp4">
+        <track kind="captions" src="assets/demo-en.vtt" srclang="en" label="English">
+        <p><a href="assets/demo-en.mp4">Download the MP4 video</a></p>
+      </video>
+      <figcaption id="demo-note">The video uses a presentation interface and a fictional archive. Search and sending preview results come from real runs of askmywa v0.1.0. The summary was written for the video. No WhatsApp account is linked and no message is sent.</figcaption>
+    </figure>
+    <details class="demo-transcript">
+      <summary>Read the transcript</summary>
+      <ol>
+        <li><b>00:00 — The scenario.</b> A fictional group of six messages in an isolated local archive. The video illustrates server results in an interface created for this presentation.</li>
+        <li><b>00:05 — Search.</b> Example question: “What was decided about the elevator?” The actual search for “elevator” finds two messages.</li>
+        <li><b>00:11 — Check.</b> The fictional archive covers 16 November 2026, 08:02–11:02, Paris time. The results show the authors, times and original text.</li>
+        <li><b>00:19 — Catch up.</b> Summary written for this video: technician on Thursday 19 November, 9 am to noon (Inès, 09:47); Sophie lets the technician in (09:55); cost split by flat size and invoice expected in December (Paul, 08:34 and 10:41).</li>
+        <li><b>00:26 — Prepare a reply.</b> The actual preview identifies “Sophie (demo)” and the text: “Thanks Sophie, I'll be there on Thursday at 9 am for the technician.” The server says nothing was sent and confirmation is needed.</li>
+        <li><b>00:34 — Decide.</b> Your assistant is instructed to show you the preview, ask for your approval and then confirm the send. askmywa has no independent approval window. This demonstration stops at the preview.</li>
+        <li><b>00:42 — Know the scope.</b> The archive stays on your computer. In real use, retrieved results are sent to Anthropic or OpenAI. askmywa does not collect them. The history supplied by WhatsApp may be incomplete.</li>
+        <li><b>00:48 — Your turn.</b> Free and open source. Claude Desktop on Mac or Windows; ChatGPT on Mac and Codex via the Terminal installer.</li>
+      </ol>
+      <p><a href="assets/demo-en.mp4">Download the MP4 video</a> · <a href="https://github.com/Ruwad-io/askmywa/blob/main/.github/assets/demo-run-en.json">View the results of this run</a></p>
+    </details>
+  </div>
+</section>
 
 <section class="band night" aria-labelledby="yes-h">
   <div class="wrap yes">

@@ -1,0 +1,292 @@
+{
+  "fictional_data": true,
+  "presentation_note": "Real MCP tool outputs, presented in an illustrated video. Not a capture of Claude. No WhatsApp pairing or send.",
+  "server": {
+    "name": "askmywa",
+    "title": "askmywa for WhatsApp",
+    "version": "0.1.0",
+    "websiteUrl": "https://askmywa.com",
+    "icons": [
+      {
+        "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiPgogIDx0aXRsZT5hc2tteXdhPC90aXRsZT4KICA8cmVjdCB3aWR0aD0iMTAyNCIgaGVpZ2h0PSIxMDI0IiByeD0iMjMyIiBmaWxsPSIjNWIzNGYyIi8+CiAgPHJlY3QgeD0iMTY4IiB5PSIyMDAiIHdpZHRoPSI2ODgiIGhlaWdodD0iNTIwIiByeD0iMjQwIiBmaWxsPSIjZmZmZmZmIi8+CiAgPHBhdGggZD0iTTMxOCA2NDAgTDI2MiA4NDIgTDQ4NiA3MTIgWiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjI0IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgPHBhdGggZD0iTTM1MiAzMzZoMzAwIiBzdHJva2U9IiNkNmNiZmYiIHN0cm9rZS13aWR0aD0iNDQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0yOTYgNDI0IEw3MzggNDAwIEw3MjggNTIwIEwyODYgNTQ0IFoiIGZpbGw9IiNmZmQ0M2IiIHN0cm9rZT0iI2ZmZDQzYiIgc3Ryb2tlLXdpZHRoPSIyMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0zNTIgNDcyaDMzMCIgc3Ryb2tlPSIjMWIxMjQwIiBzdHJva2Utd2lkdGg9IjUwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNMzUyIDYwOGgyMDAiIHN0cm9rZT0iI2Q2Y2JmZiIgc3Ryb2tlLXdpZHRoPSI0NCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=",
+        "mimeType": "image/svg+xml",
+        "sizes": [
+          "any"
+        ]
+      },
+      {
+        "src": "https://askmywa.com/assets/icon-192.png",
+        "mimeType": "image/png",
+        "sizes": [
+          "192x192"
+        ]
+      }
+    ]
+  },
+  "binary_sha256": "2171bd946e5906a7e0796e3a7bd3795df7fdf05f2e3b68773b40f9f5b9a5e347",
+  "release": "https://github.com/Ruwad-io/askmywa/releases/tag/v0.1.0",
+  "timezone": "Europe/Paris",
+  "calls": [
+    {
+      "tool": "list_chats",
+      "arguments": {
+        "query": "Immeuble — démo",
+        "limit": 20
+      },
+      "result": {
+        "chats": [
+          {
+            "is_group": true,
+            "jid": "120363000000001@g.us",
+            "last_message": {
+              "chat_jid": "120363000000001@g.us",
+              "chat_name": "Immeuble — démo",
+              "content": "Au fait, à qui est le vélo dans le hall ?",
+              "id": "DEMO6",
+              "is_from_me": false,
+              "sender_name": "Lucas",
+              "sender_phone": "99900000004",
+              "timestamp": "2026-11-16T10:02:00Z"
+            },
+            "last_message_time": "2026-11-16T10:02:00Z",
+            "name": "Immeuble — démo"
+          }
+        ],
+        "has_more": false
+      }
+    },
+    {
+      "tool": "list_messages",
+      "arguments": {
+        "chat_jid": "120363000000001@g.us",
+        "query": "ascenseur",
+        "include_context": true,
+        "context_before": 2,
+        "context_after": 3,
+        "limit": 20
+      },
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "Ascenseur : intervention jeudi 19 novembre, de 9 h à 12 h. Confirmé.",
+            "context_after": [
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "Je récupère les clés du rez-de-chaussée pour ouvrir au technicien.",
+                "id": "DEMO4",
+                "is_from_me": false,
+                "sender_name": "Sophie",
+                "sender_phone": "99900000001",
+                "timestamp": "2026-11-16T08:55:00Z"
+              },
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "La facture est prévue en décembre.",
+                "id": "DEMO5",
+                "is_from_me": false,
+                "sender_name": "Paul",
+                "sender_phone": "99900000002",
+                "timestamp": "2026-11-16T09:41:00Z"
+              },
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "Au fait, à qui est le vélo dans le hall ?",
+                "id": "DEMO6",
+                "is_from_me": false,
+                "sender_name": "Lucas",
+                "sender_phone": "99900000004",
+                "timestamp": "2026-11-16T10:02:00Z"
+              }
+            ],
+            "context_before": [
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "Quelqu'un a des nouvelles de l'ascenseur ?",
+                "id": "DEMO1",
+                "is_from_me": false,
+                "sender_name": "Sophie",
+                "sender_phone": "99900000001",
+                "timestamp": "2026-11-16T07:02:00Z"
+              },
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "Le syndic prévoit de répartir les frais au prorata des surfaces.",
+                "id": "DEMO2",
+                "is_from_me": false,
+                "sender_name": "Paul",
+                "sender_phone": "99900000002",
+                "timestamp": "2026-11-16T07:34:00Z"
+              }
+            ],
+            "id": "DEMO3",
+            "is_from_me": false,
+            "sender_name": "Inès",
+            "sender_phone": "99900000003",
+            "timestamp": "2026-11-16T08:47:00Z"
+          },
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "Quelqu'un a des nouvelles de l'ascenseur ?",
+            "context_after": [
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "Le syndic prévoit de répartir les frais au prorata des surfaces.",
+                "id": "DEMO2",
+                "is_from_me": false,
+                "sender_name": "Paul",
+                "sender_phone": "99900000002",
+                "timestamp": "2026-11-16T07:34:00Z"
+              },
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "Ascenseur : intervention jeudi 19 novembre, de 9 h à 12 h. Confirmé.",
+                "id": "DEMO3",
+                "is_from_me": false,
+                "sender_name": "Inès",
+                "sender_phone": "99900000003",
+                "timestamp": "2026-11-16T08:47:00Z"
+              },
+              {
+                "chat_jid": "120363000000001@g.us",
+                "chat_name": "Immeuble — démo",
+                "content": "Je récupère les clés du rez-de-chaussée pour ouvrir au technicien.",
+                "id": "DEMO4",
+                "is_from_me": false,
+                "sender_name": "Sophie",
+                "sender_phone": "99900000001",
+                "timestamp": "2026-11-16T08:55:00Z"
+              }
+            ],
+            "id": "DEMO1",
+            "is_from_me": false,
+            "sender_name": "Sophie",
+            "sender_phone": "99900000001",
+            "timestamp": "2026-11-16T07:02:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "list_messages",
+      "arguments": {
+        "chat_jid": "120363000000001@g.us",
+        "limit": 20
+      },
+      "result": {
+        "has_more": false,
+        "messages": [
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "Au fait, à qui est le vélo dans le hall ?",
+            "id": "DEMO6",
+            "is_from_me": false,
+            "sender_name": "Lucas",
+            "sender_phone": "99900000004",
+            "timestamp": "2026-11-16T10:02:00Z"
+          },
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "La facture est prévue en décembre.",
+            "id": "DEMO5",
+            "is_from_me": false,
+            "sender_name": "Paul",
+            "sender_phone": "99900000002",
+            "timestamp": "2026-11-16T09:41:00Z"
+          },
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "Je récupère les clés du rez-de-chaussée pour ouvrir au technicien.",
+            "id": "DEMO4",
+            "is_from_me": false,
+            "sender_name": "Sophie",
+            "sender_phone": "99900000001",
+            "timestamp": "2026-11-16T08:55:00Z"
+          },
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "Ascenseur : intervention jeudi 19 novembre, de 9 h à 12 h. Confirmé.",
+            "id": "DEMO3",
+            "is_from_me": false,
+            "sender_name": "Inès",
+            "sender_phone": "99900000003",
+            "timestamp": "2026-11-16T08:47:00Z"
+          },
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "Le syndic prévoit de répartir les frais au prorata des surfaces.",
+            "id": "DEMO2",
+            "is_from_me": false,
+            "sender_name": "Paul",
+            "sender_phone": "99900000002",
+            "timestamp": "2026-11-16T07:34:00Z"
+          },
+          {
+            "chat_jid": "120363000000001@g.us",
+            "chat_name": "Immeuble — démo",
+            "content": "Quelqu'un a des nouvelles de l'ascenseur ?",
+            "id": "DEMO1",
+            "is_from_me": false,
+            "sender_name": "Sophie",
+            "sender_phone": "99900000001",
+            "timestamp": "2026-11-16T07:02:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "search_contacts",
+      "arguments": {
+        "query": "Sophie",
+        "limit": 20
+      },
+      "result": {
+        "contacts": [
+          {
+            "has_chat": true,
+            "jid": "99900000001@s.whatsapp.net",
+            "name": "Sophie (démo)",
+            "name_source": "full_name",
+            "phone": "99900000001"
+          }
+        ],
+        "has_more": false
+      }
+    },
+    {
+      "tool": "send_message",
+      "arguments": {
+        "recipient": "Sophie",
+        "message": "Merci Sophie, je serai là jeudi à 9 h pour le technicien.",
+        "confirm": false
+      },
+      "result": {
+        "message": "Nothing was sent. Show this preview to the user and, only once they approve this exact recipient and content, call again with confirm=true.",
+        "needs_confirmation": true,
+        "preview": {
+          "is_group": false,
+          "message": "Merci Sophie, je serai là jeudi à 9 h pour le technicien.",
+          "recipient": "Sophie",
+          "recipient_jid": "99900000001@s.whatsapp.net",
+          "recipient_name": "Sophie (démo)"
+        },
+        "sent": false
+      }
+    }
+  ]
+}

@@ -118,6 +118,9 @@ h1 .hl::before { content: ""; position: absolute; left: -0.06em; right: -0.08em;
 .other-assistant strong { color: var(--violet); }
 .other-assistant span { display: block; color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
 .other-assistant:hover { border-color: var(--violet); }
+.demo-cta { margin: 0 0 20px; }
+.demo-cta a { color: var(--violet); font-weight: 800; }
+.demo-cta span { display: block; color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
 .steps code.cmd { display: block; margin-top: 6px; overflow-wrap: anywhere; user-select: all; }
 
 /* ——— The flood: a group chat that never stops, and Claude's three lines ——— */
@@ -185,6 +188,19 @@ h2 { font: 800 clamp(2.4rem, 6.4vw, 5.2rem)/0.95 var(--display); font-stretch: 8
 .band { padding: 88px 0; }
 @media (min-width: 1000px) { .band { padding: 128px 0; } }
 .lead2 { font-size: 1.15rem; color: var(--muted); max-width: 32em; }
+
+/* ——— Self-hosted demo; native playback and an accessible text alternative ——— */
+.demo-band { padding-top: 0; }
+.demo-player { margin: 36px 0 24px; }
+.demo-player video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--night); border: 2px solid var(--ink); border-radius: 22px; }
+.demo-player figcaption { max-width: 65em; margin-top: 16px; color: var(--muted); font-size: 0.94rem; }
+.demo-transcript { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 20px 0; }
+.demo-transcript summary { cursor: pointer; color: var(--violet); font-weight: 800; }
+.demo-transcript ol { max-width: 60em; padding-left: 24px; margin: 24px 0; }
+.demo-transcript li { color: var(--muted); margin-bottom: 16px; }
+.demo-transcript b { color: var(--ink); }
+.demo-transcript p { margin: 0; }
+.demo-transcript a { color: var(--violet); }
 
 /* ——— Yes band (dark) ——— */
 .night { background: var(--night); color: var(--night-text); }

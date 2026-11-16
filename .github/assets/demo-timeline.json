@@ -1,0 +1,78 @@
+{
+  "duration_seconds": 53.2,
+  "fps": 25,
+  "scenes": [
+    {
+      "scene": 0,
+      "start": 0,
+      "end": 4.6,
+      "captions": {
+        "fr": "Démo illustrée sur données fictives. Recherche et aperçu exécutés avec askmywa v0.1.0 ; aucune connexion ni aucun envoi WhatsApp.",
+        "en": "Illustrated demo using fictional data. Search and preview run with askmywa v0.1.0; no WhatsApp account is linked and nothing is sent."
+      }
+    },
+    {
+      "scene": 1,
+      "start": 4.6,
+      "end": 11.2,
+      "captions": {
+        "fr": "L'outil cherche dans l'archive locale et retrouve deux messages contenant « ascenseur ». La question est un exemple de formulation.",
+        "en": "The tool searches the local archive and finds two messages containing “elevator”. The question is an example prompt."
+      }
+    },
+    {
+      "scene": 2,
+      "start": 11.2,
+      "end": 18.8,
+      "captions": {
+        "fr": "Les auteurs, les heures et le texte viennent des résultats réels des outils, sur cette archive fictive du 16 novembre 2026.",
+        "en": "Authors, times and text come from actual tool results, using this fictional archive dated 16 November 2026."
+      }
+    },
+    {
+      "scene": 3,
+      "start": 18.8,
+      "end": 26.4,
+      "captions": {
+        "fr": "Cette synthèse est rédigée pour la vidéo à partir des messages retournés. Les sources restent visibles pour la vérifier.",
+        "en": "This summary was written for the video from the returned messages. The sources remain visible so you can check it."
+      }
+    },
+    {
+      "scene": 4,
+      "start": 26.4,
+      "end": 34.0,
+      "captions": {
+        "fr": "Le serveur identifie Sophie et renvoie cet aperçu. Le résultat indique « non envoyé » et « confirmation nécessaire ».",
+        "en": "The server identifies Sophie and returns this preview. The result says “not sent” and “confirmation needed”."
+      }
+    },
+    {
+      "scene": 5,
+      "start": 34.0,
+      "end": 41.6,
+      "captions": {
+        "fr": "L'assistant doit demander votre accord avant de confirmer l'envoi. askmywa n'a pas de fenêtre d'approbation indépendante. La démo s'arrête à l'aperçu.",
+        "en": "Your assistant is instructed to ask for approval before confirming a send. askmywa has no independent approval window. This demo stops at the preview."
+      }
+    },
+    {
+      "scene": 6,
+      "start": 41.6,
+      "end": 48.2,
+      "captions": {
+        "fr": "L'archive est locale. En usage réel, les messages consultés sont transmis au fournisseur de l'IA. L'historique fourni par WhatsApp peut être incomplet.",
+        "en": "The archive is local. In real use, retrieved messages reach your AI provider. The history supplied by WhatsApp may be incomplete."
+      }
+    },
+    {
+      "scene": 7,
+      "start": 48.2,
+      "end": 53.2,
+      "captions": {
+        "fr": "Gratuit et libre. Claude Desktop sur Mac ou Windows ; ChatGPT sur Mac et Codex avec l'installation par le Terminal. Guide sur askmywa.com.",
+        "en": "Free and open source. Claude Desktop on Mac or Windows; ChatGPT on Mac and Codex via the Terminal installer. Instructions at askmywa.com."
+      }
+    }
+  ]
+}
