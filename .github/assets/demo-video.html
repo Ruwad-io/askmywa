@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>askmywa — demo video source</title>
+<style>
+@font-face { font-family: Bricolage; src: url('../../site/assets/fonts/bricolage.woff2'); font-weight: 200 800; font-stretch: 75% 100%; }
+@font-face { font-family: Atkinson; src: url('../../site/assets/fonts/atkinson.woff2'); font-weight: 200 800; }
+@font-face { font-family: Martian; src: url('../../site/assets/fonts/martian.woff2'); }
+* { box-sizing: border-box; }
+body { margin: 0; width: 1280px; height: 720px; background: #120a2e; color: #f2eeff; font: 23px/1.4 Atkinson, sans-serif; overflow: hidden; }
+header { height: 92px; display: flex; justify-content: space-between; align-items: center; padding: 0 54px; border-bottom: 1px solid #34296b; }
+.brand { display: flex; align-items: center; gap: 12px; font: 800 29px Bricolage; letter-spacing: -1px; }
+.brand img { width: 36px; height: 36px; }
+.tag { color: #c1b4f0; font-size: 17px; }
+.tag b { color: #ffd43b; }
+main { padding: 32px 54px 0; }
+.eyebrow { color: #a997ff; font: 500 15px Martian, monospace; letter-spacing: 2px; text-transform: uppercase; margin: 0 0 12px; }
+h1 { font: 800 50px/1.03 Bricolage; font-stretch: 80%; letter-spacing: -1.6px; margin: 0 0 22px; }
+h2 { font: 800 34px/1.1 Bricolage; letter-spacing: -.8px; margin: 0 0 18px; }
+p { margin: 0 0 14px; }
+.muted { color: #c1b4f0; }
+.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.panel { background: #221852; border: 1px solid #463586; border-radius: 24px; padding: 26px; }
+.yellow { background: #ffd43b; color: #1b1240; border-color: #ffd43b; }
+.yellow .muted { color: #514031; }
+.question { font: 700 32px/1.25 Bricolage; background: #43308b; padding: 25px 30px; border-radius: 24px 24px 6px 24px; margin: 0 0 24px; }
+.pill { display: inline-block; background: #332466; color: #d2c8fa; border-radius: 100px; padding: 8px 15px; font-size: 17px; }
+.pill.yellow { color: #1b1240; background: #ffd43b; font-weight: 800; }
+.mini { font-size: 18px; }
+.label { color: #b6a7ee; text-transform: uppercase; font: 500 14px Martian; letter-spacing: 1px; margin-bottom: 12px; }
+.yellow .label { color: #514031; }
+.quote { border-top: 1px solid #463586; padding: 15px 0; }
+.quote:first-child { border-top: 0; padding-top: 0; }
+.quote p { font-size: 22px; margin: 4px 0 0; }
+.quote b { font: 700 17px Atkinson; color: #b6a0ff; }
+.quote em { font-style: normal; color: #c1b4f0; margin-left: 10px; }
+.rows { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.rows .quote { border: 1px solid #463586; background: #221852; border-radius: 18px; padding: 20px; }
+.stat { font: 800 68px/1 Bricolage; color: #ffd43b; letter-spacing: -2px; margin: 0 0 8px; }
+.sources { border-left: 3px solid #a997ff; padding-left: 16px; font-size: 18px; color: #c1b4f0; margin: 12px 0 0; }
+.answer-row { display: flex; gap: 20px; align-items: start; margin: 0 0 22px; }
+.answer-row:last-child { margin-bottom: 0; }
+.number { flex: none; width: 36px; height: 36px; background: #1b1240; color: #ffd43b; border-radius: 50%; display: grid; place-items: center; font: 800 22px Bricolage; }
+.answer-row strong { font: 800 29px/1.15 Bricolage; display: block; }
+.answer-row small { display: block; font-size: 18px; margin-top: 5px; color: #514031; }
+.flow { display: flex; gap: 20px; align-items: stretch; margin-top: 35px; }
+.flow .panel { flex: 1; }
+.flow .inactive { opacity: .65; border-style: dashed; }
+.flow h2 { font-size: 29px; }
+.flow p { font-size: 21px; }
+.step-number { font: 800 42px Bricolage; color: #a997ff; margin-bottom: 16px; }
+.yellow .step-number { color: #1b1240; }
+.intro { display: grid; grid-template-columns: 1.08fr 1fr; gap: 50px; align-items: center; padding-top: 28px; }
+.intro h1 { font-size: 70px; line-height: 1; margin-bottom: 25px; }
+.intro .panel { transform: rotate(-2deg); box-shadow: 9px 9px 0 #3b286d; }
+.big { font: 800 46px/1.08 Bricolage; letter-spacing: -1px; }
+.cta { padding-top: 35px; }
+.cta h1 { font-size: 83px; margin-bottom: 35px; }
+.button { display: inline-block; background: #ffd43b; color: #1b1240; padding: 21px 32px; font: 800 30px Bricolage; border-radius: 100px; margin-bottom: 25px; }
+.url { font: 800 45px Bricolage; color: #a997ff; margin-top: 15px; }
+footer { position: absolute; bottom: 0; left: 0; width: 1280px; height: 112px; background: #0a051c; border-top: 1px solid #34296b; padding: 18px 54px; }
+#caption { color: #e1dafa; font-size: 20px; max-width: 1120px; margin: 0; }
+.progress { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: #2b1d5b; }
+.progress div { height: 5px; background: #ffd43b; }
+.ready { position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<header><div class="brand"><img src="../../site/assets/favicon.svg" alt="">askmywa</div><div class="tag" id="tag"></div></header>
+<main id="scene"></main>
+<footer><p id="caption"></p><div class="progress"><div id="progress"></div></div></footer>
+<script>
+const query = new URLSearchParams(location.search);
+const lang = query.get('lang') === 'en' ? 'en' : 'fr';
+const index = Math.max(0, Math.min(7, Number(query.get('scene') || 0)));
+const en = lang === 'en';
+document.documentElement.lang = lang;
+const t = (fr, eng) => en ? eng : fr;
+const esc = str => String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const evidence = awaitData();
+async function awaitData() {
+  const run = await (await fetch(`demo-run-${lang}.json`)).json();
+  const messages = run.calls.find(c => c.tool === 'list_messages' && !c.arguments.query).result.messages.slice().reverse();
+  const preview = run.calls.find(c => c.tool === 'send_message').result;
+  const hitCount = run.calls.find(c => c.tool === 'list_messages' && c.arguments.query).result.messages.length;
+  const clock = msg => new Date(msg.timestamp).toLocaleTimeString('fr-FR', {timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit'});
+  const quote = id => { const m = messages.find(m => m.id === id); return `<div class="quote"><b>${esc(m.sender_name)}<em>${clock(m)}</em></b><p>${esc(m.content)}</p></div>`; };
+  const captions = [
+    t("Démo illustrée sur données fictives. Recherche et aperçu exécutés avec askmywa v0.1.0 ; aucune connexion ni aucun envoi WhatsApp.","Illustrated demo using fictional data. Search and preview run with askmywa v0.1.0; no WhatsApp account is linked and nothing is sent."),
+    t("L'outil cherche dans l'archive locale et retrouve deux messages contenant « ascenseur ». La question est un exemple de formulation.","The tool searches the local archive and finds two messages containing “elevator”. The question is an example prompt."),
+    t("Les auteurs, les heures et le texte viennent des résultats réels des outils, sur cette archive fictive du 16 novembre 2026.","Authors, times and text come from actual tool results, using this fictional archive dated 16 November 2026."),
+    t("Cette synthèse est rédigée pour la vidéo à partir des messages retournés. Les sources restent visibles pour la vérifier.","This summary was written for the video from the returned messages. The sources remain visible so you can check it."),
+    t("Le serveur identifie Sophie et renvoie cet aperçu. Le résultat indique « non envoyé » et « confirmation nécessaire ».","The server identifies Sophie and returns this preview. The result says “not sent” and “confirmation needed”."),
+    t("L'assistant doit demander votre accord avant de confirmer l'envoi. askmywa n'a pas de fenêtre d'approbation indépendante. La démo s'arrête à l'aperçu.","Your assistant is instructed to ask for approval before confirming a send. askmywa has no independent approval window. This demo stops at the preview."),
+    t("L'archive est locale. En usage réel, les messages consultés sont transmis au fournisseur de l'IA. L'historique fourni par WhatsApp peut être incomplet.","The archive is local. In real use, retrieved messages reach your AI provider. The history supplied by WhatsApp may be incomplete."),
+    t("Gratuit et libre. Claude Desktop sur Mac ou Windows ; ChatGPT sur Mac et Codex avec l'installation par le Terminal. Guide sur askmywa.com.","Free and open source. Claude Desktop on Mac or Windows; ChatGPT on Mac and Codex via the Terminal installer. Instructions at askmywa.com."),
+  ];
+  const scenes = [
+    `<div class="intro"><div><p class="eyebrow">${t('Votre WhatsApp, en plus clair','Your WhatsApp, made clearer')}</p><h1>${t('Moins à lire.<br>Plus à comprendre.','Less to read.<br>More to understand.')}</h1><p class="muted">${t('Retrouver. Résumer. Préparer une réponse.','Find. Summarize. Prepare a reply.')}</p></div><div class="panel yellow"><p class="label">${t('Un groupe fictif, une question utile','A fictional group, a useful question')}</p><p class="big">${t('Qu’a-t-on décidé pour l’ascenseur ?','What was decided about the elevator?')}</p><p class="mini">${t('Immeuble — démo · 6 messages','Building — demo · 6 messages')}</p></div></div>`,
+    `<p class="eyebrow">01 · ${t('Chercher','Search')}</p><h1>${t('Posez votre question.','Ask your question.')}</h1><div class="layout"><div><p class="question">${t('Qu’a-t-on décidé pour l’ascenseur ?','What was decided about the elevator?')}</p><p class="muted mini">${t('Question d’exemple pour votre assistant.','An example question for your assistant.')}</p><span class="pill">${t('Recherche exécutée : ascenseur','Executed search: elevator')}</span></div><div class="panel"><p class="stat">${hitCount}</p><p>${t('messages retrouvés','messages found')}</p>${quote('DEMO3')}</div></div>`,
+    `<p class="eyebrow">02 · ${t('Vérifier les messages','Check the messages')}</p><h1>${t('Retrouvez les messages d’origine.','Read the original messages.')}</h1><p class="muted mini">${t('Archive fictive · 16 novembre 2026 · 08:02–11:02 · Paris · 6 messages','Fictional archive · 16 November 2026 · 08:02–11:02 · Paris · 6 messages')}</p><div class="rows">${['DEMO3','DEMO4','DEMO2','DEMO5'].map(quote).join('')}</div>`,
+    `<p class="eyebrow">03 · ${t('Faire le point','Catch up')}</p><h1>${t('L’essentiel, avec ses sources.','The essentials, with their sources.')}</h1><div class="panel yellow"><div class="answer-row"><span class="number">1</span><div><strong>${t('Jeudi 19 novembre, de 9 h à 12 h.','Thursday 19 November, 9 am to noon.')}</strong><small>Inès · 09:47</small></div></div><div class="answer-row"><span class="number">2</span><div><strong>${t('Sophie ouvre au technicien.','Sophie lets the technician in.')}</strong><small>Sophie · 09:55</small></div></div><div class="answer-row"><span class="number">3</span><div><strong>${t('Frais au prorata ; facture prévue en décembre.','Cost split by flat size; invoice expected in December.')}</strong><small>Paul · 08:34 / 10:41</small></div></div></div>`,
+    `<p class="eyebrow">04 · ${t('Préparer','Prepare')}</p><h1>${t('Préparez une réponse.','Prepare a reply.')}</h1><div class="layout"><div class="panel yellow"><p class="label">${t('Aperçu réel du serveur','Actual server preview')}</p><p class="mini">${t('À','To')} <b>${esc(preview.preview.recipient_name)}</b> · ${t('conversation privée','direct chat')}</p><h2>${esc(preview.preview.message)}</h2><span class="pill" style="background:#1b1240;color:#ffd43b">${t('NON ENVOYÉ','NOT SENT')}</span></div><div class="panel"><p class="label">${t('Résultat de l’outil','Tool result')}</p><h2>${t('Destinataire identifié.<br>Contenu à relire.','Recipient identified.<br>Content to review.')}</h2><p class="sources">${t('Non envoyé : oui<br>Confirmation nécessaire : oui','Not sent: yes<br>Confirmation needed: yes')}</p><p class="muted mini" style="margin-top:24px">${t('La démo ne déclenche aucun envoi.','The demo does not trigger a send.')}</p></div></div>`,
+    `<p class="eyebrow">05 · ${t('Décider','Decide')}</p><h1>${t('Vous décidez de l’envoi.','You decide whether to send.')}</h1><div class="flow"><div class="panel yellow"><div class="step-number">1</div><h2>${t('Lire l’aperçu','Review the preview')}</h2><p>${t('Le destinataire et le contenu exact.','The recipient and the exact content.')}</p><span class="pill" style="background:#1b1240;color:#ffd43b">${t('Montré dans cette démo','Shown in this demo')}</span></div><div class="panel inactive"><div class="step-number">2</div><h2>${t('Donner votre accord','Give your approval')}</h2><p>${t('Votre assistant vous le demande.','Your assistant asks you for it.')}</p></div><div class="panel inactive"><div class="step-number">3</div><h2>${t('Confirmer l’envoi','Confirm the send')}</h2><p>${t('L’assistant transmet la confirmation.','The assistant supplies confirmation.')}</p></div></div>`,
+    `<p class="eyebrow">06 · ${t('Comprendre le périmètre','Know the scope')}</p><h1>${t('Sachez où vont vos données.','Know where your data goes.')}</h1><div class="flow"><div class="panel"><p class="label">${t('Votre ordinateur','Your computer')}</p><h2>${t('L’archive locale.','The local archive.')}</h2><p>${t('Les messages reçus de WhatsApp.','Messages received from WhatsApp.')}</p></div><div class="panel yellow"><p class="label">${t('Votre fournisseur d’IA','Your AI provider')}</p><h2>Anthropic<br>OpenAI</h2><p>${t('Les messages consultés par l’assistant.','Messages retrieved by your assistant.')}</p></div><div class="panel"><p class="label">askmywa</p><h2>${t('Aucune collecte.','No collection.')}</h2><p>${t('Ni compte, ni serveur de collecte.','No account, no collection server.')}</p></div></div>`,
+    `<div class="cta"><p class="eyebrow">${t('Gratuit · code ouvert','Free · open source')}</p><h1>${t('À votre tour.','Your turn.')}</h1><div class="button">${t('Installer pour Claude Desktop ↗','Install for Claude Desktop ↗')}</div><p class="muted">Mac · Windows &nbsp; / &nbsp; ${t('ChatGPT et Codex : installation par le Terminal','ChatGPT and Codex: install via Terminal')}</p><p class="url">askmywa.com</p></div>`,
+  ];
+  document.getElementById('tag').innerHTML = `${t('Présentation illustrée','Illustrated walkthrough')} · <b>${t('données fictives','fictional data')}</b>`;
+  document.getElementById('scene').innerHTML = scenes[index];
+  document.getElementById('caption').textContent = captions[index];
+  document.getElementById('progress').style.width = `${(index+1)/scenes.length*100}%`;
+  document.body.dataset.ready = 'true';
+}
+</script>
+</body>
+</html>

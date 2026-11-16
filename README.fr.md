@@ -15,7 +15,7 @@ Vous pouvez par exemple lui demander :
 
 Les outils d'envoi renvoient un aperçu par défaut. Claude reçoit la consigne de vous montrer le destinataire et le contenu, puis de demander votre accord avant de confirmer l'envoi. askmywa ne peut pas vérifier indépendamment que l'assistant a obtenu votre accord.
 
-[Voir un exemple illustré avec ses messages sources](https://askmywa.com/fr/#exemple). Les messages de cette illustration sont fictifs.
+[Voir la démo de 53 secondes](https://askmywa.com/fr/#demo) · [Voir un exemple illustré avec ses messages sources](https://askmywa.com/fr/#exemple). Les messages sont fictifs. La vidéo présente une recherche et un aperçu réellement exécutés en local, dans une interface de présentation, sans connexion ni envoi WhatsApp.
 
 ## Ce qu'il vous faut
 

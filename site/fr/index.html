@@ -36,6 +36,7 @@
   <header class="bar">
     <a class="wordmark" href="./"><img src="../assets/favicon.svg" alt="" width="30" height="30">askmy<b>wa</b></a>
     <nav class="links" aria-label="Principal">
+      <a class="lg" href="#demo">Démo</a>
       <a class="lg" href="#installer">Installer</a>
       <a class="lg" href="#vie-privee">Vie privée</a>
       <a class="lg" href="#questions">Questions</a>
@@ -57,6 +58,7 @@
           <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
         </a>
         <p class="under">Gratuit · Mac et Windows · nécessite l'<a href="https://claude.ai/download">application Claude pour ordinateur</a>. <a href="#installer">Les étapes d'installation →</a></p>
+        <p class="demo-cta"><a href="#demo">▶ Voir la démo · 53 s</a><span>Sans son · données fictives</span></p>
         <a class="other-assistant" href="#chatgpt"><strong>Vous utilisez ChatGPT ou Codex ? →</strong><span>Installation par le Terminal · ChatGPT sur Mac</span></a>
         <p class="under">Sur ordinateur ; pas sur téléphone ni dans le navigateur. <a href="#terminal">Linux, Raspberry Pi et autres assistants →</a></p>
       </div>
@@ -114,6 +116,36 @@
   </div>
   </main>
 </div>
+
+<section class="band demo-band" id="demo" aria-labelledby="demo-h">
+  <div class="wrap">
+    <p class="kicker">La démo · 53 secondes · sans son</p>
+    <h2 id="demo-h">Du message à une réponse utile.</h2>
+    <p class="lead2">Chercher dans un groupe, retrouver les sources, puis préparer une réponse. Passez en plein écran pour lire les messages.</p>
+    <figure class="demo-player">
+      <video controls playsinline preload="none" width="1280" height="720" poster="../assets/demo-fr.jpg" aria-label="Démonstration illustrée d'askmywa sur des données fictives" aria-describedby="demo-note">
+        <source src="../assets/demo-fr.mp4" type="video/mp4">
+        <track kind="captions" src="../assets/demo-fr.vtt" srclang="fr" label="Français">
+        <p><a href="../assets/demo-fr.mp4">Télécharger la vidéo MP4</a></p>
+      </video>
+      <figcaption id="demo-note">La vidéo utilise une interface de présentation et une archive fictive. La recherche et l'aperçu d'envoi proviennent d'exécutions réelles d'askmywa v0.1.0. La synthèse est rédigée pour la vidéo. Aucun compte WhatsApp n'est connecté et aucun message n'est envoyé.</figcaption>
+    </figure>
+    <details class="demo-transcript">
+      <summary>Lire la transcription</summary>
+      <ol>
+        <li><b>00:00 — Le scénario.</b> Un groupe fictif de six messages, dans une archive locale de démonstration. La vidéo illustre les résultats du serveur, avec une interface créée pour la présentation.</li>
+        <li><b>00:05 — Chercher.</b> Exemple de question : « Qu'a-t-on décidé pour l'ascenseur ? » La recherche réelle du mot « ascenseur » retrouve deux messages.</li>
+        <li><b>00:11 — Vérifier.</b> L'archive fictive couvre le 16 novembre 2026, de 08:02 à 11:02, heure de Paris. Les résultats montrent les auteurs, les heures et le texte d'origine.</li>
+        <li><b>00:19 — Faire le point.</b> Synthèse rédigée pour la vidéo : intervention jeudi 19 novembre, de 9 h à 12 h (Inès, 09:47) ; Sophie ouvre au technicien (09:55) ; frais au prorata des surfaces et facture prévue en décembre (Paul, 08:34 et 10:41).</li>
+        <li><b>00:26 — Préparer une réponse.</b> L'aperçu réel désigne « Sophie (démo) » et le texte : « Merci Sophie, je serai là jeudi à 9 h pour le technicien. » Le serveur indique que rien n'est envoyé et qu'une confirmation est nécessaire.</li>
+        <li><b>00:34 — Décider.</b> L'assistant reçoit la consigne de vous montrer l'aperçu, de demander votre accord, puis de confirmer l'envoi. askmywa n'a pas de fenêtre d'approbation indépendante. Cette démonstration s'arrête à l'aperçu.</li>
+        <li><b>00:42 — Comprendre le périmètre.</b> L'archive reste sur votre ordinateur. En usage réel, les résultats consultés sont transmis à Anthropic ou à OpenAI. askmywa ne les collecte pas. L'historique fourni par WhatsApp peut être incomplet.</li>
+        <li><b>00:48 — À votre tour.</b> Gratuit et libre. Claude Desktop sur Mac ou Windows ; ChatGPT sur Mac et Codex avec l'installation par le Terminal.</li>
+      </ol>
+      <p><a href="../assets/demo-fr.mp4">Télécharger la vidéo MP4</a> · <a href="https://github.com/Ruwad-io/askmywa/blob/main/.github/assets/demo-run-fr.json">Consulter les résultats de cette exécution</a></p>
+    </details>
+  </div>
+</section>
 
 <section class="band night" aria-labelledby="oui-h">
   <div class="wrap yes">

@@ -8,7 +8,7 @@ An [MCP](https://modelcontextprotocol.io) server for your personal WhatsApp acco
 
 It links to WhatsApp as a companion device through [whatsmeow](https://github.com/tulir/whatsmeow), keeps a local archive of your messages, and lets an assistant such as Claude Desktop search them, read them, download attachments and, after your approval, send messages and files.
 
-[See an illustrated example with its source messages](https://askmywa.com/#example). The messages in that illustration are fictional.
+[Watch the 53-second demo](https://askmywa.com/#demo) · [See an illustrated example with its source messages](https://askmywa.com/#example). Both use fictional messages. The video presents actual local search and preview results in an illustrated interface, with no WhatsApp pairing or send.
 
 ## What it does
 
