@@ -13,9 +13,9 @@ Vous pouvez par exemple lui demander :
 - « Retrouve le message où on parlait du devis du plombier. »
 - « Prépare une réponse à Sophie pour lui dire que je serai en retard. »
 
-Claude ne peut rien envoyer sans votre accord : avant chaque envoi, il vous montre le destinataire et le message, et attend que vous disiez oui.
+Les outils d'envoi renvoient un aperçu par défaut. Claude reçoit la consigne de vous montrer le destinataire et le contenu, puis de demander votre accord avant de confirmer l'envoi. askmywa ne peut pas vérifier indépendamment que l'assistant a obtenu votre accord.
 
-![WhatsApp dans Claude Desktop](./example-use.png)
+[Voir un exemple illustré avec ses messages sources](https://askmywa.com/fr/#exemple). Les messages de cette illustration sont fictifs.
 
 ## Ce qu'il vous faut
 
@@ -29,7 +29,7 @@ C'est tout. Pas de terminal, pas de code.
 
 1. Téléchargez le fichier **[`askmywa.mcpb`](https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb)**, la dernière version, sur [askmywa.com](https://askmywa.com/fr/) ou sur la [page des versions](https://github.com/Ruwad-io/askmywa/releases/latest).
 2. Double-cliquez dessus. Claude s'ouvre et vous demande de confirmer l'installation : acceptez. Le même fichier fonctionne sur Mac et sur Windows.
-3. Ouvrez une nouvelle conversation dans Claude et écrivez : **« Connecte mon WhatsApp »**. La première fois, Claude vous demande l'autorisation d'utiliser les outils d'askmywa : choisissez de toujours les autoriser, pour ne plus avoir à le refaire. Les envois restent protégés : chaque message attend votre accord.
+3. Ouvrez une nouvelle conversation dans Claude et écrivez : **« Connecte mon WhatsApp »**. Claude vous demande l'autorisation d'utiliser les outils d'askmywa : choisissez les autorisations qui vous conviennent. Les outils d'envoi renvoient un aperçu par défaut ; l'assistant reçoit la consigne de demander votre accord avant de confirmer un envoi.
 4. Claude vous demande votre numéro de téléphone, avec l'indicatif du pays (par exemple 33 6 12 34 56 78 pour la France). Il vous donne ensuite un **code de 8 caractères**.
 5. Sur votre téléphone, ouvrez WhatsApp :
    - **iPhone** : Réglages > Appareils connectés > Connecter un appareil.
@@ -37,7 +37,7 @@ C'est tout. Pas de terminal, pas de code.
    
    Choisissez **« Connecter avec un numéro de téléphone »** en bas de l'écran, puis tapez le code. Vous avez environ deux minutes.
 
-C'est fait. Vos conversations apparaissent dans les minutes qui suivent, les plus anciennes un peu plus tard. Le lien tient même après un redémarrage de l'ordinateur.
+Les messages fournis par WhatsApp apparaissent dans les minutes qui suivent. Le lien tient même après un redémarrage de l'ordinateur. WhatsApp peut ne transmettre qu'une partie de votre ancien historique : la recherche porte sur l'archive locale, qui ne contient pas forcément tous les messages du téléphone. Demandez à l'assistant les messages stockés les plus anciens et les plus récents d'une conversation avant de vous fier à un résumé.
 
 ## Utiliser
 
@@ -58,15 +58,15 @@ La recherche ignore les majuscules et les accents : « ecole » trouve « école
 
 ## Vos données
 
-- **Vos messages restent sur votre ordinateur.** Ils sont copiés dans un fichier privé de votre ordinateur, comme le fait WhatsApp Web. Aucun serveur de ce projet ne les voit.
-- **Claude ne lit que ce que vous lui demandez.** Le contenu d'un message n'est envoyé à Claude que quand il en a besoin pour vous répondre.
-- **Rien ne part sans votre accord.** Chaque envoi passe par un aperçu que vous devez approuver.
+- **L'archive est stockée sur votre ordinateur.** Aucun serveur de ce projet ne la reçoit.
+- **Les résultats consultés sont transmis au fournisseur de l'IA.** Ils peuvent inclure le texte des messages, les noms et numéros de téléphone : Anthropic pour Claude, OpenAI pour ChatGPT et Codex. Leurs politiques de confidentialité s'appliquent.
+- **Les envois montrent un aperçu par défaut.** La confirmation est fournie par l'assistant, qui reçoit la consigne d'obtenir votre accord. askmywa n'a pas de fenêtre d'approbation indépendante.
 
 ## À savoir avant d'installer
 
 - **Ce n'est pas un produit de WhatsApp.** L'extension se connecte comme un appareil lié, de la même façon que WhatsApp Web, mais par une interface que WhatsApp n'a pas officiellement ouverte. Les conditions d'utilisation de WhatsApp ne l'autorisent pas, et WhatsApp pourrait restreindre ou bannir un compte qui l'utilise.
-- **Méfiez-vous des messages piégés.** Un message reçu pourrait contenir des instructions destinées à tromper l'assistant. C'est pour cela que chaque envoi demande votre accord : lisez l'aperçu avant de dire oui.
-- **L'ordinateur doit être allumé** pour que de nouveaux messages arrivent dans l'archive. Ceux reçus pendant qu'il dormait sont rattrapés au réveil.
+- **Méfiez-vous des messages piégés.** Un message reçu pourrait contenir des instructions destinées à tromper l'assistant. Le parcours d'aperçu et de confirmation repose sur le respect des consignes par l'assistant : lisez l'aperçu avant de dire oui.
+- **L'ordinateur doit être allumé** pour que de nouveaux messages arrivent dans l'archive. WhatsApp fournit des messages de rattrapage à la reconnexion, sans garantie d'historique complet.
 
 ## Désinstaller
 

@@ -8,18 +8,18 @@ An [MCP](https://modelcontextprotocol.io) server for your personal WhatsApp acco
 
 It links to WhatsApp as a companion device through [whatsmeow](https://github.com/tulir/whatsmeow), keeps a local archive of your messages, and lets an assistant such as Claude Desktop search them, read them, download attachments and, after your approval, send messages and files.
 
-![WhatsApp MCP in Claude Desktop](./example-use.png)
+[See an illustrated example with its source messages](https://askmywa.com/#example). The messages in that illustration are fictional.
 
 ## What it does
 
-- **Local archive.** Every message lands in a SQLite database on your computer. Nothing reaches the assistant unless it calls a tool.
+- **Local archive.** Messages received from WhatsApp are stored in a SQLite database on your computer. When your assistant calls a tool, the returned messages and contact details are sent to its provider (Anthropic for Claude, OpenAI for ChatGPT and Codex), under that provider's privacy policy. askmywa runs no server and collects none of them.
 - **Real names.** Senders are resolved when messages are stored, from your address book first, then the name people set for themselves. Phone numbers and WhatsApp's hidden `@lid` identifiers are merged into one contact.
 - **Full-text search.** Accent- and case-insensitive: `ecole` finds `école`.
 - **Typed tools.** Every tool declares its input and output schema, paginates with a cursor and returns errors that say how to fix the call.
-- **Sending needs your approval.** `send_message`, `send_file` and `send_audio_message` only return a preview (recipient, resolved name, group or not, content). They send only when called again with `confirm=true`.
+- **Sending previews by default.** `send_message`, `send_file` and `send_audio_message` return a preview unless `confirm=true` is supplied. The assistant is instructed to show you the exact recipient and content and obtain your approval before confirming. askmywa cannot independently verify that the assistant obtained your agreement; there is no separate approval window.
 - **No network port.** The MCP server talks to the WhatsApp daemon over a private Unix socket. Files can only be sent from one configured folder.
 
-> **Caution.** Like any MCP server that reads private data and can send messages, this one is exposed to [the lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/): a prompt injection hidden in a message could try to make the assistant leak data. The confirmation step on every send is the main safeguard, so read previews before approving them.
+> **Caution.** Like any MCP server that reads private data and can send messages, this one is exposed to [the lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/): a prompt injection hidden in a message could try to make the assistant leak data. The preview-and-confirm flow relies on the assistant following its instructions, so read previews before approving them.
 
 ## How it differs from lharries/whatsapp-mcp
 
@@ -32,7 +32,7 @@ This is a rewrite, not a patch set. The tool names and the WhatsApp library are 
 | Sender names | Looked up at read time from the chat list; group members and `@lid` senders often show as raw numbers | Resolved when stored, from the address book first; phone numbers and `@lid` identities merged into one contact |
 | Search | `LIKE` on message text, accent-sensitive, unindexed | SQLite FTS5 index, accent- and case-insensitive |
 | Tool results | Mostly formatted text, page numbers | Typed JSON with schemas, cursor pagination with `has_more` |
-| Sending | Immediate | Preview first, sent only with `confirm=true` |
+| Sending | Immediate | Preview by default; send with `confirm=true` |
 | Files that can be sent | Any readable path | Only files under one configured folder |
 | Running it | `go run main.go` in an open terminal | A background service with rotated logs on Mac, Windows and Linux |
 | Installing it | Go, Python, `uv`, a terminal QR code and a hand-edited JSON config | A Claude Desktop extension, linked with a code typed on the phone |
@@ -43,10 +43,10 @@ An existing install of the original can switch without pairing again: the new da
 
 1. Download [`askmywa.mcpb`](https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb), the latest version, from [askmywa.com](https://askmywa.com) or the [releases](https://github.com/Ruwad-io/askmywa/releases/latest). The same file works on Mac and Windows.
 2. Double-click it. Claude Desktop opens and asks you to confirm the install.
-3. In a new conversation, write: **Connect my WhatsApp.** The first time, Claude asks for permission to use askmywa's tools: choose to always allow them, so it doesn't ask again. Sending stays safe either way: every message waits for your yes.
+3. In a new conversation, write: **Connect my WhatsApp.** Claude asks for permission to use askmywa's tools: choose the permissions you are comfortable with. Sending previews by default; the assistant is instructed to ask for your approval before confirming a send.
 4. Claude asks for your phone number, then gives you an 8-character code. On your phone, open WhatsApp > Settings (on Android, the ⋮ menu) > Linked devices > Link a device > **Link with phone number instead**, and type the code.
 
-That's it. Your messages start appearing within a few minutes, and the link keeps working after a restart. To send a file, put it in the `Documents/WhatsApp MCP` folder first (you can choose another folder in the extension's settings).
+Messages supplied by WhatsApp start appearing over the next few minutes, and the link keeps working after a restart. WhatsApp may supply only part of your older history: searches cover the local archive, not necessarily every message on your phone. Ask the assistant for the oldest and newest stored messages in a chat before relying on a summary. To send a file, put it in the `Documents/WhatsApp MCP` folder first (you can choose another folder in the extension's settings).
 
 To remove it, ask Claude to **disconnect WhatsApp from this computer** (it unlinks the computer, stops the background service and, if you want, deletes the stored messages), then uninstall the extension in Claude Desktop's settings.
 
@@ -116,7 +116,7 @@ On Windows, use the full path to `askmywa.exe`, with doubled backslashes. Cursor
 
 ### On a Raspberry Pi or another always-on machine
 
-A Pi left on keeps the archive complete even when your laptop sleeps. Connect to the Pi over SSH and run the one-line installer above: it installs the service, asks systemd to keep it running after you log out, and links WhatsApp with a code typed on your phone, so no QR code or screen is needed.
+A Pi left on can keep receiving messages while your laptop sleeps; it does not guarantee a complete history. Connect to the Pi over SSH and run the one-line installer above: it installs the service, asks systemd to keep it running after you log out, and links WhatsApp with a code typed on your phone, so no QR code or screen is needed.
 
 Claude Desktop on your laptop can then use the Pi over SSH, provided you log in to the Pi with an SSH key, without a password prompt:
 
