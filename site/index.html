@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>askmywa — WhatsApp MCP for Claude and ChatGPT: ask your WhatsApp anything</title>
-<meta name="description" content="Free, open-source WhatsApp MCP server for Claude Desktop, ChatGPT and Codex. Your AI searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.">
+<meta name="description" content="Find and summarize WhatsApp messages with Claude, ChatGPT or Codex. Local archive; messages looked up are sent to your AI provider. Free and open source.">
 <link rel="canonical" href="https://askmywa.com/">
 <link rel="alternate" hreflang="en" href="https://askmywa.com/">
 <link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/">
@@ -20,14 +20,14 @@
 <meta property="og:site_name" content="askmywa">
 <meta property="og:url" content="https://askmywa.com/">
 <meta property="og:title" content="askmywa — WhatsApp MCP for Claude and ChatGPT: ask your WhatsApp anything">
-<meta property="og:description" content="Ask Claude to find, sum up and answer your WhatsApp messages. Your chats stay on your computer; nothing is sent without your yes.">
-<meta property="og:image" content="https://askmywa.com/assets/og-en.png">
+<meta property="og:description" content="Find and summarize WhatsApp messages with Claude, ChatGPT or Codex. Local archive; messages looked up are sent to your AI provider. Free and open source.">
+<meta property="og:image" content="https://askmywa.com/assets/og-en.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="fr_FR">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/", "inLanguage": "en", "description": "Free, open-source WhatsApp MCP server for Claude Desktop, ChatGPT and Codex. Your AI searches and sums up your WhatsApp chats on your computer, and sends nothing without your yes. Mac, Windows, Linux, Raspberry Pi.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, the ChatGPT desktop app, Codex, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/Ruwad-io/askmywa", "downloadUrl": "https://github.com/Ruwad-io/askmywa/releases/latest", "image": "https://askmywa.com/assets/og-en.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "askmywa (whatsapp-mcp)", "alternateName": ["WhatsApp MCP", "whatsapp-mcp"], "url": "https://askmywa.com/", "inLanguage": "en", "description": "Find and summarize WhatsApp messages with Claude, ChatGPT or Codex. Local archive; messages looked up are sent to your AI provider. Free and open source.", "applicationCategory": "CommunicationApplication", "applicationSubCategory": "MCP server", "operatingSystem": "macOS, Windows, Linux, Raspberry Pi OS", "softwareRequirements": "Claude Desktop, the ChatGPT desktop app, Codex, or any MCP client", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "codeRepository": "https://github.com/Ruwad-io/askmywa", "downloadUrl": "https://github.com/Ruwad-io/askmywa/releases/latest", "image": "https://askmywa.com/assets/og-en.jpg"}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -47,16 +47,18 @@
   <main id="main">
   <div class="hero">
     <div>
-      <p class="eyebrow-mcp rise">WhatsApp MCP server · for Claude, ChatGPT, Codex and Cursor</p>
+      <p class="eyebrow-mcp rise">Find a message. Catch up on a group.</p>
       <h1><span class="rise">Ask your</span><br><span class="rise d1">WhatsApp</span><br><span class="rise d2 hl">anything.</span></h1>
-      <p class="lede rise d3">Claude reads your chats <strong>on your computer</strong> and answers in plain words. It never sends a thing <strong>without your yes</strong>.</p>
+      <p class="lede rise d3">Find the quote someone sent. Catch up on the family group. Ask <strong>Claude, ChatGPT or Codex</strong> in plain words.</p>
+      <p class="data-note">Your archive is stored on your computer. Messages your assistant looks up are <strong>sent to its provider</strong>: Anthropic or OpenAI. askmywa collects none of them. <a href="#privacy">Where your messages go →</a></p>
       <div class="rise d4">
         <a class="composer" href="https://github.com/Ruwad-io/askmywa/releases/latest/download/askmywa.mcpb">
           <span class="txt">Download for Claude Desktop</span>
           <span class="send" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
         </a>
-        <p class="under">Free, for Mac and Windows. Needs the <a href="https://claude.ai/download">Claude desktop app</a>: it does not work in the Claude phone app or on claude.ai.<br>
-        <a class="alt-install" href="#chatgpt">With ChatGPT or Codex →</a> <a class="alt-install" href="#terminal">Linux, Raspberry Pi or Homebrew →</a></p>
+        <p class="under">Free · Mac and Windows · needs the <a href="https://claude.ai/download">Claude desktop app</a>. <a href="#setup">Installation steps →</a></p>
+        <a class="other-assistant" href="#chatgpt"><strong>Using ChatGPT or Codex? →</strong><span>Install from Terminal · ChatGPT on Mac</span></a>
+        <p class="under">Desktop only; no phone or browser app. <a href="#terminal">Linux, Raspberry Pi and other assistants →</a></p>
       </div>
     </div>
 
@@ -99,13 +101,14 @@
         </div>
       </div>
       <figcaption class="answer">
-        <span class="who">Claude · 347 messages read</span>
+        <span class="who">Illustrated example · fictional messages</span>
         <p>The elevator gets fixed Thursday.</p>
         <ul>
           <li>9 am to noon; Sophie has the ground-floor keys.</li>
-          <li>Cost split by flat size, invoice in December.</li>
-          <li>Nobody has claimed the bike in the hall.</li>
+          <li>Cost split by flat size, invoice expected in December.</li>
+          <li>Lucas asks whose bike is in the hall.</li>
         </ul>
+        <a class="example-link" href="#example">See the messages behind this answer →</a>
       </figcaption>
     </figure>
   </div>
@@ -116,8 +119,9 @@
   <div class="wrap yes">
     <div>
       <p class="kicker">Sending</p>
-      <h2 id="yes-h">Nothing leaves without <em>your yes.</em></h2>
-      <p class="lead2">Every message and every file is shown to you first: who it goes to, and exactly what it says. Claude sends it only after you approve that exact preview.</p>
+      <h2 id="yes-h">A preview <em>before sending.</em></h2>
+      <p class="lead2">By default, sending tools return a preview: the recipient and the exact message or file. Your assistant is instructed to show it to you and ask for your approval before confirming the send.</p>
+      <p class="lead2">Confirmation goes through your assistant. askmywa has no separate approval window to verify your agreement. Check the recipient and content before saying yes.</p>
     </div>
     <div class="thread" aria-label="Example: sending a message">
       <div class="b you">Tell Karim I'll be there at 7.</div>
@@ -147,11 +151,34 @@
   </div>
 </section>
 
+<section class="band" id="example" aria-labelledby="example-h" style="padding-top:0">
+  <div class="wrap setup">
+    <div>
+      <p class="kicker">Illustrated example · fictional messages</p>
+      <h2 id="example-h">An answer you can check.</h2>
+      <p class="lead2">“What was decided about the elevator? Quote the original messages with their authors and times.”</p>
+      <p class="lead2">The example above brings those messages together. In your own chat, ask your assistant for the source messages and the period it checked.</p>
+    </div>
+    <details class="sources" open>
+      <summary>Read the example's source messages</summary>
+      <ul>
+        <li><b>Inès · 08:11</b><p>The technician comes Thursday I think</p></li>
+        <li><b>Inès · 09:47</b><p>9 to noon, confirmed!!</p></li>
+        <li><b>Sophie · 09:55</b><p>I'll grab the ground-floor keys 🙋‍♀️</p></li>
+        <li><b>Paul · 08:34</b><p>The syndic said split by flat size</p></li>
+        <li><b>Mme Laurent · 10:30</b><p>And the invoice?</p></li>
+        <li><b>Paul · 10:41</b><p>December apparently</p></li>
+      </ul>
+      <p class="source-note">These fictional messages explain the illustration; this is not a recording of the software.</p>
+    </details>
+  </div>
+</section>
+
 <section class="band" id="setup" aria-labelledby="setup-h" style="padding-top:0">
   <div class="wrap setup">
     <div>
-      <p class="kicker">Setup</p>
-      <h2 id="setup-h">Two minutes. One code.</h2>
+      <p class="kicker">Claude Desktop · Mac and Windows</p>
+      <h2 id="setup-h">One download. One code.</h2>
       <p class="lead2">No terminal, no QR code. You link your computer the way you'd link WhatsApp Web, by typing a code on your phone.</p>
       <div class="ticket" aria-label="Example pairing code">
         <div class="lbl">Your code · valid 2 minutes</div>
@@ -162,7 +189,7 @@
     <ol class="steps">
       <li><div><h3>Download the extension</h3><p>One file, <code>askmywa.mcpb</code>, for Mac and Windows.</p></div></li>
       <li><div><h3>Double-click it</h3><p>Claude opens and asks you to confirm the install.</p></div></li>
-      <li><div><h3>Say “Connect my WhatsApp”</h3><p>In a new chat. Give your number with its country code. The first time, Claude asks to use askmywa: choose to always allow it.</p></div></li>
+      <li><div><h3>Say “Connect my WhatsApp”</h3><p>In a new chat. Give your number with its country code. Claude asks for permission to use askmywa: choose the permissions you are comfortable with.</p></div></li>
       <li><div><h3>Type the code on your phone</h3><p><span class="path">WhatsApp › Linked devices › Link a device › Link with phone number instead</span></p></div></li>
     </ol>
   </div>
@@ -172,7 +199,7 @@
   <div class="wrap setup">
     <div>
       <p class="kicker">ChatGPT and Codex</p>
-      <h2 id="chatgpt-h">Rather ask ChatGPT?</h2>
+      <h2 id="chatgpt-h">Install for ChatGPT or Codex.</h2>
       <p class="lead2">askmywa also works in the ChatGPT app on a Mac, and in Codex. There is no file to double-click for ChatGPT yet: you paste one line into Terminal instead. It does not work on chatgpt.com or in the ChatGPT phone app.</p>
     </div>
     <ol class="steps">
@@ -188,8 +215,8 @@
     <p class="kicker">Privacy</p>
     <h2 id="privacy-h">Where your messages go.</h2>
     <div class="where">
-      <div><span class="place">Your computer</span><p class="what">Everything.</p><p>Your chats are copied into a private file on your computer, the way WhatsApp Web keeps them in your browser.</p></div>
-      <div><span class="place">Claude</span><p class="what">Only what it looks up.</p><p>A message reaches Claude only when Claude reads it to answer your question.</p></div>
+      <div><span class="place">Your computer</span><p class="what">The local archive.</p><p>Messages received from WhatsApp are stored on your computer. WhatsApp may supply only part of your older history.</p></div>
+      <div><span class="place">Your assistant's provider</span><p class="what">What it looks up.</p><p>Tool results, including message text, contact names and phone numbers, are sent to Anthropic for Claude or OpenAI for ChatGPT and Codex. Their privacy policies apply.</p></div>
       <div><span class="place">Us</span><p class="what">Nothing.</p><p>There is no askmywa server, no account and no tracking. The program talks to WhatsApp directly.</p></div>
     </div>
     <p class="guarantees"><span>Files only from one folder you choose</span><span>Open source, MIT license</span><span>Removed in one sentence</span><span><a href="privacy/">Privacy policy</a></span></p>
@@ -202,8 +229,8 @@
       <h2 id="honest-h">Read this before you install.</h2>
       <ul>
         <li><b>It is not made by WhatsApp.</b> It connects as a linked device, like WhatsApp Web, through an interface WhatsApp has not officially opened. WhatsApp's terms do not allow this, and WhatsApp could restrict or ban an account that uses it.</li>
-        <li><b>Watch for trick messages.</b> A message you receive could try to fool the assistant. That is why every send waits for your yes: read the preview first.</li>
-        <li><b>Your computer has to be on</b> for new messages to arrive. Whatever came in while it slept is caught up when it wakes.</li>
+        <li><b>Watch for trick messages.</b> A received message could try to fool the assistant. Sending confirmation relies on the assistant following its instructions: read the preview before approving.</li>
+        <li><b>Search covers the local archive.</b> Your computer must be on and connected to receive new messages. WhatsApp supplies history and catch-up messages when it reconnects; a complete history is not guaranteed.</li>
         <li><b>On Windows</b>, the program isn't code-signed yet. If SmartScreen warns you, choose <i>More info</i> › <i>Run anyway</i>.</li>
       </ul>
     </div>
@@ -215,7 +242,7 @@
     <div>
       <p class="kicker">For developers</p>
       <h2 id="terminal-h">A WhatsApp MCP server in one binary.</h2>
-      <p class="lead2">Under the extension is an MCP server: <code>askmywa serve</code> speaks MCP over stdio, with 15 typed tools such as <code>list_messages</code>, <code>search_contacts</code> and a <code>send_message</code> that waits for confirmation. On Linux, a Raspberry Pi or a Mac, one command picks the right build, checks it, installs the background service and links WhatsApp with a code. A Pi left on keeps your archive complete while your laptop sleeps. <a href="https://github.com/Ruwad-io/askmywa#install-without-the-extension-mac-windows-linux">Full guide</a></p>
+      <p class="lead2">Under the extension is an MCP server: <code>askmywa serve</code> speaks MCP over stdio, with 15 typed tools such as <code>list_messages</code>, <code>search_contacts</code> and a <code>send_message</code> that waits for confirmation. On Linux, a Raspberry Pi or a Mac, one command picks the right build, checks it, installs the background service and links WhatsApp with a code. A Pi left on can keep receiving messages while your laptop sleeps. <a href="https://github.com/Ruwad-io/askmywa#install-without-the-extension-mac-windows-linux">Full guide</a></p>
     </div>
     <div>
       <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.sh | sh</code></pre>
@@ -235,7 +262,8 @@
       <div><h3>Is it really free?</h3><p>Yes. Open source under the MIT license, with no account, no subscription and no ads.</p></div>
       <div><h3>Does it work with Claude on my phone?</h3><p>No. The Claude phone app and claude.ai can't use an extension that lives on your computer. You need the Claude desktop app on a Mac or a Windows PC.</p></div>
       <div><h3>Does it work with ChatGPT?</h3><p>Yes, in the ChatGPT app on a Mac and in Codex, once installed <a href="#chatgpt">from Terminal</a>. Not on chatgpt.com or in the phone app, which can't reach a program on your computer.</p></div>
-      <div><h3>Can it send messages on its own?</h3><p>No. Every send first returns a preview. Claude sends only after you approve that exact message.</p></div>
+      <div><h3>How is sending approved?</h3><p>Sending tools preview by default. The assistant is instructed to show you the recipient and content, ask for your approval, then confirm the send. askmywa cannot independently verify that the assistant obtained your agreement.</p></div>
+      <div><h3>Can it search all my old messages?</h3><p>Only messages in this computer's archive can be searched. WhatsApp may send only part of your history when you link a device. Ask your assistant for the oldest and newest stored messages in the chat you care about; a missing search result does not prove a message was never sent.</p></div>
       <div><h3>Will WhatsApp ban my account?</h3><p>We can't promise it won't. It uses the same kind of connection as WhatsApp Web, through an unofficial interface that WhatsApp's terms don't allow.</p></div>
       <div><h3>How do I remove it?</h3><p>Ask Claude: “Disconnect WhatsApp from this computer and delete the messages.” Then remove the extension in Claude's Settings › Extensions.</p></div>
       <div><h3>Who makes it?</h3><p>Open-source software published by RUWAD, a small company in Paris (<a href="legal/">legal notice</a>). It is not affiliated with WhatsApp, Meta or Anthropic. It started as a rewrite of lharries/whatsapp-mcp. Bugs and questions go to <a href="https://github.com/Ruwad-io/askmywa/issues">GitHub</a>.</p></div>

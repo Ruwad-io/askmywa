@@ -20,7 +20,7 @@
 <meta property="og:url" content="https://askmywa.com/privacy/">
 <meta property="og:title" content="Privacy policy — askmywa, the WhatsApp MCP for Claude">
 <meta property="og:description" content="Your WhatsApp archive stays on your computer, and the project collects nothing.">
-<meta property="og:image" content="https://askmywa.com/assets/og-en.png">
+<meta property="og:image" content="https://askmywa.com/assets/og-en.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="en_US">
@@ -39,7 +39,7 @@
 <main>
 <article class="doc">
 <h1>Privacy policy</h1>
-<p class="updated">Last updated: 7 November 2026</p>
+<p class="updated">Last updated: 16 November 2026</p>
 
 <p>This policy covers askmywa, the open-source software presented on this site (the Claude Desktop extension, the command-line program and the installer), and this website. In short: <b>the software runs on your computer, and the project collects no data at all.</b></p>
 
@@ -68,7 +68,7 @@
 
 <h2>Your AI assistant</h2>
 <p>When you ask your assistant something, it may call the software's tools, for example to search your messages. The results of those calls, which can include message contents, contact names and phone numbers, become part of your conversation and are sent to the assistant's provider: Anthropic for Claude, OpenAI for ChatGPT and Codex. They handle that data under their own privacy policy, as they do for everything else you write in the conversation. Messages that the assistant does not look up are not sent.</p>
-<p>The software sends a WhatsApp message or file only after showing the assistant a preview and receiving a second, explicit confirmation of that exact content, which the assistant should obtain from you.</p>
+<p>By default, sending tools return a preview without sending anything. The assistant is instructed to show you that preview and obtain your approval before calling the tool with <code>confirm=true</code>, which sends the message or file. This confirmation is supplied by the assistant; askmywa has no independent approval window and cannot verify that the assistant obtained your agreement.</p>
 
 <h2>Deleting your data</h2>
 <p>Ask the assistant to disconnect WhatsApp from this computer and delete the messages: it unlinks the device from your WhatsApp account, stops the background service and deletes the archive. You can also remove the device from your phone (WhatsApp › Linked devices) and delete the folder listed above. Your send folder, including downloaded attachments, is never deleted automatically: remove it yourself if you want to.</p>
