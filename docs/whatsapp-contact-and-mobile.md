@@ -194,7 +194,7 @@ d'historique, gérer les messages périmés et sérialiser les commandes par
 propriétaire. Installer deux daemons demanderait aussi des identifiants de
 service distincts : le label actuel `com.askmywa.daemon` est global.
 
-## Ce que montrent Meta et Claude Duet
+## Comparaison : Meta, Claude Duet et Instinct
 
 **Meta AI dans WhatsApp** et les aides contextuelles sont utiles pour comparer
 l'expérience native. L'annonce de mai 2026 présente Incognito Chat et annonce
@@ -226,6 +226,30 @@ research preview sur liste d'attente aux États-Unis ; nous n'avons pas vérifi�
 qu'Askmywa puisse y être connecté. Son annonce ne démontre pas un canal WhatsApp
 tiers disponible pour nous.
 ([Annonce du 21 octobre 2026](https://claude.com/resources/articles/claude-duet))
+
+**Instinct** est une autre référence directe pour le parcours Askmywa : un
+assistant personnel auquel on délègue des tâches par message ou appel, et qui
+peut utiliser un téléphone et un ordinateur. L'enseignement produit est de
+garder l'entrée dans la messagerie familière à l'utilisateur, avec les
+connexions aux services derrière ce point d'entrée.
+([Présentation officielle d'Instinct](https://instinct.com/))
+
+Un exemple d'intégration est documenté par **Circles**, fournisseur tiers :
+l'utilisateur lie son WhatsApp, choisit « Connect Instinct », puis envoie à
+Instinct un message prérempli avec un code à usage unique. D'après Circles,
+Instinct échange ce code contre son propre accès aux conversations autorisées.
+Ce parcours est une piste concrète pour l'inscription Askmywa : association
+depuis le téléphone et accès révocable sans clé API à recopier.
+([Guide Circles pour Instinct, mis à jour le 1er novembre 2026](https://usecircles.app/en/agents/instinct))
+
+Il s'agit du fonctionnement annoncé par Circles, sans essai effectué ici.
+Les pages publiques d'Instinct consultées ne permettent pas de confirmer un
+branchement direct de notre MCP stdio. Avant de choisir Instinct comme moteur,
+il faut vérifier son mécanisme d'accès aux outils externes et tester notre
+authentification ; le service distant aurait besoin d'un endpoint ou d'un pont
+vers Askmywa. La recommandation OpenClaw pour le premier prototype local reste
+donc inchangée, tandis qu'Instinct enrichit la comparaison d'expérience et
+d'inscription.
 
 ## Rendre le parcours accessible au grand public
 
