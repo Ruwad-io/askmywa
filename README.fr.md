@@ -4,6 +4,8 @@
 
 **[askmywa.com](https://askmywa.com/fr/)** · *[English version](README.md)* · [Politique de confidentialité](https://askmywa.com/fr/confidentialite/)
 
+[![Ruwad-io/askmywa MCP server](https://glama.ai/mcp/servers/Ruwad-io/askmywa/badges/score.svg)](https://glama.ai/mcp/servers/Ruwad-io/askmywa)
+
 Cette extension permet à Claude de lire, chercher et envoyer vos messages WhatsApp, depuis l'application Claude sur votre Mac ou votre PC Windows.
 
 Vous pouvez par exemple lui demander :
