@@ -4,6 +4,8 @@
 
 **[askmywa.com](https://askmywa.com)** · *[Version française](README.fr.md)* · [Privacy policy](https://askmywa.com/privacy/)
 
+[![Ruwad-io/askmywa MCP server](https://glama.ai/mcp/servers/Ruwad-io/askmywa/badges/score.svg)](https://glama.ai/mcp/servers/Ruwad-io/askmywa)
+
 An [MCP](https://modelcontextprotocol.io) server for your personal WhatsApp account, as a single Go binary for Mac, Windows and Linux, including Raspberry Pi.
 
 It links to WhatsApp as a companion device through [whatsmeow](https://github.com/tulir/whatsmeow), keeps a local archive of your messages, and lets an assistant such as Claude Desktop search them, read them, download attachments and, after your approval, send messages and files.
