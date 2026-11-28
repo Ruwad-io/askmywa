@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mode serveur et webhooks — askmywa, le WhatsApp MCP</title>
+<meta name="description" content="Faites tourner askmywa sur votre serveur pour une application de confiance : envoi seul (aucun message gardé), porte HTTP privée avec secret et plafonds d'envoi, webhooks signés pour chaque nouveau message.">
+<link rel="canonical" href="https://askmywa.com/fr/serveur/">
+<link rel="alternate" hreflang="en" href="https://askmywa.com/server/">
+<link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/serveur/">
+<link rel="alternate" hreflang="x-default" href="https://askmywa.com/server/">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/icon-192.png" type="image/png" sizes="192x192">
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#efeaff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120a2e" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="askmywa">
+<meta property="og:url" content="https://askmywa.com/fr/serveur/">
+<meta property="og:title" content="Mode serveur et webhooks — askmywa">
+<meta property="og:description" content="Envoi seul, porte HTTP privée avec plafonds d'envoi et webhooks signés : askmywa pour une application de confiance, sur votre serveur.">
+<meta property="og:image" content="https://askmywa.com/assets/og-fr.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<div class="wrap">
+<header class="bar">
+  <a class="wordmark" href="../"><img src="../../assets/favicon.svg" alt="" width="30" height="30">askmy<b>wa</b></a>
+  <nav class="links" aria-label="Principal">
+    <a href="../../server/" hreflang="en" lang="en">EN</a>
+    <a href="https://github.com/Ruwad-io/askmywa">GitHub</a>
+  </nav>
+</header>
+<main>
+<article class="doc">
+<p class="kicker">Pour les développeurs</p>
+<h1>Mode serveur et webhooks</h1>
+
+<p>Sur votre ordinateur, askmywa archive vos messages pour votre assistant. Sur un serveur, il peut plutôt travailler pour <b>une application de confiance à vous</b> : par exemple une application d'assistant personnel qui prépare des réponses et vous laisse les envoyer en un clic. Trois options, toutes coupées par défaut, en font un second appareil lié qui ne garde rien et ne fait que ce dont l'application a besoin.</p>
+
+<pre class="term"><code>votre appli ── un texte, avec un secret ──&gt;  askmywa  ──&gt;  WhatsApp
+votre appli &lt;── chaque message, signé ─────  askmywa  &lt;──  WhatsApp
+               (réseau privé seulement)     (aucun message gardé)</code></pre>
+
+<p>Rien ne part par accident. La porte envoie un texte à une personne et rien d'autre, sous des plafonds par minute et par jour, et n'envoie jamais deux fois sous la même clé. L'aperçu et votre accord restent dans votre application : elle vous montre le destinataire et le texte exact, et n'appelle askmywa qu'après votre clic.</p>
+
+<h2>Envoi seul : aucun message gardé</h2>
+<p><code>--send-only</code> (ou <code>ASKMYWA_SEND_ONLY=1</code>) ne stocke ni message reçu, ni historique, ni copie de ce qui part. Seuls la session WhatsApp et les noms des contacts sont gardés (et les noms des groupes). L'option refuse <code>--legacy-store</code> : il n'y a pas d'historique où importer.</p>
+
+<h2>La porte HTTP</h2>
+<p><code>--http-addr ADRESSE</code> (ou <code>ASKMYWA_HTTP_ADDR</code>) ouvre trois opérations, en HTTP simple. Le secret se lit dans <code>ASKMYWA_HTTP_TOKEN</code> seulement : 32 caractères au moins, jamais en option de ligne de commande, pour qu'il n'apparaisse pas dans <code>ps</code>. Chaque requête porte <code>Authorization: Bearer &lt;secret&gt;</code>.</p>
+<table>
+  <thead><tr><th>Requête</th><th>Réponse</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /v1/status</code></td><td><code>{"connected": true, "logged_in": true, "send_only": true}</code></td></tr>
+    <tr><td><code>GET /v1/contact?phone=%2B33600000001</code></td><td>Le nom que <b>vous</b> avez donné à ce numéro dans votre carnet d'adresses, ou <code>null</code>. Un nom de profil ou d'entreprise est choisi par l'autre personne : il ne garantit jamais un numéro.</td></tr>
+    <tr><td><code>POST /v1/send</code></td><td>Un texte à une personne : <code>{"to", "text", "idempotency_key"}</code> et rien d'autre. Ni groupe, ni fichier. Le texte part tel quel, 4 000 caractères au plus. Répond <code>{"message_id", "timestamp"}</code>.</td></tr>
+  </tbody>
+</table>
+<pre class="term"><code>export ASKMYWA_HTTP_TOKEN=…   # le même secret que celui de votre appli
+
+curl -s http://askmywa.internal:8080/v1/status \
+  -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN"
+
+curl -s -G http://askmywa.internal:8080/v1/contact \
+  --data-urlencode 'phone=+33600000001' \
+  -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN"
+
+curl -s http://askmywa.internal:8080/v1/send \
+  -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"to":"+33600000001","text":"Je serai là à 19 h.","idempotency_key":"brouillon-0001"}'</code></pre>
+<p>Encodez le <code>+</code> dans l'adresse (<code>%2B</code>, ou <code>curl -G --data-urlencode</code>) : un <code>+</code> nu se lit comme une espace et le numéro est refusé.</p>
+<ul>
+  <li><b>Pas d'aperçu à la porte.</b> <code>POST /v1/send</code> envoie tout de suite. Votre application montre l'aperçu et demande votre accord avant d'appeler la porte.</li>
+  <li><b>Une même clé ne part jamais deux fois</b>, même après un envoi en échec ou coupé : WhatsApp a pu le prendre, l'issue est donc inconnue et la porte répond 409 au lieu de réessayer. Clés et compteurs vivent en mémoire pendant 24 heures ; un redémarrage les oublie.</li>
+  <li><b>Plafonds.</b> Au plus <code>ASKMYWA_HTTP_SENDS_PER_MINUTE</code> (5 par défaut) et <code>ASKMYWA_HTTP_SENDS_PER_DAY</code> (40 par défaut) envois. Au-delà, la porte répond 429 et n'envoie rien. Pas connecté : 503, rien n'est parti. WhatsApp n'a pas confirmé : 502, et la clé est consommée.</li>
+</ul>
+
+<h2>Webhooks</h2>
+<p><code>--webhook-url URL</code> (ou <code>ASKMYWA_WEBHOOK_URL</code>) envoie chaque message <i>en direct</i> à votre application, en JSON. L'historique n'est pas envoyé. Les messages que vous envoyez depuis votre téléphone le sont aussi, avec <code>from_me</code>. Cela fonctionne en envoi seul : le message atteint votre application et askmywa ne garde rien.</p>
+<ul>
+  <li><b>Ce qui part :</b> <code>type</code> (<code>"message"</code>), <code>id</code>, <code>timestamp</code>, <code>from_me</code>, <code>chat</code> (<code>jid</code>, <code>name</code>, <code>is_group</code>), <code>sender</code> (<code>phone</code>, <code>lid</code>, <code>name</code>, <code>name_source</code>), <code>text</code> et, pour une pièce jointe, son type <code>media</code>, son nom de fichier et son type MIME. Jamais la pièce jointe elle-même.</li>
+  <li><b>Signé :</b> le secret vient de <code>ASKMYWA_WEBHOOK_SECRET</code> seulement (32 caractères ou plus). Chaque requête porte <code>X-Askmywa-Event-Id</code>, <code>X-Askmywa-Timestamp</code> (secondes Unix) et <code>X-Askmywa-Signature: sha256=</code> suivi du HMAC-SHA256 en hexadécimal de <code>timestamp + "." + corps</code>. L'URL doit être en http(s), sans identifiants dedans.</li>
+  <li><b>Dans l'ordre, réessayé :</b> un événement à la fois, réessayé avec un délai croissant (1 seconde, doublé jusqu'à environ 4 minutes) jusqu'à une réponse 2xx. Une réponse 4xx autre que 408 ou 429 abandonne l'événement. La file vit en mémoire, 2 000 événements au plus, les plus anciens tombant au-delà : un redémarrage perd ce qui n'était pas encore livré.</li>
+</ul>
+<p>Vérifiez la signature sur le corps brut, refusez un horodatage de plus de cinq minutes, puis ignorez un identifiant d'événement déjà reçu :</p>
+<pre class="term"><code>import hashlib, hmac, time
+
+def verify(secret: str, headers: dict, body: bytes) -&gt; bool:
+    ts = headers.get("X-Askmywa-Timestamp", "")
+    sig = headers.get("X-Askmywa-Signature", "")
+    if not ts.isdigit() or abs(time.time() - int(ts)) &gt; 300:
+        return False  # plus de cinq minutes : refuser
+    mac = hmac.new(secret.encode(), ts.encode() + b"." + body, hashlib.sha256)
+    return hmac.compare_digest(sig, "sha256=" + mac.hexdigest())</code></pre>
+
+<h2>Le lancer avec Docker</h2>
+<p><code>whatsapp-go/Dockerfile</code> construit le serveur en envoi seul : données sur le volume <code>/data</code>, porte sur <code>[::]:8080</code>, et un point d'entrée qui donne le volume à un utilisateur <code>askmywa</code> sans privilèges, puis abandonne root. Posez <code>ASKMYWA_HTTP_TOKEN</code> sur le service (et les variables du webhook si vous le voulez). Liez-le une fois depuis un terminal dans le conteneur, puis tapez le code dans WhatsApp › Appareils connectés › Connecter un appareil › Connecter avec un numéro de téléphone :</p>
+<pre class="term"><code>askmywa link --phone &lt;votre numéro&gt;</code></pre>
+
+<h2>La sécurité, en bref</h2>
+<ul>
+  <li><b>Réseau privé seulement.</b> La porte n'a pas de TLS et ne choisit pas qui peut la joindre. Ne donnez au service aucun domaine public et joignez-le depuis votre application sur un réseau privé.</li>
+  <li><b>Secrets dans l'environnement.</b> <code>ASKMYWA_HTTP_TOKEN</code> et <code>ASKMYWA_WEBHOOK_SECRET</code> se lisent dans l'environnement seulement, jamais dans une option, et font au moins 32 caractères.</li>
+  <li><b>L'envoi seul ne garde aucun message.</b> Le volume contient la session et les noms des contacts et des groupes, rien d'autre.</li>
+  <li><b>Envois plafonnés.</b> 5 par minute et 40 par jour sauf réglage contraire ; un texte à une personne ; jamais deux fois pour la même clé.</li>
+  <li><b>Webhooks signés.</b> Votre application peut prouver que chaque événement vient d'askmywa et refuser un rejeu.</li>
+  <li><b>Journaux discrets.</b> Un envoi en échec est journalisé sans le destinataire ni le texte.</li>
+</ul>
+
+<div class="honest">
+  <h2>À lire avant de déployer.</h2>
+  <ul>
+    <li><b>Risque de bannissement.</b> Un appareil lié sur une adresse de centre de données n'est pas ce que WhatsApp attend, et ses conditions n'autorisent pas les clients non officiels. WhatsApp pourrait restreindre ou bannir le compte.</li>
+    <li><b>Gardez un faible volume.</b> Gardez des plafonds serrés et n'envoyez que ce que vous avez approuvé vous-même.</li>
+    <li><b>Vous pouvez le couper.</b> Retirer l'appareil depuis votre téléphone (WhatsApp › Appareils connectés) l'arrête aussitôt.</li>
+  </ul>
+</div>
+
+<p>Référence complète : <a href="https://github.com/Ruwad-io/askmywa/blob/main/README.fr.md#mode-serveur--envoi-seul-porte-http-privée-et-webhooks">le README sur GitHub</a>.</p>
+</article>
+</main>
+</div>
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <nav aria-label="Pied de page"><a href="../">Accueil</a><a href="../confidentialite/">Confidentialité</a><a href="../mentions-legales/">Mentions légales</a><a href="https://github.com/Ruwad-io/askmywa">GitHub</a></nav>
+      <p class="legal">askmywa n'est ni affilié, ni approuvé, ni soutenu par WhatsApp, Meta ou Anthropic. WhatsApp est une marque de WhatsApp LLC. Claude est une marque d'Anthropic, PBC. Ni cookies, ni mesure d'audience.</p>
+    </div>
+  </div>
+</footer>
+<script src="../../assets/site.js" defer></script>
+</body>
+</html>

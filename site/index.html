@@ -275,6 +275,7 @@
       <p class="kicker">For developers</p>
       <h2 id="terminal-h">A WhatsApp MCP server in one binary.</h2>
       <p class="lead2">Under the extension is an MCP server: <code>askmywa serve</code> speaks MCP over stdio, with 15 typed tools such as <code>list_messages</code>, <code>search_contacts</code> and a <code>send_message</code> that waits for confirmation. On Linux, a Raspberry Pi or a Mac, one command picks the right build, checks it, installs the background service and links WhatsApp with a code. A Pi left on can keep receiving messages while your laptop sleeps. <a href="https://github.com/Ruwad-io/askmywa#install-without-the-extension-mac-windows-linux">Full guide</a></p>
+      <p class="lead2">On your own server, it can also work for one trusted app: send-only, so it keeps no message; a private HTTP door with a secret and send caps; and a signed webhook for each new message. <a href="server/">Server mode and webhooks</a></p>
     </div>
     <div>
       <pre class="term"><code><span class="p">$ </span>curl -fsSL https://github.com/Ruwad-io/askmywa/releases/latest/download/install.sh | sh</code></pre>
@@ -309,6 +310,7 @@
       <nav aria-label="Footer">
         <a href="https://github.com/Ruwad-io/askmywa">GitHub</a>
         <a href="https://github.com/Ruwad-io/askmywa/releases">All downloads</a>
+        <a href="server/">Server mode</a>
         <a href="privacy/">Privacy</a>
         <a href="legal/">Legal notice</a>
         <a href="fr/" hreflang="fr" lang="fr">Français</a>

@@ -324,3 +324,13 @@ h1 .hl::before { left: -0.06em; right: -0.1em; bottom: -0.02em; height: 0.94em; 
 .term-band > div { min-width: 0; }
 .wordmark { display: inline-flex; align-items: center; gap: 10px; }
 .wordmark img { width: 30px; height: 30px; border-radius: 8px; }
+
+/* ——— Developer pages: code blocks and tables inside a .doc ——— */
+.doc pre.term { margin: 0 0 1.4em; }
+.doc pre.term code { font: inherit; color: inherit; background: none; border: 0; padding: 0; }
+.doc table { width: 100%; border-collapse: collapse; margin: 0 0 1.4em; font-size: 0.95rem; }
+.doc th, .doc td { text-align: left; vertical-align: top; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+.doc th { font: 500 0.74rem/1.4 var(--mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); border-bottom: 2px solid var(--ink); }
+.doc td code { overflow-wrap: anywhere; }
+.doc .honest { margin: 2.4em 0 1.6em; }
+.doc .honest h2 { margin: 0; }
