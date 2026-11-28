@@ -18,7 +18,8 @@ COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENV ASKMYWA_DATA_DIR=/data \
     ASKMYWA_SEND_ONLY=1 \
     ASKMYWA_HTTP_ADDR=[::]:8080
-VOLUME ["/data"]
+# No VOLUME instruction: hosts such as Railway refuse it and mount their own
+# volume at /data (docker run: -v askmywa-data:/data).
 EXPOSE 8080
 # The entrypoint gives the volume to the askmywa user, then drops root.
 ENTRYPOINT ["docker-entrypoint.sh"]
