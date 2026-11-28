@@ -141,7 +141,7 @@ func (d *Daemon) putName(ctx context.Context, phone, lid, name, source string) {
 	}
 	res, err := d.store.PutContact(ctx, phone, lid, name, source)
 	if err != nil {
-		d.log.Warn("store contact failed", "phone", phone, "lid", lid, "error", err)
+		d.log.Warn("store contact failed", "error", err)
 		return
 	}
 	if res.Linked && res.Phone != "" && res.LID != "" {

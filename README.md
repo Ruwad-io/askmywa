@@ -135,6 +135,37 @@ Claude Desktop on your laptop can then use the Pi over SSH, provided you log in 
 
 Files to send must then be on the Pi, in its send folder.
 
+## Server mode: send-only, behind a private HTTP door
+
+For a trusted app on your own server (askmywa's first user is Mīzān on
+Railway), askmywa can run as a **second linked device that only sends**:
+
+- `--send-only` (or `ASKMYWA_SEND_ONLY=1`) keeps **no message** — no live
+  message, no history sync, no copy of what is sent. Only the WhatsApp
+  session and contact names are stored (and group names). It refuses
+  `--legacy-store`.
+- `--http-addr ADDR` (or `ASKMYWA_HTTP_ADDR`) opens the HTTP door. The secret
+  is read from `ASKMYWA_HTTP_TOKEN` only (32+ characters, never a flag, so it
+  never shows in `ps`). Every request needs `Authorization: Bearer <secret>`.
+- The door does three things: `GET /v1/status`, `GET /v1/contact?phone=+33…`
+  (the name **you** gave the number in your address book, or null: a push
+  or business name is chosen by the other person and never vouches for a
+  number) and `POST /v1/send`
+  (`{"to":"+33…","text":"…","idempotency_key":"…"}`: one text to one person;
+  no group, no file; the text leaves exactly as given). The same key never
+sends twice, even after a failed or cut-off send (its outcome is unknown, so
+it answers 409). Sends are capped per
+  minute and per day (`ASKMYWA_HTTP_SENDS_PER_MINUTE`, default 5;
+  `ASKMYWA_HTTP_SENDS_PER_DAY`, default 40).
+- `whatsapp-go/Dockerfile` builds that server: data on the `/data` volume,
+  door on `[::]:8080`. Give the service **no public domain**: reach it on a
+  private network only. Pair it once from a shell in the container with
+  `askmywa link --phone <your number>`, then type the code in WhatsApp.
+
+Running WhatsApp from a datacenter address is not what WhatsApp expects of a
+linked device; keep the volume low. Unlinking the device from your phone
+(Linked devices) cuts it off at once.
+
 ## Tools
 
 | Tool | What it does |

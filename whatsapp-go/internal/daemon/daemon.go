@@ -22,6 +22,7 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 
 	"askmywa/internal/config"
+	"askmywa/internal/httpdoor"
 	"askmywa/internal/ipc"
 	"askmywa/internal/store"
 )
@@ -38,6 +39,12 @@ type Options struct {
 	QROut *os.File
 	// PairMode is PairQR or PairWait; it only matters when there is no session.
 	PairMode string
+	// SendOnly keeps no message: no live message, no history sync, no copy
+	// of what is sent. Only the session and the contact names are stored.
+	// Meant for a server that only sends on behalf of a trusted app.
+	SendOnly bool
+	// HTTP, when set, serves the private HTTP door (package httpdoor).
+	HTTP *httpdoor.Config
 }
 
 // Daemon is the running service.
@@ -144,8 +151,19 @@ func Run(ctx context.Context, opts Options) error {
 	p := opts.Paths
 
 	d.cli.AddEventHandler(d.handleEvent)
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2)
 	go func() { errCh <- ipc.Serve(ctx, p.Socket, d, d.log) }()
+	if opts.HTTP != nil {
+		cfg := *opts.HTTP
+		cfg.Log = d.log
+		if !opts.SendOnly {
+			d.log.Warn("http door without --send-only: this server also keeps the message archive")
+		}
+		go func() { errCh <- httpdoor.Serve(ctx, cfg, d) }()
+	}
+	if opts.SendOnly {
+		d.log.Info("send-only: no message is stored, only the session and contact names")
+	}
 	defer d.cli.Disconnect()
 	if d.cli.Store.ID == nil && opts.PairMode == PairWait {
 		d.log.Info("not paired yet: waiting for a pairing request (connect_whatsapp tool)")
@@ -275,9 +293,13 @@ func (d *Daemon) handleEvent(evt any) {
 	ctx := context.Background()
 	switch v := evt.(type) {
 	case *events.Message:
-		d.handleMessage(ctx, v)
+		if !d.opts.SendOnly {
+			d.handleMessage(ctx, v)
+		}
 	case *events.HistorySync:
-		d.handleHistorySync(ctx, v)
+		if !d.opts.SendOnly {
+			d.handleHistorySync(ctx, v)
+		}
 	case *events.Contact:
 		d.handleContact(ctx, v)
 	case *events.PushName:

@@ -16,6 +16,8 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -24,6 +26,7 @@ import (
 
 	"askmywa/internal/config"
 	"askmywa/internal/daemon"
+	"askmywa/internal/httpdoor"
 	"askmywa/internal/ipc"
 	"askmywa/internal/mcpserver"
 	"askmywa/internal/service"
@@ -36,8 +39,9 @@ var version = "dev"
 const usage = `askmywa — WhatsApp archive and MCP server in one binary
 
 Usage:
-  askmywa daemon [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--log-file FILE]
+  askmywa daemon [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--log-file FILE] [--send-only] [--http-addr ADDR]
       Connect to WhatsApp (QR code on first run), archive messages, serve the socket.
+      --send-only keeps no message; --http-addr serves the private HTTP door (secret in $ASKMYWA_HTTP_TOKEN).
   askmywa serve [--data-dir DIR]
       MCP server over stdio (for claude_desktop_config.json).
   askmywa import --legacy-store DIR [--data-dir DIR]
@@ -133,6 +137,8 @@ func runDaemon(args []string) error {
 	legacy := fs.String("legacy-store", "", "old whatsapp-bridge/store directory: its session is copied and its history imported on first run")
 	logFile := fs.String("log-file", "", "write logs to this file with rotation instead of stderr")
 	pairMode := fs.String("pair", "auto", "without a session: qr (show a QR code), wait (wait for connect_whatsapp), or auto (qr in a terminal, wait otherwise)")
+	sendOnly := fs.Bool("send-only", os.Getenv("ASKMYWA_SEND_ONLY") == "1", "keep no message (only the session and contact names); for a server that only sends ($ASKMYWA_SEND_ONLY=1)")
+	httpAddr := fs.String("http-addr", os.Getenv("ASKMYWA_HTTP_ADDR"), "serve the private HTTP door on this address; the secret is read from $ASKMYWA_HTTP_TOKEN only ($ASKMYWA_HTTP_ADDR)")
 	background := fs.Bool("background", false, "run as the background service: never show a QR code, and on Windows close the console window")
 	debug := fs.Bool("debug", false, "verbose logging")
 	if err := fs.Parse(args); err != nil {
@@ -180,7 +186,28 @@ func runDaemon(args []string) error {
 	default:
 		return fmt.Errorf("invalid --pair %q: use qr, wait or auto", mode)
 	}
-	return daemon.Run(ctx, daemon.Options{Paths: paths, LegacyStore: legacyDir, Log: log, QROut: os.Stdout, PairMode: mode})
+	if *sendOnly && legacyDir != "" {
+		return errors.New("--send-only keeps no message: it cannot import a legacy history (drop --legacy-store)")
+	}
+	var door *httpdoor.Config
+	if *httpAddr != "" {
+		// The secret never travels on the command line, where ps would show it.
+		door = &httpdoor.Config{Addr: *httpAddr, Token: os.Getenv("ASKMYWA_HTTP_TOKEN"), Limits: httpdoor.Limits{
+			PerMinute: envInt("ASKMYWA_HTTP_SENDS_PER_MINUTE", 5), PerDay: envInt("ASKMYWA_HTTP_SENDS_PER_DAY", 40)}}
+		if err := door.Validate(); err != nil {
+			return err
+		}
+	}
+	return daemon.Run(ctx, daemon.Options{Paths: paths, LegacyStore: legacyDir, Log: log, QROut: os.Stdout, PairMode: mode,
+		SendOnly: *sendOnly, HTTP: door})
+}
+
+// envInt reads a positive integer from the environment, or the default.
+func envInt(name string, def int) int {
+	if v, err := strconv.Atoi(strings.TrimSpace(os.Getenv(name))); err == nil && v > 0 {
+		return v
+	}
+	return def
 }
 
 func runImport(args []string) error {
