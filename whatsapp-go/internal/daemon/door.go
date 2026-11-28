@@ -10,7 +10,14 @@ import (
 
 // DoorStatus implements httpdoor.Handler.
 func (d *Daemon) DoorStatus(_ context.Context) (httpdoor.Status, error) {
-	return httpdoor.Status{Connected: d.cli.IsConnected(), LoggedIn: d.isLoggedIn(), SendOnly: d.opts.SendOnly}, nil
+	d.mu.Lock()
+	phone := d.sessionPhone
+	loggedIn := phone != "" && !d.loggedOut
+	d.mu.Unlock()
+	if phone != "" {
+		phone = "+" + phone
+	}
+	return httpdoor.Status{Phone: phone, Connected: d.cli.IsLoggedIn() && d.cli.IsConnected(), LoggedIn: loggedIn, SendOnly: d.opts.SendOnly}, nil
 }
 
 // DoorContactName implements httpdoor.Handler: the name the owner gave this

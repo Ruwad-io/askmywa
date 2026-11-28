@@ -16,6 +16,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -37,11 +38,30 @@ type Handler interface {
 	DoorSend(ctx context.Context, digits, text string) (Sent, error)
 }
 
+// Accounts selects a session before any lookup or send. Only Pair(create=true)
+// may allocate a new account, using the caller's stable id as its idempotency key.
+type Accounts interface {
+	Lookup(id string) (Handler, bool)
+	Pair(id string, start bool) (PairState, error)
+}
+
+type PairState struct {
+	State     string     `json:"state"`
+	QR        []byte     `json:"qr,omitempty"`
+	ExpiresAt *time.Time `json:"expires_at,omitempty"`
+	Phone     string     `json:"phone,omitempty"`
+}
+
+var accountID = regexp.MustCompile(`^(primary|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$`)
+
+func ValidAccountID(id string) bool { return accountID.MatchString(id) }
+
 // Status is the door's view of the connection.
 type Status struct {
-	Connected bool `json:"connected"`
-	LoggedIn  bool `json:"logged_in"`
-	SendOnly  bool `json:"send_only"`
+	Connected bool   `json:"connected"`
+	LoggedIn  bool   `json:"logged_in"`
+	SendOnly  bool   `json:"send_only"`
+	Phone     string `json:"phone,omitempty"`
 }
 
 // Sent is a delivered message.
@@ -58,10 +78,11 @@ type Limits struct {
 
 // Config configures Serve.
 type Config struct {
-	Addr   string
-	Token  string
-	Limits Limits
-	Log    *slog.Logger
+	Accounts Accounts
+	Addr     string
+	Token    string
+	Limits   Limits
+	Log      *slog.Logger
 	// Now is the clock (tests).
 	Now func() time.Time
 }
@@ -141,21 +162,47 @@ func (d *Door) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
+	path := r.URL.Path
+	id := "primary"
+	h := d.h
+	if rest, ok := strings.CutPrefix(path, "/v1/accounts/"); ok {
+		var op string
+		id, op, ok = strings.Cut(rest, "/")
+		if !ok || !ValidAccountID(id) || d.cfg.Accounts == nil {
+			writeError(w, http.StatusNotFound, "unknown account")
+			return
+		}
+		if op == "pair" && (r.Method == http.MethodPost || r.Method == http.MethodGet) {
+			state, err := d.cfg.Accounts.Pair(id, r.Method == http.MethodPost)
+			if err != nil {
+				writeError(w, http.StatusServiceUnavailable, "pairing unavailable")
+				return
+			}
+			writeJSON(w, http.StatusOK, state)
+			return
+		}
+		h, ok = d.cfg.Accounts.Lookup(id)
+		if !ok {
+			writeError(w, http.StatusNotFound, "unknown account")
+			return
+		}
+		path = "/v1/" + op
+	}
 	switch {
-	case r.Method == http.MethodGet && r.URL.Path == "/v1/status":
-		st, err := d.h.DoorStatus(r.Context())
+	case r.Method == http.MethodGet && path == "/v1/status":
+		st, err := h.DoorStatus(r.Context())
 		if err != nil {
 			writeError(w, http.StatusServiceUnavailable, "status unavailable")
 			return
 		}
 		writeJSON(w, http.StatusOK, st)
-	case r.Method == http.MethodGet && r.URL.Path == "/v1/contact":
+	case r.Method == http.MethodGet && path == "/v1/contact":
 		digits, ok := phoneDigits(r.URL.Query().Get("phone"))
 		if !ok {
 			writeError(w, http.StatusBadRequest, "phone: international number, + then 8 to 15 digits")
 			return
 		}
-		name, err := d.h.DoorContactName(r.Context(), digits)
+		name, err := h.DoorContactName(r.Context(), digits)
 		if err != nil {
 			writeError(w, http.StatusServiceUnavailable, "contact lookup failed")
 			return
@@ -167,8 +214,8 @@ func (d *Door) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			out.Name = &name
 		}
 		writeJSON(w, http.StatusOK, out)
-	case r.Method == http.MethodPost && r.URL.Path == "/v1/send":
-		d.send(w, r)
+	case r.Method == http.MethodPost && path == "/v1/send":
+		d.send(w, r, id, h)
 	default:
 		writeError(w, http.StatusNotFound, "not found")
 	}
@@ -190,7 +237,7 @@ type sendBody struct {
 	Key  string `json:"idempotency_key"`
 }
 
-func (d *Door) send(w http.ResponseWriter, r *http.Request) {
+func (d *Door) send(w http.ResponseWriter, r *http.Request, id string, h Handler) {
 	r.Body = http.MaxBytesReader(w, r.Body, 32<<10)
 	raw, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -219,6 +266,8 @@ func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	key = id + ":" + key
+
 	// A key already used answers first, whatever the connection does now.
 	d.mu.Lock()
 	now := d.cfg.Now()
@@ -240,7 +289,7 @@ func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 	d.mu.Unlock()
 
 	// Not paired or not connected: a clean refusal, nothing left.
-	if st, err := d.h.DoorStatus(r.Context()); err != nil || !st.LoggedIn || !st.Connected {
+	if st, err := h.DoorStatus(r.Context()); err != nil || !st.LoggedIn || !st.Connected {
 		writeError(w, http.StatusServiceUnavailable, "WhatsApp is not connected: nothing was sent")
 		return
 	}
@@ -263,7 +312,7 @@ func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 	d.day = append(d.day, now)
 	d.mu.Unlock()
 
-	sent, err := d.h.DoorSend(r.Context(), digits, text)
+	sent, err := h.DoorSend(r.Context(), digits, text)
 
 	d.mu.Lock()
 	delete(d.pending, key)

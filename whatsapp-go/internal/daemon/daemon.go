@@ -28,9 +28,12 @@ import (
 	"askmywa/internal/webhook"
 )
 
+var deviceInfoOnce sync.Once
+
 // Options configures Run.
 type Options struct {
-	Paths config.Paths
+	AccountID string
+	Paths     config.Paths
 	// LegacyStore is the old whatsapp-bridge/store directory. When set, its
 	// whatsapp.db is copied to the data directory if no session exists yet,
 	// and its messages.db is imported if the message table is empty.
@@ -59,13 +62,15 @@ type Daemon struct {
 	cli     *whatsmeow.Client
 	started time.Time
 
-	mu         sync.Mutex
-	linked     map[string]bool   // "phone|lid" pairs already recorded
-	pushNames  map[string]string // identity key -> last push name recorded
-	groupNames map[string]string // group JID -> name
-	loggedOut  bool
-	pair       pairState
-	hook       *webhook.Notifier
+	mu           sync.Mutex
+	linked       map[string]bool   // "phone|lid" pairs already recorded
+	pushNames    map[string]string // identity key -> last push name recorded
+	groupNames   map[string]string // group JID -> name
+	sessionPhone string
+	loggedOut    bool
+	qrPairActive bool
+	pair         pairState
+	hook         *webhook.Notifier
 }
 
 // Prepare opens the stores, copies the legacy session if needed, syncs the
@@ -115,8 +120,13 @@ func Prepare(ctx context.Context, opts Options) (*Daemon, error) {
 		return nil, fmt.Errorf("read device: %w", err)
 	}
 	// Name shown in WhatsApp > Linked devices for new pairings.
-	wastore.SetOSInfo("WhatsApp MCP", [3]uint32{1, 0, 0})
-	d.cli = whatsmeow.NewClient(device, newWALogger(d.log, "whatsmeow"))
+	deviceInfoOnce.Do(func() { wastore.SetOSInfo("WhatsApp MCP", [3]uint32{1, 0, 0}) })
+	d.sessionPhone = device.GetJID().User
+	clientLog := newWALogger(d.log, "whatsmeow")
+	if opts.AccountID != "" {
+		clientLog = &accountLogger{log: d.log}
+	}
+	d.cli = whatsmeow.NewClient(device, clientLog)
 
 	if d.cli.Store.ID == nil {
 		d.log.Info("no session yet, skipping the contact sync")
@@ -147,6 +157,9 @@ func (d *Daemon) Store() *store.Store { return d.store }
 
 // Run starts the daemon and blocks until ctx is cancelled.
 func Run(ctx context.Context, opts Options) error {
+	if opts.HTTP != nil && opts.SendOnly && opts.PairMode == PairWait {
+		opts.AccountID = "primary"
+	}
 	d, err := Prepare(ctx, opts)
 	if err != nil {
 		return err
@@ -154,14 +167,7 @@ func Run(ctx context.Context, opts Options) error {
 	defer d.Close()
 	p := opts.Paths
 
-	if opts.Webhook != nil {
-		cfg := *opts.Webhook
-		cfg.Log = d.log
-		d.hook = webhook.New(cfg)
-		go d.hook.Run(ctx)
-		d.log.Info("webhook on: each live message is posted to the configured URL")
-	}
-	d.cli.AddEventHandler(d.handleEvent)
+	d.startEvents(ctx)
 	errCh := make(chan error, 2)
 	go func() { errCh <- ipc.Serve(ctx, p.Socket, d, d.log) }()
 	if opts.HTTP != nil {
@@ -169,6 +175,14 @@ func Run(ctx context.Context, opts Options) error {
 		cfg.Log = d.log
 		if !opts.SendOnly {
 			d.log.Warn("http door without --send-only: this server also keeps the message archive")
+		}
+		if opts.SendOnly && opts.PairMode == PairWait {
+			accounts, err := openAccounts(ctx, d)
+			if err != nil {
+				return err
+			}
+			defer accounts.close()
+			cfg.Accounts = accounts
 		}
 		go func() { errCh <- httpdoor.Serve(ctx, cfg, d) }()
 	}
@@ -189,6 +203,17 @@ func Run(ctx context.Context, opts Options) error {
 	case err := <-errCh:
 		return err
 	}
+}
+
+func (d *Daemon) startEvents(ctx context.Context) {
+	if d.opts.Webhook != nil {
+		cfg := *d.opts.Webhook
+		cfg.Log = d.log
+		d.hook = webhook.New(cfg)
+		go d.hook.Run(ctx)
+		d.log.Info("webhook on: each live message is posted to the configured URL")
+	}
+	d.cli.AddEventHandler(d.handleEvent)
 }
 
 func sessionDSN(path string) string {
@@ -325,8 +350,13 @@ func (d *Daemon) handleEvent(evt any) {
 		if v.Name != "" {
 			d.setGroupName(ctx, v.JID, v.Name)
 		}
+	case *events.PairSuccess:
+		d.mu.Lock()
+		d.sessionPhone = v.ID.User
+		d.mu.Unlock()
 	case *events.Connected:
 		d.mu.Lock()
+		d.sessionPhone = d.cli.Store.GetJID().User
 		d.loggedOut = false
 		d.mu.Unlock()
 		d.log.Info("connected to WhatsApp")
@@ -346,6 +376,7 @@ func (d *Daemon) handleEvent(evt any) {
 	case *events.LoggedOut:
 		d.mu.Lock()
 		d.loggedOut = true
+		d.sessionPhone = ""
 		d.mu.Unlock()
 		d.log.Error("logged out by WhatsApp: pair again with the connect_whatsapp tool or `askmywa daemon`", "reason", v.Reason.String())
 	case *events.TemporaryBan:

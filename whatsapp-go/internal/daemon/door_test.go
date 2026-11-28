@@ -65,7 +65,7 @@ func TestSendOnlyPassesLiveMessagesToTheWebhookAndStoresNone(t *testing.T) {
 	defer srv.Close()
 	hook := webhook.New(webhook.Config{URL: srv.URL, Secret: strings.Repeat("s", 40), Log: slog.New(slog.NewTextHandler(io.Discard, nil))})
 	go hook.Run(ctx)
-	d := &Daemon{store: st, log: slog.New(slog.NewTextHandler(io.Discard, nil)), opts: Options{SendOnly: true}, hook: hook,
+	d := &Daemon{store: st, log: slog.New(slog.NewTextHandler(io.Discard, nil)), opts: Options{SendOnly: true, AccountID: "23456789-1234-4abc-8abc-123456789012"}, hook: hook,
 		linked: map[string]bool{}, pushNames: map[string]string{}, groupNames: map[string]string{}}
 	sender := types.NewJID("33600000001", types.DefaultUserServer)
 	d.handleMessage(ctx, &events.Message{
@@ -74,7 +74,7 @@ func TestSendOnlyPassesLiveMessagesToTheWebhookAndStoresNone(t *testing.T) {
 	})
 	select {
 	case e := <-got:
-		if e.ID != "3EB0IN0001" || e.Text != "Le HAR est prêt" || e.Sender.Phone != "+33600000001" || e.Sender.Name != "Karim" || e.Sender.NameSource != store.SourcePushName || e.Chat.IsGroup {
+		if e.Type != "account.message" || e.AccountID != d.opts.AccountID || e.ID != "3EB0IN0001" || e.Text != "Le HAR est prêt" || e.Sender.Phone != "+33600000001" || e.Sender.Name != "Karim" || e.Sender.NameSource != store.SourcePushName || e.Chat.IsGroup {
 			t.Fatalf("event %+v", e)
 		}
 	case <-time.After(3 * time.Second):
