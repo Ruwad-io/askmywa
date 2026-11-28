@@ -260,6 +260,11 @@ func (d *Daemon) send(ctx context.Context, to types.JID, msg *waE2E.Message, tex
 	if err != nil {
 		return ipc.SendResult{}, fmt.Errorf("send to %s: %w", to.String(), err)
 	}
+	if d.opts.SendOnly {
+		// Nothing of what is sent is kept on a send-only server.
+		d.log.Info("message sent", "id", resp.ID)
+		return ipc.SendResult{MessageID: resp.ID, To: to.String(), Timestamp: resp.Timestamp}, nil
+	}
 	phone, lid := d.ownIdentity()
 	chatJID := to.String()
 	isGroup := to.Server == types.GroupServer
