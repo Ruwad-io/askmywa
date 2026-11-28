@@ -25,6 +25,7 @@ import (
 	"askmywa/internal/httpdoor"
 	"askmywa/internal/ipc"
 	"askmywa/internal/store"
+	"askmywa/internal/webhook"
 )
 
 // Options configures Run.
@@ -45,6 +46,8 @@ type Options struct {
 	SendOnly bool
 	// HTTP, when set, serves the private HTTP door (package httpdoor).
 	HTTP *httpdoor.Config
+	// Webhook, when set, posts each live message to another app (package webhook).
+	Webhook *webhook.Config
 }
 
 // Daemon is the running service.
@@ -62,6 +65,7 @@ type Daemon struct {
 	groupNames map[string]string // group JID -> name
 	loggedOut  bool
 	pair       pairState
+	hook       *webhook.Notifier
 }
 
 // Prepare opens the stores, copies the legacy session if needed, syncs the
@@ -150,6 +154,13 @@ func Run(ctx context.Context, opts Options) error {
 	defer d.Close()
 	p := opts.Paths
 
+	if opts.Webhook != nil {
+		cfg := *opts.Webhook
+		cfg.Log = d.log
+		d.hook = webhook.New(cfg)
+		go d.hook.Run(ctx)
+		d.log.Info("webhook on: each live message is posted to the configured URL")
+	}
 	d.cli.AddEventHandler(d.handleEvent)
 	errCh := make(chan error, 2)
 	go func() { errCh <- ipc.Serve(ctx, p.Socket, d, d.log) }()
@@ -293,9 +304,8 @@ func (d *Daemon) handleEvent(evt any) {
 	ctx := context.Background()
 	switch v := evt.(type) {
 	case *events.Message:
-		if !d.opts.SendOnly {
-			d.handleMessage(ctx, v)
-		}
+		// Send-only keeps no message, but still passes live ones to the webhook.
+		d.handleMessage(ctx, v)
 	case *events.HistorySync:
 		if !d.opts.SendOnly {
 			d.handleHistorySync(ctx, v)

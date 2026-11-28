@@ -162,6 +162,20 @@ it answers 409). Sends are capped per
   private network only. Pair it once from a shell in the container with
   `askmywa link --phone <your number>`, then type the code in WhatsApp.
 
+**Webhook.** `--webhook-url URL` (or `ASKMYWA_WEBHOOK_URL`) posts each
+*live* message (not the history sync) to another app, as JSON: `id`,
+`timestamp`, `from_me`, `chat` (`jid`, `name`, `is_group`), `sender`
+(`phone`, `lid`, `name`, `name_source`), `text` and, for an attachment, its
+`media` type, file name and MIME type (never its content). Each request is
+signed: `X-Askmywa-Signature: sha256=hex(HMAC-SHA256(secret, timestamp + "." +
+body))` with `X-Askmywa-Timestamp` (Unix seconds) and `X-Askmywa-Event-Id`;
+the secret comes from `ASKMYWA_WEBHOOK_SECRET` only (32+ characters).
+Receivers should refuse a timestamp older than five minutes and ignore an id
+they already have. Events are delivered in order and retried with backoff
+until a 2xx; a 4xx other than 408/429 drops the event. The queue lives in
+memory (2 000 events): a restart loses what was not delivered yet. Works with
+`--send-only`: the message reaches the webhook and askmywa keeps nothing.
+
 Running WhatsApp from a datacenter address is not what WhatsApp expects of a
 linked device; keep the volume low. Unlinking the device from your phone
 (Linked devices) cuts it off at once.

@@ -31,6 +31,7 @@ import (
 	"askmywa/internal/mcpserver"
 	"askmywa/internal/service"
 	"askmywa/internal/store"
+	"askmywa/internal/webhook"
 )
 
 // version is overridden at build time with -ldflags "-X main.version=...".
@@ -41,7 +42,8 @@ const usage = `askmywa — WhatsApp archive and MCP server in one binary
 Usage:
   askmywa daemon [--data-dir DIR] [--send-root DIR] [--legacy-store DIR] [--log-file FILE] [--send-only] [--http-addr ADDR]
       Connect to WhatsApp (QR code on first run), archive messages, serve the socket.
-      --send-only keeps no message; --http-addr serves the private HTTP door (secret in $ASKMYWA_HTTP_TOKEN).
+      --send-only keeps no message; --http-addr serves the private HTTP door (secret in $ASKMYWA_HTTP_TOKEN);
+      --webhook-url posts each live message, text included, signed with $ASKMYWA_WEBHOOK_SECRET.
   askmywa serve [--data-dir DIR]
       MCP server over stdio (for claude_desktop_config.json).
   askmywa import --legacy-store DIR [--data-dir DIR]
@@ -139,6 +141,7 @@ func runDaemon(args []string) error {
 	pairMode := fs.String("pair", "auto", "without a session: qr (show a QR code), wait (wait for connect_whatsapp), or auto (qr in a terminal, wait otherwise)")
 	sendOnly := fs.Bool("send-only", os.Getenv("ASKMYWA_SEND_ONLY") == "1", "keep no message (only the session and contact names); for a server that only sends ($ASKMYWA_SEND_ONLY=1)")
 	httpAddr := fs.String("http-addr", os.Getenv("ASKMYWA_HTTP_ADDR"), "serve the private HTTP door on this address; the secret is read from $ASKMYWA_HTTP_TOKEN only ($ASKMYWA_HTTP_ADDR)")
+	webhookURL := fs.String("webhook-url", os.Getenv("ASKMYWA_WEBHOOK_URL"), "post each live message to this URL, signed with $ASKMYWA_WEBHOOK_SECRET ($ASKMYWA_WEBHOOK_URL)")
 	background := fs.Bool("background", false, "run as the background service: never show a QR code, and on Windows close the console window")
 	debug := fs.Bool("debug", false, "verbose logging")
 	if err := fs.Parse(args); err != nil {
@@ -186,6 +189,14 @@ func runDaemon(args []string) error {
 	default:
 		return fmt.Errorf("invalid --pair %q: use qr, wait or auto", mode)
 	}
+	var hook *webhook.Config
+	if *webhookURL != "" {
+		// The secret never travels on the command line.
+		hook = &webhook.Config{URL: *webhookURL, Secret: os.Getenv("ASKMYWA_WEBHOOK_SECRET")}
+		if err := hook.Validate(); err != nil {
+			return err
+		}
+	}
 	if *sendOnly && legacyDir != "" {
 		return errors.New("--send-only keeps no message: it cannot import a legacy history (drop --legacy-store)")
 	}
@@ -199,7 +210,7 @@ func runDaemon(args []string) error {
 		}
 	}
 	return daemon.Run(ctx, daemon.Options{Paths: paths, LegacyStore: legacyDir, Log: log, QROut: os.Stdout, PairMode: mode,
-		SendOnly: *sendOnly, HTTP: door})
+		SendOnly: *sendOnly, HTTP: door, Webhook: hook})
 }
 
 // envInt reads a positive integer from the environment, or the default.
