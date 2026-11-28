@@ -193,3 +193,48 @@ func TestNotConnectedIsACleanRefusal(t *testing.T) {
 		t.Fatalf("a refusal must not use the limit: %d", rec.Code)
 	}
 }
+
+func TestAFailedSendIsNeverResent(t *testing.T) {
+	f := &fake{fail: errors.New("send to 33600000001@s.whatsapp.net: timeout")}
+	d := newDoor(t, f, Limits{PerMinute: 5, PerDay: 5}, nil)
+	body := `{"to":"+33600000001","text":"x","idempotency_key":"key-00001"}`
+	if rec := call(d, http.MethodPost, "/v1/send", "Bearer "+token, body); rec.Code != http.StatusBadGateway {
+		t.Fatalf("first: %d", rec.Code)
+	}
+	f.fail = nil
+	if rec := call(d, http.MethodPost, "/v1/send", "Bearer "+token, body); rec.Code != http.StatusConflict {
+		t.Fatalf("a key whose outcome is unknown was tried again: %d", rec.Code)
+	}
+	if len(f.sends) != 0 {
+		t.Fatalf("resent: %v", f.sends)
+	}
+}
+
+func TestAnAnsweredKeyAnswersEvenWhenDisconnected(t *testing.T) {
+	f := &fake{}
+	d := newDoor(t, f, Limits{PerMinute: 5, PerDay: 5}, nil)
+	body := `{"to":"+33600000001","text":"x","idempotency_key":"key-00001"}`
+	call(d, http.MethodPost, "/v1/send", "Bearer "+token, body)
+	f.down = true
+	if rec := call(d, http.MethodPost, "/v1/send", "Bearer "+token, body); rec.Code != http.StatusOK {
+		t.Fatalf("replay while disconnected: %d (a 503 would read as « nothing was sent »)", rec.Code)
+	}
+}
+
+func TestStrictBody(t *testing.T) {
+	f := &fake{}
+	d := newDoor(t, f, Limits{PerMinute: 5, PerDay: 5}, nil)
+	for _, body := range []string{
+		`{"TO":"+33600000001","text":"x","idempotency_key":"key-00001"}`,
+		`{"to":"+33600000001","text":"x","idempotency_key":"key-00001"} {"to":"+33600000002"}`,
+		`{"to":"+33600000001","text":"x"}`,
+	} {
+		if rec := call(d, http.MethodPost, "/v1/send", "Bearer "+token, body); rec.Code != http.StatusBadRequest {
+			t.Fatalf("%s: %d", body, rec.Code)
+		}
+	}
+	call(d, http.MethodPost, "/v1/send", "Bearer "+token, `{"to":"+33600000001","text":"  Bonjour\n","idempotency_key":"key-00009"}`)
+	if len(f.sends) != 1 || f.sends[0] != "33600000001:  Bonjour\n" {
+		t.Fatalf("the text must leave exactly as confirmed: %q", f.sends)
+	}
+}

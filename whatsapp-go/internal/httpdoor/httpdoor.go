@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"net/http"
@@ -92,8 +93,9 @@ type Door struct {
 }
 
 type doneSend struct {
-	sent Sent
-	at   time.Time
+	sent      Sent
+	at        time.Time
+	uncertain bool
 }
 
 // New builds the door. Call Validate first.
@@ -190,10 +192,13 @@ type sendBody struct {
 
 func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 32<<10)
-	var body sendBody
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-	if err := dec.Decode(&body); err != nil {
+	raw, err := io.ReadAll(r.Body)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "body too large")
+		return
+	}
+	body, err := decodeSend(raw)
+	if err != nil {
 		writeError(w, http.StatusBadRequest, "body: {to, text, idempotency_key}")
 		return
 	}
@@ -202,8 +207,9 @@ func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "to: international number, + then 8 to 15 digits (no group)")
 		return
 	}
-	text := strings.TrimSpace(body.Text)
-	if text == "" || !utf8.ValidString(text) || utf8.RuneCountInString(text) > MaxTextRunes {
+	// The text leaves exactly as confirmed; only an empty one is refused.
+	text := body.Text
+	if strings.TrimSpace(text) == "" || !utf8.ValidString(text) || utf8.RuneCountInString(text) > MaxTextRunes {
 		writeError(w, http.StatusBadRequest, fmt.Sprintf("text: 1 to %d characters", MaxTextRunes))
 		return
 	}
@@ -213,6 +219,26 @@ func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// A key already used answers first, whatever the connection does now.
+	d.mu.Lock()
+	now := d.cfg.Now()
+	d.prune(now)
+	if prev, ok := d.done[key]; ok {
+		d.mu.Unlock()
+		if prev.uncertain {
+			writeError(w, http.StatusConflict, "this send ended with an unknown outcome: it is never sent again")
+			return
+		}
+		writeJSON(w, http.StatusOK, prev.sent)
+		return
+	}
+	if d.pending[key] {
+		d.mu.Unlock()
+		writeError(w, http.StatusConflict, "this send is already in progress")
+		return
+	}
+	d.mu.Unlock()
+
 	// Not paired or not connected: a clean refusal, nothing left.
 	if st, err := d.h.DoorStatus(r.Context()); err != nil || !st.LoggedIn || !st.Connected {
 		writeError(w, http.StatusServiceUnavailable, "WhatsApp is not connected: nothing was sent")
@@ -220,14 +246,9 @@ func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d.mu.Lock()
-	now := d.cfg.Now()
+	now = d.cfg.Now()
 	d.prune(now)
-	if prev, ok := d.done[key]; ok {
-		d.mu.Unlock()
-		writeJSON(w, http.StatusOK, prev.sent)
-		return
-	}
-	if d.pending[key] {
+	if _, ok := d.done[key]; ok || d.pending[key] {
 		d.mu.Unlock()
 		writeError(w, http.StatusConflict, "this send is already in progress")
 		return
@@ -246,18 +267,43 @@ func (d *Door) send(w http.ResponseWriter, r *http.Request) {
 
 	d.mu.Lock()
 	delete(d.pending, key)
-	if err == nil {
-		d.done[key] = doneSend{sent: sent, at: d.cfg.Now()}
-	}
+	// A failed send is remembered too: WhatsApp may have taken it, so the
+	// same key is never sent again.
+	d.done[key] = doneSend{sent: sent, at: d.cfg.Now(), uncertain: err != nil}
 	d.mu.Unlock()
 	if err != nil {
-		// Never the text or the number in the log.
-		d.cfg.Log.Warn("http door send failed", "error", err.Error())
+		// Never the error text: it can name the recipient.
+		d.cfg.Log.Warn("http door send failed: outcome unknown")
 		writeError(w, http.StatusBadGateway, "WhatsApp did not confirm the send")
 		return
 	}
 	d.cfg.Log.Info("http door message sent", "id", sent.MessageID)
 	writeJSON(w, http.StatusOK, sent)
+}
+
+// decodeSend reads exactly one JSON object with exactly the three fields,
+// names matched case-sensitively, nothing after it.
+func decodeSend(raw []byte) (sendBody, error) {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return sendBody{}, err
+	}
+	for name := range fields {
+		if name != "to" && name != "text" && name != "idempotency_key" {
+			return sendBody{}, fmt.Errorf("unknown field")
+		}
+	}
+	var body sendBody
+	for name, dst := range map[string]*string{"to": &body.To, "text": &body.Text, "idempotency_key": &body.Key} {
+		value, ok := fields[name]
+		if !ok {
+			return sendBody{}, fmt.Errorf("missing field")
+		}
+		if err := json.Unmarshal(value, dst); err != nil {
+			return sendBody{}, err
+		}
+	}
+	return body, nil
 }
 
 // prune drops counters and idempotency results older than their window.

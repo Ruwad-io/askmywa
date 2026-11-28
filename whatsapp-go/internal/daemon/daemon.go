@@ -151,7 +151,7 @@ func Run(ctx context.Context, opts Options) error {
 	p := opts.Paths
 
 	d.cli.AddEventHandler(d.handleEvent)
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2)
 	go func() { errCh <- ipc.Serve(ctx, p.Socket, d, d.log) }()
 	if opts.HTTP != nil {
 		cfg := *opts.HTTP

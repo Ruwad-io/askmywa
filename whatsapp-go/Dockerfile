@@ -12,12 +12,14 @@ ARG VERSION=server
 RUN CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/askmywa .
 
 FROM alpine:3.22
-RUN adduser -D -u 10001 askmywa && mkdir -p /data && chown askmywa /data
+RUN apk add --no-cache su-exec && adduser -D -u 10001 askmywa && mkdir -p /data && chown askmywa /data
 COPY --from=build /out/askmywa /usr/local/bin/askmywa
-USER askmywa
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENV ASKMYWA_DATA_DIR=/data \
     ASKMYWA_SEND_ONLY=1 \
     ASKMYWA_HTTP_ADDR=[::]:8080
 VOLUME ["/data"]
 EXPOSE 8080
+# The entrypoint gives the volume to the askmywa user, then drops root.
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["askmywa", "daemon", "--data-dir", "/data", "--pair", "wait"]

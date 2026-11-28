@@ -186,6 +186,9 @@ func runDaemon(args []string) error {
 	default:
 		return fmt.Errorf("invalid --pair %q: use qr, wait or auto", mode)
 	}
+	if *sendOnly && legacyDir != "" {
+		return errors.New("--send-only keeps no message: it cannot import a legacy history (drop --legacy-store)")
+	}
 	var door *httpdoor.Config
 	if *httpAddr != "" {
 		// The secret never travels on the command line, where ps would show it.
