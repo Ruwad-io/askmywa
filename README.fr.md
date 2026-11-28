@@ -198,6 +198,19 @@ les plus anciens tombent au-delà) : un redémarrage perd ce qui n'était pas
 encore livré. Fonctionne avec `--send-only` : le message atteint le webhook et
 askmywa ne garde rien.
 
+**Plusieurs numéros.** En mode serveur avec `--send-only --pair wait`,
+le compte `primary` conserve sa base de session existante. Pour un autre
+numéro, l’application choisit un UUIDv4 et appelle
+`POST /v1/accounts/{id}/pair`. Elle lit ensuite `GET /v1/accounts/{id}/pair`.
+À l’état `qr`, elle affiche le PNG en base64 du champ `qr` jusqu’à
+`expires_at`. À l’état `connected`, `phone` donne le numéro associé.
+L’affichage est réservé au propriétaire connecté, sans cache ni journal du QR.
+L’état, le carnet et l’envoi du compte passent par `/v1/accounts/{id}/`.
+Les routes historiques `/v1/` gardent le compte principal. Le webhook signé
+d’un compte supplémentaire porte le type `account.message` et son
+`account_id`. Dédoublonnez par compte et identifiant de message. Conservez
+tout le volume, répertoire `accounts/` compris, entre deux redémarrages.
+
 **Docker.** `whatsapp-go/Dockerfile` construit le serveur en envoi seul :
 données sur le volume `/data`, porte sur `[::]:8080`, et un point d'entrée qui
 donne le volume à un utilisateur `askmywa` sans privilèges puis abandonne

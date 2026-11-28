@@ -33,6 +33,7 @@ const QueueSize = 2000
 
 // Event is one WhatsApp message, as sent to the receiver.
 type Event struct {
+	AccountID string    `json:"account_id,omitempty"`
 	Type      string    `json:"type"` // "message"
 	ID        string    `json:"id"`   // WhatsApp message id; the receiver's dedupe key
 	Timestamp time.Time `json:"timestamp"`

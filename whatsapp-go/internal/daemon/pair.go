@@ -57,6 +57,9 @@ func (d *Daemon) pairPhone(p ipc.PairParams) (ipc.PairResult, error) {
 
 	d.mu.Lock()
 	switch {
+	case d.qrPairActive:
+		d.mu.Unlock()
+		return ipc.PairResult{}, errors.New("QR pairing in progress")
 	case d.loggedOut:
 		d.mu.Unlock()
 		return ipc.PairResult{}, ErrLoggedOut

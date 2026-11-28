@@ -220,6 +220,19 @@ a 4xx other than 408/429 drops the event. The queue lives in memory
 delivered yet. Works with `--send-only`: the message reaches the webhook and
 askmywa keeps nothing.
 
+**Multiple numbers.** In send-only server mode with `--pair wait`, the original
+account is `primary` and keeps its existing session database. For another
+number the trusted application chooses a UUIDv4 and calls
+`POST /v1/accounts/{id}/pair`. Poll `GET /v1/accounts/{id}/pair` for the
+current state. In state `qr`, display the `qr` field (a base64 PNG) until
+`expires_at`. In state `connected`, `phone` identifies the linked account.
+Serve this response only to the signed-in owner, without caching or logging it.
+Each account has its own status, contact lookup and send under
+`/v1/accounts/{id}/`. The existing `/v1/` routes address the original device.
+A named account sends signed webhook events with type `account.message` and
+its `account_id`. Deduplicate by account and message ID. Persist the whole
+volume, including the `accounts/` directory, across restarts.
+
 **Docker.** `whatsapp-go/Dockerfile` builds the send-only server: data on the
 `/data` volume, door on `[::]:8080`, and an entrypoint that gives the volume
 to an unprivileged `askmywa` user, then drops root. Set `ASKMYWA_HTTP_TOKEN`

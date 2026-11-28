@@ -238,3 +238,35 @@ func TestStrictBody(t *testing.T) {
 		t.Fatalf("the text must leave exactly as confirmed: %q", f.sends)
 	}
 }
+
+type fakeAccounts map[string]Handler
+
+func (a fakeAccounts) Lookup(id string) (Handler, bool) { h, ok := a[id]; return h, ok }
+func (a fakeAccounts) Pair(id string, start bool) (PairState, error) {
+	return PairState{State: "starting"}, nil
+}
+
+func TestRepliesToSamePersonUseDistinctAccounts(t *testing.T) {
+	primary, second := &fake{}, &fake{}
+	const id = "11111111-1111-4111-8111-111111111111"
+	door := newDoor(t, primary, Limits{PerDay: 10, PerMinute: 10}, nil)
+	door.cfg.Accounts = fakeAccounts{"primary": primary, id: second}
+	for _, account := range []string{"primary", id} {
+		for range 2 {
+			got := call(door, "POST", "/v1/accounts/"+account+"/send", "Bearer "+token, `{"to":"+33600000098","text":"`+account+`","idempotency_key":"same-key-123"}`)
+			if got.Code != 200 {
+				t.Fatal(got.Code)
+			}
+		}
+	}
+	if len(primary.sends) != 1 || primary.sends[0] != "33600000098:primary" || len(second.sends) != 1 || second.sends[0] != "33600000098:"+id {
+		t.Fatal("incorrect session or replay")
+	}
+	unknown := call(door, "POST", "/v1/accounts/22222222-1111-4111-8111-111111111111/send", "Bearer "+token, "{}")
+	if unknown.Code != 404 {
+		t.Fatal("unknown account fell back")
+	}
+	if got := call(door, "POST", "/v1/accounts/"+id+"/pair", "", "{}"); got.Code != 401 {
+		t.Fatal("unprotected pairing")
+	}
+}

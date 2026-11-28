@@ -23,3 +23,13 @@ func (l *slogAdapter) Debugf(msg string, args ...any) { l.log.Debug(fmt.Sprintf(
 func (l *slogAdapter) Sub(module string) waLog.Logger {
 	return &slogAdapter{log: l.log.With("sub", module)}
 }
+
+// Some whatsmeow trace format strings include raw QR credentials and frames.
+// In managed mode only report severity; the daemon emits its own status events.
+type accountLogger struct{ log *slog.Logger }
+
+func (l *accountLogger) Debugf(string, ...any)   {}
+func (l *accountLogger) Infof(string, ...any)    {}
+func (l *accountLogger) Warnf(string, ...any)    { l.log.Warn("WhatsApp protocol warning") }
+func (l *accountLogger) Errorf(string, ...any)   { l.log.Error("WhatsApp protocol error") }
+func (l *accountLogger) Sub(string) waLog.Logger { return l }

@@ -74,7 +74,7 @@ func (d *Daemon) handleMessage(ctx context.Context, evt *events.Message) {
 	}
 	// A live message (not a history sync) goes to the webhook, text included.
 	if d.hook != nil && evt.SourceWebMsg == nil {
-		ev := webhook.Event{Type: "message", ID: info.ID, Timestamp: info.Timestamp, FromMe: info.IsFromMe,
+		ev := webhook.Event{AccountID: d.opts.AccountID, Type: "message", ID: info.ID, Timestamp: info.Timestamp, FromMe: info.IsFromMe,
 			Chat: webhook.Chat{JID: chatJID, Name: chatName, IsGroup: isGroup}, Text: text,
 			Sender: webhook.Person{LID: lid, Name: senderName, NameSource: senderSource}}
 		if phone != "" {
@@ -82,6 +82,11 @@ func (d *Daemon) handleMessage(ctx context.Context, evt *events.Message) {
 		}
 		if media != nil {
 			ev.Media = &webhook.Media{Type: media.MediaType, Filename: media.Filename, MimeType: media.MimeType}
+		}
+		// A pre-multi-account receiver ignores this version instead of filing
+		// a second number's message under its only known account.
+		if d.opts.AccountID != "" && d.opts.AccountID != "primary" {
+			ev.Type = "account.message"
 		}
 		d.hook.Enqueue(ev)
 	}
