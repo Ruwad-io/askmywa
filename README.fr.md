@@ -109,6 +109,108 @@ askmywa link
 
 Pour utiliser un Pi depuis Claude Desktop sur votre ordinateur, voir le [README principal](README.md#on-a-raspberry-pi-or-another-always-on-machine) (en anglais).
 
+## Mode serveur : envoi seul, porte HTTP privée et webhooks
+
+Cette partie s'adresse aux développeurs. askmywa peut aussi tourner sur un
+serveur pour **une application de confiance à vous** : par exemple une
+application d'assistant personnel qui prépare des réponses et vous laisse les
+envoyer en un clic. Trois options, toutes coupées par défaut, en font un
+second appareil lié qui ne garde rien et ne fait que ce dont l'application a
+besoin. La page [askmywa.com/fr/serveur](https://askmywa.com/fr/serveur/)
+reprend tout cela pas à pas.
+
+**Envoi seul.** `--send-only` (ou `ASKMYWA_SEND_ONLY=1`) ne garde **aucun
+message** : ni message reçu, ni historique, ni copie de ce qui part. Seuls la
+session WhatsApp et les noms des contacts sont stockés (et les noms des
+groupes). L'option refuse `--legacy-store` : il n'y a pas d'historique où
+importer.
+
+**La porte HTTP.** `--http-addr ADRESSE` (ou `ASKMYWA_HTTP_ADDR`) ouvre trois
+opérations, en HTTP simple. Le secret se lit dans `ASKMYWA_HTTP_TOKEN`
+seulement (32 caractères ou plus, jamais en option de ligne de commande, pour
+qu'il n'apparaisse pas dans `ps`) ; chaque requête porte
+`Authorization: Bearer <secret>`.
+
+| Requête | Réponse |
+|---|---|
+| `GET /v1/status` | `{"connected": true, "logged_in": true, "send_only": true}` |
+| `GET /v1/contact?phone=%2B33600000001` | `{"name": "…"}` : le nom que **vous** avez donné à ce numéro dans votre carnet d'adresses, ou `null`. Un nom de profil ou d'entreprise est choisi par l'autre personne et ne garantit jamais un numéro. |
+| `POST /v1/send` avec `{"to": "+33600000001", "text": "…", "idempotency_key": "…"}` | `{"message_id": "…", "timestamp": "…"}` : un texte à une personne ; ni groupe, ni fichier, rien d'autre dans le corps. Le texte part tel quel (4 000 caractères au plus). |
+
+```bash
+export ASKMYWA_HTTP_TOKEN=…   # le même secret que celui de l'application
+curl -s http://askmywa.internal:8080/v1/status -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN"
+curl -s -G http://askmywa.internal:8080/v1/contact --data-urlencode 'phone=+33600000001' \
+  -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN"
+curl -s http://askmywa.internal:8080/v1/send -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"to":"+33600000001","text":"Je serai là à 19 h.","idempotency_key":"brouillon-0001"}'
+```
+
+Encodez le `+` dans l'adresse (`%2B`, ou `curl -G --data-urlencode`) : un `+`
+nu se lit comme une espace et le numéro est refusé.
+
+- **Pas d'aperçu à la porte.** `POST /v1/send` envoie tout de suite. L'aperçu
+  et l'accord reviennent à l'application qui l'appelle : elle vous montre le
+  destinataire et le texte exact, et n'appelle la porte qu'après votre clic.
+- **Une même clé ne part jamais deux fois**, même après un envoi en échec ou
+  coupé : WhatsApp a pu le prendre, l'issue est donc inconnue et la porte
+  répond 409 au lieu de réessayer. Clés et compteurs vivent en mémoire pendant
+  24 heures ; un redémarrage les oublie.
+- **Plafonds.** Au plus `ASKMYWA_HTTP_SENDS_PER_MINUTE` (5 par défaut) et
+  `ASKMYWA_HTTP_SENDS_PER_DAY` (40 par défaut) envois ; au-delà, la porte
+  répond 429 et n'envoie rien. Pas connecté : 503, rien n'est parti. WhatsApp
+  n'a pas confirmé : 502, et la clé est consommée.
+- **Réseau privé seulement.** La porte n'a pas de TLS et ne choisit pas qui
+  peut la joindre : ne donnez au service **aucun domaine public** et
+  joignez-le sur un réseau privé. Sans `--send-only`, elle prévient dans le
+  journal que ce serveur garde aussi l'archive des messages.
+
+**Webhooks.** `--webhook-url URL` (ou `ASKMYWA_WEBHOOK_URL`) envoie chaque
+message *en direct* (pas l'historique), y compris ceux que vous envoyez depuis
+votre téléphone, à une autre application, en JSON : `type` (`"message"`),
+`id`, `timestamp`, `from_me`, `chat` (`jid`, `name`, `is_group`), `sender`
+(`phone`, `lid`, `name`, `name_source`), `text` et, pour une pièce jointe, son
+type `media`, son nom de fichier et son type MIME (jamais son contenu). Le
+secret vient de `ASKMYWA_WEBHOOK_SECRET` seulement (32 caractères ou plus) ;
+l'URL doit être en http(s), sans identifiants. Chaque requête porte
+`X-Askmywa-Event-Id`, `X-Askmywa-Timestamp` (secondes Unix) et
+`X-Askmywa-Signature: sha256=hex(HMAC-SHA256(secret, timestamp + "." + corps))`.
+Vérifiez-la sur le corps brut :
+
+```python
+import hashlib, hmac, time
+
+def verify(secret: str, headers: dict, body: bytes) -> bool:
+    ts = headers.get("X-Askmywa-Timestamp", "")
+    sig = headers.get("X-Askmywa-Signature", "")
+    if not ts.isdigit() or abs(time.time() - int(ts)) > 300:
+        return False  # plus de cinq minutes : refuser
+    mac = hmac.new(secret.encode(), ts.encode() + b"." + body, hashlib.sha256)
+    return hmac.compare_digest(sig, "sha256=" + mac.hexdigest())
+```
+
+Ignorez ensuite un identifiant d'événement déjà reçu. Les événements partent
+dans l'ordre et sont réessayés avec un délai croissant (1 seconde, doublé
+jusqu'à environ 4 minutes) jusqu'à une réponse 2xx ; une réponse 4xx autre que
+408 ou 429 abandonne l'événement. La file vit en mémoire (2 000 événements,
+les plus anciens tombent au-delà) : un redémarrage perd ce qui n'était pas
+encore livré. Fonctionne avec `--send-only` : le message atteint le webhook et
+askmywa ne garde rien.
+
+**Docker.** `whatsapp-go/Dockerfile` construit le serveur en envoi seul :
+données sur le volume `/data`, porte sur `[::]:8080`, et un point d'entrée qui
+donne le volume à un utilisateur `askmywa` sans privilèges puis abandonne
+root. Posez `ASKMYWA_HTTP_TOKEN` (et les variables du webhook si vous le
+voulez) sur le service. Liez-le une fois depuis un terminal dans le conteneur
+avec `askmywa link --phone <votre numéro>`, puis tapez le code dans WhatsApp.
+
+> **Risque de bannissement.** Un appareil lié sur une adresse de centre de
+> données n'est pas ce que WhatsApp attend, et ses conditions n'autorisent pas
+> les clients non officiels. Gardez un faible volume et des plafonds serrés.
+> Retirer l'appareil depuis votre téléphone (Appareils connectés) le coupe
+> aussitôt.
+
 ## Pour aller plus loin
 
 Le projet est libre et gratuit (licence MIT). Les explications techniques, l'installation sans l'extension et le développement sont en anglais dans [whatsapp-go/README.md](whatsapp-go/README.md).

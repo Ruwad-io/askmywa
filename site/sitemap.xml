@@ -48,4 +48,20 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/mentions-legales/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://askmywa.com/legal/"/>
   </url>
+  <url>
+    <loc>https://askmywa.com/server/</loc>
+    <lastmod>2026-11-28</lastmod>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://askmywa.com/server/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/serveur/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://askmywa.com/server/"/>
+  </url>
+  <url>
+    <loc>https://askmywa.com/fr/serveur/</loc>
+    <lastmod>2026-11-28</lastmod>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://askmywa.com/server/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://askmywa.com/fr/serveur/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://askmywa.com/server/"/>
+  </url>
 </urlset>

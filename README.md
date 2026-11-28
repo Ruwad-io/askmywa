@@ -19,7 +19,8 @@ It links to WhatsApp as a companion device through [whatsmeow](https://github.co
 - **Full-text search.** Accent- and case-insensitive: `ecole` finds `école`.
 - **Typed tools.** Every tool declares its input and output schema, paginates with a cursor and returns errors that say how to fix the call.
 - **Sending previews by default.** `send_message`, `send_file` and `send_audio_message` return a preview unless `confirm=true` is supplied. The assistant is instructed to show you the exact recipient and content and obtain your approval before confirming. askmywa cannot independently verify that the assistant obtained your agreement; there is no separate approval window.
-- **No network port.** The MCP server talks to the WhatsApp daemon over a private Unix socket. Files can only be sent from one configured folder.
+- **No network port by default.** The MCP server talks to the WhatsApp daemon over a private Unix socket. Files can only be sent from one configured folder.
+- **Server mode and webhooks, if you want them.** On your own server, askmywa can run send-only (it keeps no message), behind a private HTTP door with a secret and send caps, and post each new message to another app as a signed webhook. See [Server mode](#server-mode-send-only-a-private-http-door-and-webhooks).
 
 > **Caution.** Like any MCP server that reads private data and can send messages, this one is exposed to [the lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/): a prompt injection hidden in a message could try to make the assistant leak data. The preview-and-confirm flow relies on the assistant following its instructions, so read previews before approving them.
 
@@ -135,50 +136,101 @@ Claude Desktop on your laptop can then use the Pi over SSH, provided you log in 
 
 Files to send must then be on the Pi, in its send folder.
 
-## Server mode: send-only, behind a private HTTP door
+## Server mode: send-only, a private HTTP door and webhooks
 
-For a trusted app on your own server (askmywa's first user is Mīzān on
-Railway), askmywa can run as a **second linked device that only sends**:
+askmywa can also run on a server for **one trusted app of yours**: for
+example a personal assistant app that drafts replies and lets you send them
+on one click. Three options, each off by default, combine into a second
+linked device that keeps nothing and only does what that app needs.
+[askmywa.com/server](https://askmywa.com/server/) shows the same thing step by step.
 
-- `--send-only` (or `ASKMYWA_SEND_ONLY=1`) keeps **no message** — no live
-  message, no history sync, no copy of what is sent. Only the WhatsApp
-  session and contact names are stored (and group names). It refuses
-  `--legacy-store`.
-- `--http-addr ADDR` (or `ASKMYWA_HTTP_ADDR`) opens the HTTP door. The secret
-  is read from `ASKMYWA_HTTP_TOKEN` only (32+ characters, never a flag, so it
-  never shows in `ps`). Every request needs `Authorization: Bearer <secret>`.
-- The door does three things: `GET /v1/status`, `GET /v1/contact?phone=+33…`
-  (the name **you** gave the number in your address book, or null: a push
-  or business name is chosen by the other person and never vouches for a
-  number) and `POST /v1/send`
-  (`{"to":"+33…","text":"…","idempotency_key":"…"}`: one text to one person;
-  no group, no file; the text leaves exactly as given). The same key never
-sends twice, even after a failed or cut-off send (its outcome is unknown, so
-it answers 409). Sends are capped per
-  minute and per day (`ASKMYWA_HTTP_SENDS_PER_MINUTE`, default 5;
-  `ASKMYWA_HTTP_SENDS_PER_DAY`, default 40).
-- `whatsapp-go/Dockerfile` builds that server: data on the `/data` volume,
-  door on `[::]:8080`. Give the service **no public domain**: reach it on a
-  private network only. Pair it once from a shell in the container with
-  `askmywa link --phone <your number>`, then type the code in WhatsApp.
+**Send-only.** `--send-only` (or `ASKMYWA_SEND_ONLY=1`) keeps **no message**:
+no live message, no history sync, no copy of what is sent. Only the WhatsApp
+session and contact names are stored (and group names). It refuses
+`--legacy-store`, since there is no history to import into.
 
-**Webhook.** `--webhook-url URL` (or `ASKMYWA_WEBHOOK_URL`) posts each
-*live* message (not the history sync) to another app, as JSON: `id`,
-`timestamp`, `from_me`, `chat` (`jid`, `name`, `is_group`), `sender`
-(`phone`, `lid`, `name`, `name_source`), `text` and, for an attachment, its
-`media` type, file name and MIME type (never its content). Each request is
-signed: `X-Askmywa-Signature: sha256=hex(HMAC-SHA256(secret, timestamp + "." +
-body))` with `X-Askmywa-Timestamp` (Unix seconds) and `X-Askmywa-Event-Id`;
-the secret comes from `ASKMYWA_WEBHOOK_SECRET` only (32+ characters).
-Receivers should refuse a timestamp older than five minutes and ignore an id
-they already have. Events are delivered in order and retried with backoff
-until a 2xx; a 4xx other than 408/429 drops the event. The queue lives in
-memory (2 000 events): a restart loses what was not delivered yet. Works with
-`--send-only`: the message reaches the webhook and askmywa keeps nothing.
+**The HTTP door.** `--http-addr ADDR` (or `ASKMYWA_HTTP_ADDR`) serves three
+operations over plain HTTP. The secret is read from `ASKMYWA_HTTP_TOKEN` only
+(32+ characters, never a flag, so it never shows in `ps`), and every request
+needs `Authorization: Bearer <secret>`.
 
-Running WhatsApp from a datacenter address is not what WhatsApp expects of a
-linked device; keep the volume low. Unlinking the device from your phone
-(Linked devices) cuts it off at once.
+| Request | Answer |
+|---|---|
+| `GET /v1/status` | `{"connected": true, "logged_in": true, "send_only": true}` |
+| `GET /v1/contact?phone=%2B33600000001` | `{"name": "…"}`: the name **you** gave that number in your address book, or `null`. A push or business name is chosen by the other person and never vouches for a number. |
+| `POST /v1/send` with `{"to": "+33600000001", "text": "…", "idempotency_key": "…"}` | `{"message_id": "…", "timestamp": "…"}`: one text to one person; no group, no file, nothing else in the body. The text leaves exactly as given (up to 4 000 characters). |
+
+```bash
+export ASKMYWA_HTTP_TOKEN=…   # the same secret the app holds
+curl -s http://askmywa.internal:8080/v1/status -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN"
+curl -s -G http://askmywa.internal:8080/v1/contact --data-urlencode 'phone=+33600000001' \
+  -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN"
+curl -s http://askmywa.internal:8080/v1/send -H "Authorization: Bearer $ASKMYWA_HTTP_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"to":"+33600000001","text":"I will be there at 7.","idempotency_key":"draft-0001"}'
+```
+
+Encode the `+` in the query (`%2B`, or `curl -G --data-urlencode`): a bare `+`
+reads as a space and the number is refused.
+
+- **No preview at the door.** `POST /v1/send` sends at once. The preview and
+  the approval belong to the app that calls it: it shows you the recipient and
+  the exact text, and calls the door only after your click.
+- **The same key is never sent twice**, even after a failed or cut-off send:
+  WhatsApp may have taken it, so the outcome is unknown and the door answers
+  409 instead of retrying. Keys and counters live in memory for 24 hours; a
+  restart forgets them.
+- **Caps.** At most `ASKMYWA_HTTP_SENDS_PER_MINUTE` (default 5) and
+  `ASKMYWA_HTTP_SENDS_PER_DAY` (default 40) sends; past them the door answers
+  429 and sends nothing. Not connected: 503, nothing sent. WhatsApp did not
+  confirm: 502, and the key is spent.
+- **Private network only.** The door has no TLS and does not decide who can
+  reach it: give the service **no public domain** and reach it on a private
+  network only. Without `--send-only` it warns that this server also keeps
+  the message archive.
+
+**Webhooks.** `--webhook-url URL` (or `ASKMYWA_WEBHOOK_URL`) posts each
+*live* message (not the history sync), including the ones you send from your
+phone, to another app as JSON: `type` (`"message"`), `id`, `timestamp`,
+`from_me`, `chat` (`jid`, `name`, `is_group`), `sender` (`phone`, `lid`,
+`name`, `name_source`), `text` and, for an attachment, its `media` type, file
+name and MIME type (never its content). The secret comes from
+`ASKMYWA_WEBHOOK_SECRET` only (32+ characters); the URL must be http(s)
+without credentials. Each request carries `X-Askmywa-Event-Id`,
+`X-Askmywa-Timestamp` (Unix seconds) and
+`X-Askmywa-Signature: sha256=hex(HMAC-SHA256(secret, timestamp + "." + body))`.
+Verify it over the raw body:
+
+```python
+import hashlib, hmac, time
+
+def verify(secret: str, headers: dict, body: bytes) -> bool:
+    ts = headers.get("X-Askmywa-Timestamp", "")
+    sig = headers.get("X-Askmywa-Signature", "")
+    if not ts.isdigit() or abs(time.time() - int(ts)) > 300:
+        return False  # older than five minutes: refuse
+    mac = hmac.new(secret.encode(), ts.encode() + b"." + body, hashlib.sha256)
+    return hmac.compare_digest(sig, "sha256=" + mac.hexdigest())
+```
+
+Then ignore an event id you already have. Events are delivered in order and
+retried with backoff (1 second, doubling up to about 4 minutes) until a 2xx;
+a 4xx other than 408/429 drops the event. The queue lives in memory
+(2 000 events, the oldest dropped past that): a restart loses what was not
+delivered yet. Works with `--send-only`: the message reaches the webhook and
+askmywa keeps nothing.
+
+**Docker.** `whatsapp-go/Dockerfile` builds the send-only server: data on the
+`/data` volume, door on `[::]:8080`, and an entrypoint that gives the volume
+to an unprivileged `askmywa` user, then drops root. Set `ASKMYWA_HTTP_TOKEN`
+(and the webhook variables if you want them) on the service. Pair it once
+from a shell in the container with `askmywa link --phone <your number>`, then
+type the code in WhatsApp.
+
+> **Ban risk.** A linked device on a datacenter address is not what WhatsApp
+> expects, and WhatsApp's terms do not allow unofficial clients. Keep the
+> volume low and the caps tight. Unlinking the device from your phone
+> (Linked devices) cuts it off at once.
 
 ## Tools
 
