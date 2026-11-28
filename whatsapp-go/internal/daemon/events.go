@@ -9,6 +9,7 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 
 	"askmywa/internal/store"
+	"askmywa/internal/webhook"
 )
 
 // handleMessage stores one message (live or from a history sync) with its
@@ -63,12 +64,29 @@ func (d *Daemon) handleMessage(ctx context.Context, evt *events.Message) {
 		}
 	}
 
-	senderName := ""
+	senderName, senderSource := "", ""
 	if !info.IsFromMe {
-		senderName, _ = d.store.ContactName(ctx, phone, lid)
-		if senderName == "" {
-			senderName = strings.TrimSpace(info.PushName)
+		if c, ok, _ := d.store.LookupContact(ctx, phone, lid); ok && c.Name != "" {
+			senderName, senderSource = c.Name, c.NameSource
+		} else if push := strings.TrimSpace(info.PushName); push != "" {
+			senderName, senderSource = push, store.SourcePushName
 		}
+	}
+	// A live message (not a history sync) goes to the webhook, text included.
+	if d.hook != nil && evt.SourceWebMsg == nil {
+		ev := webhook.Event{Type: "message", ID: info.ID, Timestamp: info.Timestamp, FromMe: info.IsFromMe,
+			Chat: webhook.Chat{JID: chatJID, Name: chatName, IsGroup: isGroup}, Text: text,
+			Sender: webhook.Person{LID: lid, Name: senderName, NameSource: senderSource}}
+		if phone != "" {
+			ev.Sender.Phone = "+" + phone
+		}
+		if media != nil {
+			ev.Media = &webhook.Media{Type: media.MediaType, Filename: media.Filename, MimeType: media.MimeType}
+		}
+		d.hook.Enqueue(ev)
+	}
+	if d.opts.SendOnly {
+		return
 	}
 	if err := d.store.PutChat(ctx, chatJID, chatName, isGroup, info.Timestamp); err != nil {
 		d.log.Warn("store chat failed", "chat", chatJID, "error", err)
